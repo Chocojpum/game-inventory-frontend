@@ -9,6 +9,8 @@ export interface Game {
   coverArt: string;
   releaseDate: string;
   platform: string;
+  consoleId?: string;
+  physicalDigital: 'physical' | 'digital';
   customAttributes: Record<string, any>;
   categoryIds: string[];
   createdAt: Date;
@@ -37,6 +39,10 @@ export class GameService {
 
   getGamesByCategory(categoryId: string): Observable<Game[]> {
     return this.http.get<Game[]>(`${this.apiUrl}/category/${categoryId}`);
+  }
+
+  getGamesByConsole(consoleId: string): Observable<Game[]> {
+    return this.http.get<Game[]>(`${this.apiUrl}/console/${consoleId}`);
   }
 
   createGame(game: Partial<Game>): Observable<Game> {

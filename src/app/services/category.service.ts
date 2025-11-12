@@ -26,6 +26,14 @@ export class CategoryService {
     return this.http.get<Category[]>(`${this.apiUrl}?type=${type}`);
   }
 
+  searchCategories(query: string, type?: string): Observable<Category[]> {
+    let url = `${this.apiUrl}?search=${query}`;
+    if (type) {
+      url += `&type=${type}`;
+    }
+    return this.http.get<Category[]>(url);
+  }
+
   getCategory(id: string): Observable<Category> {
     return this.http.get<Category>(`${this.apiUrl}/${id}`);
   }

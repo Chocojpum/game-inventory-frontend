@@ -34,11 +34,20 @@ import { CategoryService, Category } from '../../services/category.service';
 
       <div class="categories-display">
         <div class="category-group" *ngFor="let type of categoryTypes">
-          <h3>{{ type | titlecase }}</h3>
+          <div class="group-header">
+            <h3>{{ type | titlecase }}</h3>
+            <input 
+              type="text" 
+              class="search-input"
+              [(ngModel)]="searchQueries[type]"
+              (input)="onSearch(type)"
+              placeholder="Search {{ type }}..."
+            />
+          </div>
           <div class="category-list">
             <div 
               class="category-item" 
-              *ngFor="let category of getCategoriesByType(type)"
+              *ngFor="let category of getFilteredCategories(type)"
             >
               <div class="category-content">
                 <strong>{{ category.name }}</strong>
@@ -49,8 +58,8 @@ import { CategoryService, Category } from '../../services/category.service';
                 🗑️
               </button>
             </div>
-            <p class="empty-message" *ngIf="getCategoriesByType(type).length === 0">
-              No {{ type }} categories yet
+            <p class="empty-message" *ngIf="getFilteredCategories(type).length === 0">
+              No {{ type }} categories found
             </p>
           </div>
         </div>
@@ -122,9 +131,28 @@ import { CategoryService, Category } from '../../services/category.service';
       display: grid;
       gap: 2rem;
     }
-    .category-group h3 {
-      font-size: 1.3rem;
+    .group-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 1rem;
+      gap: 1rem;
+    }
+    .group-header h3 {
+      font-size: 1.3rem;
+      margin: 0;
+    }
+    .search-input {
+      padding: 0.5rem 1rem;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      min-width: 250px;
+      transition: border-color 0.3s;
+    }
+    .search-input:focus {
+      outline: none;
+      border-color: #667eea;
     }
     .category-list {
       display: grid;
@@ -186,7 +214,14 @@ import { CategoryService, Category } from '../../services/category.service';
 })
 export class CategoryManagerComponent implements OnInit {
   categories: Category[] = [];
+  filteredCategories: { [key: string]: Category[] } = {};
   categoryTypes = ['franchise', 'saga', 'genre', 'custom'];
+  searchQueries: { [key: string]: string } = {
+    franchise: '',
+    saga: '',
+    genre: '',
+    custom: ''
+  };
   newCategory = {
     name: '',
     type: 'genre' as 'franchise' | 'saga' | 'genre' | 'custom',
@@ -202,11 +237,28 @@ export class CategoryManagerComponent implements OnInit {
   loadCategories(): void {
     this.categoryService.getAllCategories().subscribe(categories => {
       this.categories = categories;
+      this.updateFilteredCategories();
     });
   }
 
-  getCategoriesByType(type: string): Category[] {
-    return this.categories.filter(cat => cat.type === type);
+  updateFilteredCategories(): void {
+    this.categoryTypes.forEach(type => {
+      this.filteredCategories[type] = this.categories.filter(cat => cat.type === type);
+    });
+  }
+
+  getFilteredCategories(type: string): Category[] {
+    const query = this.searchQueries[type].toLowerCase().trim();
+    if (!query) {
+      return this.filteredCategories[type] || [];
+    }
+    return (this.filteredCategories[type] || []).filter(cat =>
+      cat.name.toLowerCase().includes(query)
+    );
+  }
+
+  onSearch(type: string): void {
+    // Filtering is handled by getFilteredCategories()
   }
 
   addCategory(): void {

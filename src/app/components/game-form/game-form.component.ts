@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { GameService, Game } from '../../services/game.service';
 import { CategoryService, Category } from '../../services/category.service';
 import { AttributeService, Attribute } from '../../services/attribute.service';
+import { ConsoleService, Console } from '../../services/console.service';
 
 @Component({
   selector: 'app-game-form',
@@ -50,20 +51,62 @@ import { AttributeService, Attribute } from '../../services/attribute.service';
               <input type="text" formControlName="platform" placeholder="e.g., PlayStation 5, PC, Xbox" />
             </div>
           </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Console</label>
+              <select formControlName="consoleId">
+                <option value="">None</option>
+                <option *ngFor="let console of consoles" [value]="console.id">
+                  {{ console.name }} ({{ console.model }})
+                </option>
+              </select>
+              <p class="hint">Select from your console inventory</p>
+            </div>
+
+            <div class="form-group">
+              <label>Physical / Digital *</label>
+              <div class="radio-group">
+                <label class="radio-label">
+                  <input type="radio" formControlName="physicalDigital" value="physical" />
+                  📀 Physical
+                </label>
+                <label class="radio-label">
+                  <input type="radio" formControlName="physicalDigital" value="digital" />
+                  💾 Digital
+                </label>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="form-section">
           <h3>Categories</h3>
-          <div class="categories-list">
-            <label *ngFor="let category of categories" class="checkbox-label">
-              <input 
-                type="checkbox" 
-                [checked]="isCategorySelected(category.id)"
-                (change)="toggleCategory(category.id)"
-              />
-              {{ category.name }} <span class="category-type">({{ category.type }})</span>
-            </label>
+          
+          <div class="category-type-section" *ngFor="let type of categoryTypes">
+            <h4>{{ type | titlecase }}</h4>
+            <input 
+              type="text" 
+              class="search-input"
+              [(ngModel)]="categorySearchQueries[type]"
+              [ngModelOptions]="{standalone: true}"
+              placeholder="Search {{ type }}..."
+            />
+            <div class="categories-list">
+              <label *ngFor="let category of getFilteredCategories(type)" class="checkbox-label">
+                <input 
+                  type="checkbox" 
+                  [checked]="isCategorySelected(category.id)"
+                  (change)="toggleCategory(category.id)"
+                />
+                {{ category.name }}
+              </label>
+              <p class="hint" *ngIf="getFilteredCategories(type).length === 0">
+                No {{ type }} categories found
+              </p>
+            </div>
           </div>
+
           <p class="hint" *ngIf="categories.length === 0">
             No categories yet. <a routerLink="/categories">Create categories</a>
           </p>
@@ -211,11 +254,34 @@ import { AttributeService, Attribute } from '../../services/attribute.service';
       outline: none;
       border-color: #667eea;
     }
+    .radio-group {
+      display: flex;
+      gap: 1.5rem;
+      margin-top: 0.5rem;
+    }
+    .radio-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: normal;
+      cursor: pointer;
+      padding: 0.75rem 1rem;
+      background: #f8f9fa;
+      border-radius: 8px;
+      transition: background 0.3s;
+    }
+    .radio-label:hover {
+      background: #e9ecef;
+    }
+    .radio-label input[type="radio"] {
+      width: auto;
+      cursor: pointer;
+    }
     .cover-preview {
       margin-top: 1rem;
       width: 200px;
       height: 280px;
-      border-radius: 10px;
+      border-radius: 5px;
       overflow: hidden;
       box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
@@ -255,10 +321,38 @@ import { AttributeService, Attribute } from '../../services/attribute.service';
     .remove-btn:hover {
       background: #ee5a6f;
     }
+    .hint {
+      color: #999;
+      font-size: 0.85rem;
+      margin-top: 0.25rem;
+      font-style: italic;
+    }
+    .hint a {
+      color: #667eea;
+      text-decoration: underline;
+    }
+    .category-type-section {
+      margin-bottom: 2rem;
+    }
+    .search-input {
+      width: 100%;
+      padding: 0.5rem 1rem;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+    }
+    .search-input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
     .categories-list {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
       gap: 0.75rem;
+      max-height: 200px;
+      overflow-y: auto;
+      padding: 0.5rem;
     }
     .checkbox-label {
       display: flex;
@@ -269,6 +363,7 @@ import { AttributeService, Attribute } from '../../services/attribute.service';
       border-radius: 8px;
       cursor: pointer;
       transition: background 0.3s;
+      font-weight: normal;
     }
     .checkbox-label:hover {
       background: #e9ecef;
@@ -276,18 +371,6 @@ import { AttributeService, Attribute } from '../../services/attribute.service';
     .checkbox-label input[type="checkbox"] {
       width: auto;
       cursor: pointer;
-    }
-    .category-type {
-      color: #999;
-      font-size: 0.9rem;
-    }
-    .hint {
-      color: #999;
-      font-style: italic;
-    }
-    .hint a {
-      color: #667eea;
-      text-decoration: underline;
     }
     .inline-form {
       display: flex;
@@ -352,6 +435,14 @@ export class GameFormComponent implements OnInit {
   isEditMode = false;
   gameId: string | null = null;
   categories: Category[] = [];
+  categoryTypes = ['genre', 'franchise', 'saga', 'custom'];
+  categorySearchQueries: { [key: string]: string } = {
+    genre: '',
+    franchise: '',
+    saga: '',
+    custom: ''
+  };
+  consoles: Console[] = [];
   globalAttributes: Attribute[] = [];
   selectedCategoryIds: string[] = [];
   customAttributesObj: Record<string, any> = {};
@@ -364,6 +455,7 @@ export class GameFormComponent implements OnInit {
     private gameService: GameService,
     private categoryService: CategoryService,
     private attributeService: AttributeService,
+    private consoleService: ConsoleService,
     private route: ActivatedRoute,
     private router: Router
   ) {
@@ -373,6 +465,8 @@ export class GameFormComponent implements OnInit {
       coverArt: ['', Validators.required],
       releaseDate: ['', Validators.required],
       platform: ['', Validators.required],
+      consoleId: [''],
+      physicalDigital: ['physical', Validators.required],
     });
   }
 
@@ -382,6 +476,7 @@ export class GameFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadCategories();
+    this.loadConsoles();
     this.loadGlobalAttributes();
 
     const id = this.route.snapshot.paramMap.get('id');
@@ -398,6 +493,12 @@ export class GameFormComponent implements OnInit {
     });
   }
 
+  loadConsoles(): void {
+    this.consoleService.getAllConsoles().subscribe(consoles => {
+      this.consoles = consoles;
+    });
+  }
+
   loadGlobalAttributes(): void {
     this.attributeService.getGlobalAttributes().subscribe(attributes => {
       this.globalAttributes = attributes;
@@ -411,6 +512,8 @@ export class GameFormComponent implements OnInit {
         coverArt: game.coverArt,
         releaseDate: game.releaseDate.split('T')[0],
         platform: game.platform,
+        consoleId: game.consoleId || '',
+        physicalDigital: game.physicalDigital,
       });
 
       if (game.alternateTitles) {
@@ -423,6 +526,15 @@ export class GameFormComponent implements OnInit {
       this.customAttributesObj = game.customAttributes || {};
       this.updateCustomAttributesArray();
     });
+  }
+
+  getFilteredCategories(type: string): Category[] {
+    const query = this.categorySearchQueries[type].toLowerCase().trim();
+    const typedCategories = this.categories.filter(c => c.type === type);
+    if (!query) {
+      return typedCategories;
+    }
+    return typedCategories.filter(cat => cat.name.toLowerCase().includes(query));
   }
 
   addAlternateTitle(): void {

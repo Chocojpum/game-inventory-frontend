@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GameService, Game } from '../../services/game.service';
 import { CategoryService, Category } from '../../services/category.service';
+import { ConsoleService, Console } from '../../services/console.service';
 
 @Component({
   selector: 'app-game-detail',
@@ -13,6 +14,9 @@ import { CategoryService, Category } from '../../services/category.service';
         <div class="game-header">
           <div class="game-cover-large">
             <img [src]="game.coverArt" [alt]="game.title" />
+            <div class="physical-badge" [class.digital]="game.physicalDigital === 'digital'">
+              {{ game.physicalDigital === 'physical' ? '📀 Physical' : '💾 Digital' }}
+            </div>
           </div>
           
           <div class="game-main-info">
@@ -30,9 +34,17 @@ import { CategoryService, Category } from '../../services/category.service';
                 <span class="label">Platform:</span>
                 <span class="value">{{ game.platform }}</span>
               </div>
+              <div class="info-item" *ngIf="gameConsole">
+                <span class="label">Console:</span>
+                <span class="value">{{ gameConsole.name }} ({{ gameConsole.model }})</span>
+              </div>
               <div class="info-item">
                 <span class="label">Release Date:</span>
                 <span class="value">{{ game.releaseDate | date: 'longDate' }}</span>
+              </div>
+              <div class="info-item">
+                <span class="label">Format:</span>
+                <span class="value">{{ game.physicalDigital }}</span>
               </div>
             </div>
 
@@ -48,6 +60,9 @@ import { CategoryService, Category } from '../../services/category.service';
 
             <div class="actions">
               <button class="edit-button" (click)="editGame()">✏️ Edit</button>
+              <button class="backlog-button" (click)="showBacklogManager()">
+                🎯 Manage Backlog
+              </button>
               <button class="delete-button" (click)="deleteGame()">🗑️ Delete</button>
             </div>
           </div>
@@ -62,6 +77,13 @@ import { CategoryService, Category } from '../../services/category.service';
             </div>
           </div>
         </div>
+
+        <app-backlog-manager 
+          *ngIf="showBacklog" 
+          [gameId]="game.id"
+          [gameTitle]="game.title"
+          (close)="showBacklog = false">
+        </app-backlog-manager>
       </div>
     </div>
 
@@ -97,21 +119,37 @@ import { CategoryService, Category } from '../../services/category.service';
     }
     .game-header {
       display: grid;
-      grid-template-columns: 400px 1fr;
+      grid-template-columns: 350px 1fr;
       gap: 2rem;
       padding: 2rem;
     }
     .game-cover-large {
       width: 100%;
-      height: 550px;
-      border-radius: 15px;
+      height: 500px;
       overflow: hidden;
       box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      position: relative;
+      background: #f0f0f0;
     }
     .game-cover-large img {
       width: 100%;
       height: 100%;
       object-fit: cover;
+    }
+    .physical-badge {
+      position: absolute;
+      bottom: 15px;
+      right: 15px;
+      background: rgba(102, 126, 234, 0.95);
+      color: white;
+      padding: 0.75rem 1rem;
+      border-radius: 25px;
+      font-weight: 600;
+      font-size: 1rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+    .physical-badge.digital {
+      background: rgba(118, 75, 162, 0.95);
     }
     .game-main-info h1 {
       margin: 0 0 1rem 0;
@@ -141,6 +179,7 @@ import { CategoryService, Category } from '../../services/category.service';
     .value {
       color: #333;
       font-size: 1.1rem;
+      text-transform: capitalize;
     }
     .categories-section {
       margin: 2rem 0;
@@ -169,8 +208,9 @@ import { CategoryService, Category } from '../../services/category.service';
       display: flex;
       gap: 1rem;
       margin-top: 2rem;
+      flex-wrap: wrap;
     }
-    .edit-button, .delete-button {
+    .edit-button, .backlog-button, .delete-button {
       padding: 0.75rem 1.5rem;
       border: none;
       border-radius: 25px;
@@ -187,6 +227,15 @@ import { CategoryService, Category } from '../../services/category.service';
       background: #5568d3;
       transform: translateY(-2px);
       box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    .backlog-button {
+      background: #2ecc71;
+      color: white;
+    }
+    .backlog-button:hover {
+      background: #27ae60;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);
     }
     .delete-button {
       background: #ff4757;
@@ -246,12 +295,15 @@ import { CategoryService, Category } from '../../services/category.service';
 export class GameDetailComponent implements OnInit {
   game: Game | null = null;
   gameCategories: Category[] = [];
+  gameConsole: Console | null = null;
+  showBacklog = false;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private gameService: GameService,
-    private categoryService: CategoryService
+    private categoryService: CategoryService,
+    private consoleService: ConsoleService
   ) { }
 
   ngOnInit(): void {
@@ -260,6 +312,7 @@ export class GameDetailComponent implements OnInit {
       this.gameService.getGame(id).subscribe(game => {
         this.game = game;
         this.loadCategories();
+        this.loadConsole();
       });
     }
   }
@@ -271,6 +324,19 @@ export class GameDetailComponent implements OnInit {
           this.game!.categoryIds.includes(cat.id)
         );
       });
+    }
+  }
+
+  loadConsole(): void {
+    if (this.game && this.game.consoleId) {
+      this.consoleService.getConsole(this.game.consoleId).subscribe(
+        console => {
+          this.gameConsole = console;
+        },
+        error => {
+          console.error('Console not found', error);
+        }
+      );
     }
   }
 
@@ -300,6 +366,10 @@ export class GameDetailComponent implements OnInit {
     if (this.game) {
       this.router.navigate(['/edit-game', this.game.id]);
     }
+  }
+
+  showBacklogManager(): void {
+    this.showBacklog = true;
   }
 
   deleteGame(): void {
