@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { PeripheralService, Peripheral } from '../../services/peripheral.service';
 import { ConsoleService, Console } from '../../services/console.service';
+import { ConsoleFamilyService, ConsoleFamily } from '../../services/console-family.service';
+import { trigger, transition, style, animate, query, stagger } from '@angular/animations';
 
 @Component({
   selector: 'app-peripheral-list',
@@ -12,13 +14,26 @@ import { ConsoleService, Console } from '../../services/console.service';
         <button class="add-btn" routerLink="/add-peripheral">+ Add Peripheral</button>
       </div>
       
-      <app-search-bar (searchQuery)="onSearch($event)"></app-search-bar>
+      <app-search-bar [placeholder]="'🔍 Search peripherals...'" (searchQuery)="onSearch($event)"></app-search-bar>
 
-      <div class="peripherals-grid" *ngIf="peripherals.length > 0">
+      <div class="filters">
+        <div class="filter-group">
+          <label>Console Family:</label>
+          <select (change)="onFamilyFilter($event)" class="filter-select">
+            <option value="">All</option>
+            <option *ngFor="let family of families" [value]="family.id">{{ family.name }}</option>
+          </select>
+        </div>
+
+        <button class="clear-filters-btn" (click)="clearFilters()">Clear Filters</button>
+      </div>
+
+      <div class="peripherals-grid" *ngIf="peripherals.length > 0" [@listAnimation]="peripherals.length">
         <div 
           class="peripheral-card" 
           *ngFor="let peripheral of peripherals"
           (click)="editPeripheral(peripheral.id)"
+          [@cardAnimation]
         >
           <div class="peripheral-icon">🕹️</div>
           <div class="peripheral-info">
@@ -68,6 +83,50 @@ import { ConsoleService, Console } from '../../services/console.service';
     }
     .add-btn:hover {
       background: #5568d3;
+      transform: translateY(-2px);
+    }
+    .filters {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-end;
+      margin-bottom: 2rem;
+      background: white;
+      padding: 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      flex: 1;
+      min-width: 150px;
+    }
+    .filter-group label {
+      font-weight: 600;
+      color: #667eea;
+      font-size: 0.9rem;
+    }
+    .filter-select {
+      padding: 0.5rem;
+      border-radius: 5px;
+      border: 2px solid #667eea;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .clear-filters-btn {
+      padding: 0.5rem 1rem;
+      background: #ff4757;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      height: fit-content;
+    }
+    .clear-filters-btn:hover {
+      background: #ee5a6f;
       transform: translateY(-2px);
     }
     .peripherals-grid {
@@ -140,22 +199,44 @@ import { ConsoleService, Console } from '../../services/console.service';
       color: #999;
       font-size: 1.2rem;
     }
-  `]
+  `],
+  animations: [
+    trigger('listAnimation', [
+      transition('* => *', [
+        query(':enter', [
+          style({ opacity: 0, transform: 'translateX(-20px)' }),
+          stagger(50, [
+            animate('300ms ease-out', style({ opacity: 1, transform: 'translateX(0)' }))
+          ])
+        ], { optional: true })
+      ])
+    ]),
+    trigger('cardAnimation', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateX(-20px)' }),
+        animate('300ms ease-out', style({ opacity: 1, transform: 'translateX(0)' }))
+      ])
+    ])
+  ]
 })
 export class PeripheralListComponent implements OnInit {
   peripherals: Peripheral[] = [];
   consoles: Console[] = [];
+  families: ConsoleFamily[] = [];
   private allPeripherals: Peripheral[] = [];
+  private selectedFamilyId: string = '';
 
   constructor(
     private peripheralService: PeripheralService,
     private consoleService: ConsoleService,
+    private familyService: ConsoleFamilyService,
     private router: Router
   ) { }
 
   ngOnInit(): void {
     this.loadPeripherals();
     this.loadConsoles();
+    this.loadFamilies();
   }
 
   loadPeripherals(): void {
@@ -171,19 +252,54 @@ export class PeripheralListComponent implements OnInit {
     });
   }
 
+  loadFamilies(): void {
+    this.familyService.getAllFamilies().subscribe(families => {
+      this.families = families;
+    });
+  }
+
   getConsoleName(consoleId: string): string {
     const console = this.consoles.find(c => c.id === consoleId);
-    return console ? console.name : 'Unknown Console';
+    if (!console) return 'Unknown Console';
+    
+    const family = this.families.find(f => f.id === console.consoleFamilyId);
+    return family ? `${family.name} - ${console.model}` : console.model;
   }
 
   onSearch(query: string): void {
     if (query.trim() === '') {
-      this.peripherals = this.allPeripherals;
+      this.applyFilter();
     } else {
       this.peripheralService.searchPeripherals(query).subscribe(peripherals => {
-        this.peripherals = peripherals;
+        this.peripherals = this.filterByFamily(peripherals);
       });
     }
+  }
+
+  onFamilyFilter(event: any): void {
+    this.selectedFamilyId = event.target.value;
+    this.applyFilter();
+  }
+
+  applyFilter(): void {
+    this.peripherals = this.filterByFamily(this.allPeripherals);
+  }
+
+  filterByFamily(peripherals: Peripheral[]): Peripheral[] {
+    if (!this.selectedFamilyId) return peripherals;
+    
+    const familyConsoleIds = this.consoles
+      .filter(c => c.consoleFamilyId === this.selectedFamilyId)
+      .map(c => c.id);
+    
+    return peripherals.filter(p => familyConsoleIds.includes(p.consoleId));
+  }
+
+  clearFilters(): void {
+    this.selectedFamilyId = '';
+    this.peripherals = this.allPeripherals;
+    const select = document.querySelector('.filter-select') as HTMLSelectElement;
+    if (select) select.value = '';
   }
 
   editPeripheral(id: string): void {

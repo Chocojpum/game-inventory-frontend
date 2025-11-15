@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule, Routes } from '@angular/router';
@@ -18,11 +19,14 @@ import { PeripheralListComponent } from './components/peripheral-list/peripheral
 import { PeripheralFormComponent } from './components/peripheral-form/peripheral-form.component';
 import { BacklogManagerComponent } from './components/backlog-manager/backlog-manager.component';
 
+import { ConsoleFamilyManagerComponent } from './components/console-family-manager/console-family-manager.component';
+
 const routes: Routes = [
   { path: '', component: GameListComponent },
   { path: 'game/:id', component: GameDetailComponent },
   { path: 'add-game', component: GameFormComponent },
   { path: 'edit-game/:id', component: GameFormComponent },
+  { path: 'console-families', component: ConsoleFamilyManagerComponent },
   { path: 'consoles', component: ConsoleListComponent },
   { path: 'console/:id', component: ConsoleDetailComponent },
   { path: 'add-console', component: ConsoleFormComponent },
@@ -43,6 +47,7 @@ const routes: Routes = [
     SearchBarComponent,
     CategoryManagerComponent,
     AttributeManagerComponent,
+    ConsoleFamilyManagerComponent,
     ConsoleListComponent,
     ConsoleDetailComponent,
     ConsoleFormComponent,
@@ -52,6 +57,7 @@ const routes: Routes = [
   ],
   imports: [
     BrowserModule,
+    BrowserAnimationsModule,
     HttpClientModule,
     FormsModule,
     ReactiveFormsModule,

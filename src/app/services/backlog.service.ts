@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 export interface Backlog {
   id: string;
   gameId: string;
-  completionDate: string;
+  completionDate: string | null;
   endingType: string;
   completionType: string;
   customAttributes: Record<string, any>;

@@ -16,8 +16,16 @@ import { CompletionTypeService, CompletionType } from '../../services/completion
           <h3>Add Completion Entry</h3>
           <div class="form-grid">
             <div class="form-group">
-              <label>Completion Date *</label>
+              <label>Completion Date</label>
               <input type="date" [(ngModel)]="newBacklog.completionDate" />
+              <label class="checkbox-label">
+                <input 
+                  type="checkbox" 
+                  [(ngModel)]="unknownDate"
+                  (change)="onUnknownDateChange()"
+                />
+                Unknown date
+              </label>
             </div>
 
             <div class="form-group">
@@ -68,7 +76,7 @@ import { CompletionTypeService, CompletionType } from '../../services/completion
           <button 
             class="submit-btn" 
             (click)="addBacklogEntry()"
-            [disabled]="!newBacklog.completionDate || !newBacklog.completionType"
+            [disabled]="!newBacklog.completionType || (!newBacklog.completionDate && !unknownDate)"
           >
             Add Entry
           </button>
@@ -354,6 +362,7 @@ export class BacklogManagerComponent implements OnInit {
     endingType: '',
     completionType: ''
   };
+  unknownDate = false;
   newCompletionTypeName = '';
   newAttributeName = '';
   newAttributeValue = '';
@@ -372,10 +381,18 @@ export class BacklogManagerComponent implements OnInit {
 
   loadBacklogs(): void {
     this.backlogService.getBacklogsByGame(this.gameId).subscribe(backlogs => {
-      this.backlogs = backlogs.sort((a, b) => 
-        new Date(b.completionDate).getTime() - new Date(a.completionDate).getTime()
-      );
+      this.backlogs = backlogs.sort((a, b) => {
+        if (!a.completionDate) return 1;
+        if (!b.completionDate) return -1;
+        return new Date(b.completionDate).getTime() - new Date(a.completionDate).getTime();
+      });
     });
+  }
+
+  onUnknownDateChange(): void {
+    if (this.unknownDate) {
+      this.newBacklog.completionDate = '';
+    }
   }
 
   loadCompletionTypes(): void {
@@ -417,22 +434,23 @@ export class BacklogManagerComponent implements OnInit {
   }
 
   addBacklogEntry(): void {
-    if (this.newBacklog.completionDate && this.newBacklog.completionType) {
+    if (this.newBacklog.completionType && (this.newBacklog.completionDate || this.unknownDate)) {
       this.backlogService.createBacklog({
         gameId: this.gameId,
-        completionDate: this.newBacklog.completionDate,
+        completionDate: this.unknownDate ? null : this.newBacklog.completionDate,
         endingType: this.newBacklog.endingType,
         completionType: this.newBacklog.completionType,
         customAttributes: this.customAttributesObj
       }).subscribe(() => {
-        this.loadBacklogs();
         this.newBacklog = {
           completionDate: '',
           endingType: '',
           completionType: ''
         };
+        this.unknownDate = false;
         this.customAttributesObj = {};
         this.customAttributesArray = [];
+        this.closeModal();
       });
     }
   }

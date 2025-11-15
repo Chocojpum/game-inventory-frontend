@@ -4,8 +4,7 @@ import { Observable } from 'rxjs';
 
 export interface Console {
   id: string;
-  name: string;
-  developer: string;
+  consoleFamilyId: string;
   releaseDate: string;
   picture: string;
   region: string;
@@ -34,6 +33,10 @@ export class ConsoleService {
 
   searchConsoles(query: string): Observable<Console[]> {
     return this.http.get<Console[]>(`${this.apiUrl}?search=${query}`);
+  }
+
+  getConsolesByFamily(familyId: string): Observable<Console[]> {
+    return this.http.get<Console[]>(`${this.apiUrl}?familyId=${familyId}`);
   }
 
   createConsole(console: Partial<Console>): Observable<Console> {

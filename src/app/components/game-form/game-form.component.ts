@@ -5,6 +5,7 @@ import { GameService, Game } from '../../services/game.service';
 import { CategoryService, Category } from '../../services/category.service';
 import { AttributeService, Attribute } from '../../services/attribute.service';
 import { ConsoleService, Console } from '../../services/console.service';
+import { ConsoleFamilyService, ConsoleFamily } from '../../services/console-family.service';
 
 @Component({
   selector: 'app-game-form',
@@ -47,21 +48,39 @@ import { ConsoleService, Console } from '../../services/console.service';
             </div>
 
             <div class="form-group">
-              <label>Platform *</label>
-              <input type="text" formControlName="platform" placeholder="e.g., PlayStation 5, PC, Xbox" />
+              <label>Developer *</label>
+              <input type="text" formControlName="developer" placeholder="e.g., Nintendo, Sony" />
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group">
-              <label>Console</label>
-              <select formControlName="consoleId">
-                <option value="">None</option>
-                <option *ngFor="let console of consoles" [value]="console.id">
-                  {{ console.name }} ({{ console.model }})
+              <label>Console Family *</label>
+              <select formControlName="consoleFamilyId">
+                <option value="">Select Console</option>
+                <option *ngFor="let family of consoleFamilies" [value]="family.id">
+                  {{ family.name }}
                 </option>
               </select>
-              <p class="hint">Select from your console inventory</p>
+              <p class="hint">The console platform (e.g., PlayStation 5, Nintendo Switch)</p>
+            </div>
+
+            <div class="form-group">
+              <label>Owned Console Instance</label>
+              <select formControlName="consoleId">
+                <option value="">None / Not Owned</option>
+                <option *ngFor="let console of getFilteredConsoles()" [value]="console.id">
+                  {{ getConsoleName(console) }}
+                </option>
+              </select>
+              <p class="hint">Your specific owned console (optional)</p>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Region *</label>
+              <input type="text" formControlName="region" placeholder="e.g., NTSC, PAL, NTSC-J" />
             </div>
 
             <div class="form-group">
@@ -195,239 +214,88 @@ import { ConsoleService, Console } from '../../services/console.service';
   `,
   styles: [`
     .form-container {
-      max-width: 900px;
-      margin: 0 auto;
-      background: white;
-      padding: 2rem;
-      border-radius: 20px;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+      max-width: 900px; margin: 0 auto; background: white;
+      padding: 2rem; border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.15);
     }
-    h2 {
-      margin: 0 0 2rem 0;
-      color: #333;
-      font-size: 2rem;
-    }
+    h2 { margin: 0 0 2rem 0; color: #333; font-size: 2rem; }
     .form-section {
-      margin-bottom: 2rem;
-      padding-bottom: 2rem;
-      border-bottom: 2px solid #f0f0f0;
+      margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 2px solid #f0f0f0;
     }
-    .form-section:last-of-type {
-      border-bottom: none;
+    .form-section:last-of-type { border-bottom: none; }
+    h3 { color: #667eea; margin: 0 0 1.5rem 0; }
+    h4 { color: #555; margin: 1rem 0 0.75rem 0; font-size: 1.1rem; }
+    .form-group { margin-bottom: 1.5rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    label { display: block; margin-bottom: 0.5rem; color: #333; font-weight: 600; }
+    input[type="text"], input[type="url"], input[type="date"], input[type="number"], select {
+      width: 100%; padding: 0.75rem; border: 2px solid #e0e0e0;
+      border-radius: 8px; font-size: 1rem; transition: border-color 0.3s;
     }
-    h3 {
-      color: #667eea;
-      margin: 0 0 1.5rem 0;
-    }
-    h4 {
-      color: #555;
-      margin: 1rem 0 0.75rem 0;
-      font-size: 1.1rem;
-    }
-    .form-group {
-      margin-bottom: 1.5rem;
-    }
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-    }
-    label {
-      display: block;
-      margin-bottom: 0.5rem;
-      color: #333;
-      font-weight: 600;
-    }
-    input[type="text"],
-    input[type="url"],
-    input[type="date"],
-    input[type="number"],
-    select {
-      width: 100%;
-      padding: 0.75rem;
-      border: 2px solid #e0e0e0;
-      border-radius: 8px;
-      font-size: 1rem;
-      transition: border-color 0.3s;
-    }
-    input:focus, select:focus {
-      outline: none;
-      border-color: #667eea;
-    }
-    .radio-group {
-      display: flex;
-      gap: 1.5rem;
-      margin-top: 0.5rem;
-    }
+    input:focus, select:focus { outline: none; border-color: #667eea; }
+    .radio-group { display: flex; gap: 1.5rem; margin-top: 0.5rem; }
     .radio-label {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-weight: normal;
-      cursor: pointer;
-      padding: 0.75rem 1rem;
-      background: #f8f9fa;
-      border-radius: 8px;
-      transition: background 0.3s;
+      display: flex; align-items: center; gap: 0.5rem; font-weight: normal;
+      cursor: pointer; padding: 0.75rem 1rem; background: #f8f9fa;
+      border-radius: 8px; transition: background 0.3s;
     }
-    .radio-label:hover {
-      background: #e9ecef;
-    }
-    .radio-label input[type="radio"] {
-      width: auto;
-      cursor: pointer;
-    }
+    .radio-label:hover { background: #e9ecef; }
+    .radio-label input[type="radio"] { width: auto; cursor: pointer; }
     .cover-preview {
-      margin-top: 1rem;
-      width: 200px;
-      height: 280px;
-      border-radius: 5px;
-      overflow: hidden;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      margin-top: 1rem; max-width: 200px; border-radius: 5px;
+      overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
-    .cover-preview img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .array-item {
-      display: flex;
-      gap: 0.5rem;
-      margin-bottom: 0.5rem;
-    }
-    .array-item input {
-      flex: 1;
-    }
+    .cover-preview img { display: block; width: 100%; height: auto; }
+    .array-item { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
+    .array-item input { flex: 1; }
     .add-btn, .remove-btn {
-      padding: 0.5rem 1rem;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: all 0.3s;
+      padding: 0.5rem 1rem; border: none; border-radius: 5px;
+      cursor: pointer; font-weight: 600; transition: all 0.3s;
     }
-    .add-btn {
-      background: #667eea;
-      color: white;
-      margin-top: 0.5rem;
-    }
-    .add-btn:hover {
-      background: #5568d3;
-    }
-    .remove-btn {
-      background: #ff4757;
-      color: white;
-    }
-    .remove-btn:hover {
-      background: #ee5a6f;
-    }
+    .add-btn { background: #667eea; color: white; margin-top: 0.5rem; }
+    .add-btn:hover { background: #5568d3; }
+    .remove-btn { background: #ff4757; color: white; }
+    .remove-btn:hover { background: #ee5a6f; }
     .hint {
-      color: #999;
-      font-size: 0.85rem;
-      margin-top: 0.25rem;
-      font-style: italic;
+      color: #999; font-size: 0.85rem; margin-top: 0.25rem; font-style: italic;
     }
-    .hint a {
-      color: #667eea;
-      text-decoration: underline;
-    }
-    .category-type-section {
-      margin-bottom: 2rem;
-    }
+    .hint a { color: #667eea; text-decoration: underline; }
+    .category-type-section { margin-bottom: 2rem; }
     .search-input {
-      width: 100%;
-      padding: 0.5rem 1rem;
-      border: 2px solid #e0e0e0;
-      border-radius: 8px;
-      margin-bottom: 1rem;
-      font-size: 0.95rem;
+      width: 100%; padding: 0.5rem 1rem; border: 2px solid #e0e0e0;
+      border-radius: 8px; margin-bottom: 1rem; font-size: 0.95rem;
     }
-    .search-input:focus {
-      outline: none;
-      border-color: #667eea;
-    }
+    .search-input:focus { outline: none; border-color: #667eea; }
     .categories-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 0.75rem;
-      max-height: 200px;
-      overflow-y: auto;
-      padding: 0.5rem;
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 0.75rem; max-height: 200px; overflow-y: auto; padding: 0.5rem;
     }
     .checkbox-label {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.75rem;
-      background: #f8f9fa;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.3s;
-      font-weight: normal;
+      display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem;
+      background: #f8f9fa; border-radius: 8px; cursor: pointer;
+      transition: background 0.3s; font-weight: normal;
     }
-    .checkbox-label:hover {
-      background: #e9ecef;
-    }
-    .checkbox-label input[type="checkbox"] {
-      width: auto;
-      cursor: pointer;
-    }
-    .inline-form {
-      display: flex;
-      gap: 0.5rem;
-      margin-bottom: 1rem;
-    }
-    .inline-form input {
-      flex: 1;
-    }
+    .checkbox-label:hover { background: #e9ecef; }
+    .checkbox-label input[type="checkbox"] { width: auto; cursor: pointer; }
+    .inline-form { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+    .inline-form input { flex: 1; }
     .attribute-row {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      padding: 0.75rem;
-      background: #f8f9fa;
-      border-radius: 8px;
-      margin-bottom: 0.5rem;
+      display: flex; align-items: center; gap: 1rem; padding: 0.75rem;
+      background: #f8f9fa; border-radius: 8px; margin-bottom: 0.5rem;
     }
-    .attribute-row strong {
-      color: #667eea;
-      min-width: 150px;
-    }
-    .form-actions {
-      display: flex;
-      gap: 1rem;
-      margin-top: 2rem;
-    }
+    .attribute-row strong { color: #667eea; min-width: 150px; }
+    .form-actions { display: flex; gap: 1rem; margin-top: 2rem; }
     .submit-btn, .cancel-btn {
-      padding: 1rem 2rem;
-      border: none;
-      border-radius: 25px;
-      font-size: 1.1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s;
+      padding: 1rem 2rem; border: none; border-radius: 25px;
+      font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s;
     }
-    .submit-btn {
-      background: #667eea;
-      color: white;
-      flex: 1;
-    }
+    .submit-btn { background: #667eea; color: white; flex: 1; }
     .submit-btn:hover:not(:disabled) {
-      background: #5568d3;
-      transform: translateY(-2px);
+      background: #5568d3; transform: translateY(-2px);
       box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
     }
-    .submit-btn:disabled {
-      background: #ccc;
-      cursor: not-allowed;
-    }
-    .cancel-btn {
-      background: #e0e0e0;
-      color: #333;
-    }
-    .cancel-btn:hover {
-      background: #d0d0d0;
-    }
+    .submit-btn:disabled { background: #ccc; cursor: not-allowed; }
+    .cancel-btn { background: #e0e0e0; color: #333; }
+    .cancel-btn:hover { background: #d0d0d0; }
   `]
 })
 export class GameFormComponent implements OnInit {
@@ -437,12 +305,10 @@ export class GameFormComponent implements OnInit {
   categories: Category[] = [];
   categoryTypes = ['genre', 'franchise', 'saga', 'custom'];
   categorySearchQueries: { [key: string]: string } = {
-    genre: '',
-    franchise: '',
-    saga: '',
-    custom: ''
+    genre: '', franchise: '', saga: '', custom: ''
   };
   consoles: Console[] = [];
+  consoleFamilies: ConsoleFamily[] = [];
   globalAttributes: Attribute[] = [];
   selectedCategoryIds: string[] = [];
   customAttributesObj: Record<string, any> = {};
@@ -456,6 +322,7 @@ export class GameFormComponent implements OnInit {
     private categoryService: CategoryService,
     private attributeService: AttributeService,
     private consoleService: ConsoleService,
+    private consoleFamilyService: ConsoleFamilyService,
     private route: ActivatedRoute,
     private router: Router
   ) {
@@ -464,8 +331,10 @@ export class GameFormComponent implements OnInit {
       alternateTitles: this.fb.array([]),
       coverArt: ['', Validators.required],
       releaseDate: ['', Validators.required],
-      platform: ['', Validators.required],
+      developer: ['', Validators.required],
+      consoleFamilyId: ['', Validators.required],
       consoleId: [''],
+      region: ['', Validators.required],
       physicalDigital: ['physical', Validators.required],
     });
   }
@@ -477,6 +346,7 @@ export class GameFormComponent implements OnInit {
   ngOnInit(): void {
     this.loadCategories();
     this.loadConsoles();
+    this.loadConsoleFamilies();
     this.loadGlobalAttributes();
 
     const id = this.route.snapshot.paramMap.get('id');
@@ -499,6 +369,12 @@ export class GameFormComponent implements OnInit {
     });
   }
 
+  loadConsoleFamilies(): void {
+    this.consoleFamilyService.getAllFamilies().subscribe(families => {
+      this.consoleFamilies = families;
+    });
+  }
+
   loadGlobalAttributes(): void {
     this.attributeService.getGlobalAttributes().subscribe(attributes => {
       this.globalAttributes = attributes;
@@ -511,8 +387,10 @@ export class GameFormComponent implements OnInit {
         title: game.title,
         coverArt: game.coverArt,
         releaseDate: game.releaseDate.split('T')[0],
-        platform: game.platform,
+        developer: game.developer,
+        consoleFamilyId: game.consoleFamilyId,
         consoleId: game.consoleId || '',
+        region: game.region,
         physicalDigital: game.physicalDigital,
       });
 
@@ -531,10 +409,18 @@ export class GameFormComponent implements OnInit {
   getFilteredCategories(type: string): Category[] {
     const query = this.categorySearchQueries[type].toLowerCase().trim();
     const typedCategories = this.categories.filter(c => c.type === type);
-    if (!query) {
-      return typedCategories;
-    }
+    if (!query) return typedCategories;
     return typedCategories.filter(cat => cat.name.toLowerCase().includes(query));
+  }
+
+  getFilteredConsoles(): Console[] {
+    const familyId = this.gameForm.get('consoleFamilyId')?.value;
+    if (!familyId) return [];
+    return this.consoles.filter(c => c.consoleFamilyId === familyId);
+  }
+
+  getConsoleName(console: Console): string {
+    return `${console.model} - ${console.region} (${console.color})`;
   }
 
   addAlternateTitle(): void {
@@ -590,8 +476,7 @@ export class GameFormComponent implements OnInit {
 
   updateCustomAttributesArray(): void {
     this.customAttributesArray = Object.entries(this.customAttributesObj).map(([key, value]) => ({
-      key,
-      value
+      key, value
     }));
   }
 

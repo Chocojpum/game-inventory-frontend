@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Output, Input } from '@angular/core';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
@@ -9,7 +9,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
       <input 
         type="text" 
         class="search-input" 
-        placeholder="🔍 Search games by title..."
+        [placeholder]="placeholder"
         (input)="onSearchChange($event)"
       />
     </div>
@@ -35,6 +35,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
   `]
 })
 export class SearchBarComponent {
+  @Input() placeholder: string = '🔍 Search...';
   @Output() searchQuery = new EventEmitter<string>();
   private searchSubject = new Subject<string>();
 

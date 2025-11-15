@@ -19,6 +19,7 @@ import { ExportService } from './services/export.service';
         <nav>
           <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Games</a>
           <a routerLink="/add-game" routerLinkActive="active">Add Game</a>
+          <a routerLink="/console-families" routerLinkActive="active">Console Families</a>
           <a routerLink="/consoles" routerLinkActive="active">Consoles</a>
           <a routerLink="/peripherals" routerLinkActive="active">Peripherals</a>
           <a routerLink="/categories" routerLinkActive="active">Categories</a>

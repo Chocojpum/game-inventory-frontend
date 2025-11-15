@@ -3,20 +3,20 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { GameService, Game } from '../../services/game.service';
 import { CategoryService, Category } from '../../services/category.service';
 import { ConsoleService, Console } from '../../services/console.service';
+import { ConsoleFamilyService, ConsoleFamily } from '../../services/console-family.service';
+import { BacklogService, Backlog } from '../../services/backlog.service';
+import { trigger, transition, style, animate } from '@angular/animations';
 
 @Component({
   selector: 'app-game-detail',
   template: `
-    <div class="game-detail-container" *ngIf="game">
+    <div class="game-detail-container" *ngIf="game" [@fadeIn]>
       <button class="back-button" (click)="goBack()">← Back to Library</button>
       
       <div class="game-detail-card">
         <div class="game-header">
           <div class="game-cover-large">
             <img [src]="game.coverArt" [alt]="game.title" />
-            <div class="physical-badge" [class.digital]="game.physicalDigital === 'digital'">
-              {{ game.physicalDigital === 'physical' ? '📀 Physical' : '💾 Digital' }}
-            </div>
           </div>
           
           <div class="game-main-info">
@@ -31,16 +31,24 @@ import { ConsoleService, Console } from '../../services/console.service';
             
             <div class="info-grid">
               <div class="info-item">
-                <span class="label">Platform:</span>
-                <span class="value">{{ game.platform }}</span>
+                <span class="label">Console:</span>
+                <span class="value">{{ getConsoleFamilyName() }}</span>
               </div>
               <div class="info-item" *ngIf="gameConsole">
-                <span class="label">Console:</span>
-                <span class="value">{{ gameConsole.name }} ({{ gameConsole.model }})</span>
+                <span class="label">Owned Model:</span>
+                <span class="value">{{ gameConsole.model }}</span>
               </div>
               <div class="info-item">
                 <span class="label">Release Date:</span>
                 <span class="value">{{ game.releaseDate | date: 'longDate' }}</span>
+              </div>
+              <div class="info-item">
+                <span class="label">Developer:</span>
+                <span class="value">{{ game.developer }}</span>
+              </div>
+              <div class="info-item">
+                <span class="label">Region:</span>
+                <span class="value">{{ game.region }}</span>
               </div>
               <div class="info-item">
                 <span class="label">Format:</span>
@@ -50,19 +58,46 @@ import { ConsoleService, Console } from '../../services/console.service';
 
             <div class="categories-section" *ngIf="gameCategories.length > 0">
               <h3>Categories</h3>
-              <div class="category-tags">
-                <span class="category-tag" *ngFor="let cat of gameCategories">
-                  {{ cat.name }}
-                  <span class="category-type">({{ cat.type }})</span>
-                </span>
+              
+              <div class="category-subsection" *ngIf="getCategoriesByType('genre').length > 0">
+                <h4>Genres</h4>
+                <div class="category-tags">
+                  <span class="category-tag" *ngFor="let cat of getCategoriesByType('genre')">
+                    {{ cat.name }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="category-subsection" *ngIf="getCategoriesByType('franchise').length > 0">
+                <h4>Franchises</h4>
+                <div class="category-tags">
+                  <span class="category-tag" *ngFor="let cat of getCategoriesByType('franchise')">
+                    {{ cat.name }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="category-subsection" *ngIf="getCategoriesByType('saga').length > 0">
+                <h4>Sagas</h4>
+                <div class="category-tags">
+                  <span class="category-tag" *ngFor="let cat of getCategoriesByType('saga')">
+                    {{ cat.name }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="category-subsection" *ngIf="getCategoriesByType('custom').length > 0">
+                <h4>Custom</h4>
+                <div class="category-tags">
+                  <span class="category-tag" *ngFor="let cat of getCategoriesByType('custom')">
+                    {{ cat.name }}
+                  </span>
+                </div>
               </div>
             </div>
 
             <div class="actions">
               <button class="edit-button" (click)="editGame()">✏️ Edit</button>
-              <button class="backlog-button" (click)="showBacklogManager()">
-                🎯 Manage Backlog
-              </button>
               <button class="delete-button" (click)="deleteGame()">🗑️ Delete</button>
             </div>
           </div>
@@ -78,11 +113,76 @@ import { ConsoleService, Console } from '../../services/console.service';
           </div>
         </div>
 
+        <div class="backlog-section">
+          <div class="backlog-header">
+            <h2>🎯 Completion History</h2>
+            <button class="add-backlog-btn" (click)="showBacklogManager()">+ Add Entry</button>
+          </div>
+
+          <div *ngIf="backlogs.length > 0" class="backlog-list">
+            <div *ngFor="let backlog of backlogs" class="backlog-item">
+              <div class="backlog-content" *ngIf="!isEditingBacklog(backlog.id)">
+                <div class="backlog-main">
+                  <strong>{{ backlog.completionDate ? (backlog.completionDate | date: 'yyyy-MM-dd') : 'Unknown date' }}</strong>
+                  <span class="completion-type-badge">{{ backlog.completionType }}</span>
+                </div>
+                <div class="backlog-details" *ngIf="backlog.endingType">
+                  <span class="label">Ending:</span> {{ backlog.endingType }}
+                </div>
+                <div class="backlog-attributes" *ngIf="hasBacklogAttributes(backlog)">
+                  <div *ngFor="let attr of getBacklogAttributesArray(backlog)" class="attr-display">
+                    <span class="attr-label">{{ attr.key }}:</span> {{ attr.value }}
+                  </div>
+                </div>
+              </div>
+
+              <div class="backlog-edit-form" *ngIf="isEditingBacklog(backlog.id)">
+                <div class="edit-field">
+                  <label>Completion Date</label>
+                  <input 
+                    type="date" 
+                    [(ngModel)]="editingBacklogData.completionDate"
+                    [disabled]="editingBacklogData.unknownDate"
+                  />
+                  <label class="checkbox-label">
+                    <input 
+                      type="checkbox" 
+                      [(ngModel)]="editingBacklogData.unknownDate"
+                    />
+                    Unknown date
+                  </label>
+                </div>
+                <div class="edit-field">
+                  <label>Ending Type</label>
+                  <input type="text" [(ngModel)]="editingBacklogData.endingType" />
+                </div>
+                <div class="edit-field">
+                  <label>Completion Type</label>
+                  <input type="text" [(ngModel)]="editingBacklogData.completionType" />
+                </div>
+                <div class="edit-actions">
+                  <button class="save-btn" (click)="saveBacklogEdit(backlog.id)">Save</button>
+                  <button class="cancel-edit-btn" (click)="cancelBacklogEdit()">Cancel</button>
+                </div>
+              </div>
+
+              <div class="backlog-actions">
+                <button class="edit-btn-small" (click)="startEditingBacklog(backlog)" *ngIf="!isEditingBacklog(backlog.id)">✏️</button>
+                <button class="delete-btn-small" (click)="deleteBacklogEntry(backlog.id)" *ngIf="!isEditingBacklog(backlog.id)">✕</button>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="backlogs.length === 0" class="empty-backlog">
+            <p>No completions recorded yet.</p>
+          </div>
+        </div>
+
         <app-backlog-manager 
           *ngIf="showBacklog" 
           [gameId]="game.id"
           [gameTitle]="game.title"
-          (close)="showBacklog = false">
+          (close)="closeBacklogManager()">
         </app-backlog-manager>
       </div>
     </div>
@@ -119,22 +219,19 @@ import { ConsoleService, Console } from '../../services/console.service';
     }
     .game-header {
       display: grid;
-      grid-template-columns: 350px 1fr;
+      grid-template-columns: auto 1fr;
       gap: 2rem;
       padding: 2rem;
     }
     .game-cover-large {
-      width: 100%;
-      height: 500px;
-      overflow: hidden;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
       position: relative;
       background: #f0f0f0;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
     }
     .game-cover-large img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+      display: block;
+      max-width: 400px;
+      height: auto;
     }
     .physical-badge {
       position: absolute;
@@ -188,6 +285,14 @@ import { ConsoleService, Console } from '../../services/console.service';
       margin: 0 0 1rem 0;
       color: #333;
     }
+    .category-subsection {
+      margin-bottom: 1rem;
+    }
+    .category-subsection h4 {
+      margin: 0 0 0.5rem 0;
+      color: #667eea;
+      font-size: 1rem;
+    }
     .category-tags {
       display: flex;
       flex-wrap: wrap;
@@ -200,17 +305,13 @@ import { ConsoleService, Console } from '../../services/console.service';
       border-radius: 20px;
       font-size: 0.9rem;
     }
-    .category-type {
-      opacity: 0.8;
-      font-size: 0.85rem;
-    }
     .actions {
       display: flex;
       gap: 1rem;
       margin-top: 2rem;
       flex-wrap: wrap;
     }
-    .edit-button, .backlog-button, .delete-button {
+    .edit-button, .delete-button {
       padding: 0.75rem 1.5rem;
       border: none;
       border-radius: 25px;
@@ -227,15 +328,6 @@ import { ConsoleService, Console } from '../../services/console.service';
       background: #5568d3;
       transform: translateY(-2px);
       box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-    }
-    .backlog-button {
-      background: #2ecc71;
-      color: white;
-    }
-    .backlog-button:hover {
-      background: #27ae60;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);
     }
     .delete-button {
       background: #ff4757;
@@ -276,6 +368,106 @@ import { ConsoleService, Console } from '../../services/console.service';
       color: #333;
       font-size: 1.05rem;
     }
+    .backlog-section {
+      padding: 2rem;
+      background: #f8f9fa;
+      border-top: 1px solid #e0e0e0;
+    }
+    .backlog-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    .backlog-header h2 {
+      margin: 0;
+      color: #333;
+    }
+    .add-backlog-btn {
+      padding: 0.5rem 1rem;
+      background: #2ecc71;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .add-backlog-btn:hover {
+      background: #27ae60;
+      transform: translateY(-2px);
+    }
+    .backlog-list {
+      display: grid;
+      gap: 1rem;
+    }
+    .backlog-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 1.5rem;
+      background: white;
+      border-radius: 10px;
+      border-left: 4px solid #2ecc71;
+    }
+    .backlog-content {
+      flex: 1;
+    }
+    .backlog-main {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 0.75rem;
+    }
+    .backlog-main strong {
+      color: #333;
+      font-size: 1.1rem;
+    }
+    .completion-type-badge {
+      background: #2ecc71;
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 15px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .backlog-details {
+      color: #666;
+      margin-bottom: 0.5rem;
+    }
+    .backlog-attributes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 0.75rem;
+    }
+    .attr-display {
+      background: #f8f9fa;
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+    .delete-btn-small {
+      background: #ff4757;
+      color: white;
+      border: none;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.3s;
+    }
+    .delete-btn-small:hover {
+      background: #ee5a6f;
+      transform: scale(1.1);
+    }
+    .empty-backlog {
+      text-align: center;
+      padding: 2rem;
+      color: #999;
+      font-style: italic;
+    }
     .loading {
       text-align: center;
       padding: 4rem;
@@ -286,24 +478,38 @@ import { ConsoleService, Console } from '../../services/console.service';
       .game-header {
         grid-template-columns: 1fr;
       }
-      .game-cover-large {
-        height: 400px;
+      .game-cover-large img {
+        max-width: 100%;
       }
     }
-  `]
+  `],
+  animations: [
+    trigger('fadeIn', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(20px)' }),
+        animate('500ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
+      ])
+    ])
+  ]
 })
 export class GameDetailComponent implements OnInit {
   game: Game | null = null;
   gameCategories: Category[] = [];
   gameConsole: Console | null = null;
+  consoleFamily: ConsoleFamily | null = null;
+  backlogs: Backlog[] = [];
   showBacklog = false;
+  editingBacklogId: string | null = null;
+  editingBacklogData: any = {};
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private gameService: GameService,
     private categoryService: CategoryService,
-    private consoleService: ConsoleService
+    private consoleService: ConsoleService,
+    private consoleFamilyService: ConsoleFamilyService,
+    private backlogService: BacklogService
   ) { }
 
   ngOnInit(): void {
@@ -313,6 +519,8 @@ export class GameDetailComponent implements OnInit {
         this.game = game;
         this.loadCategories();
         this.loadConsole();
+        this.loadConsoleFamily();
+        this.loadBacklogs();
       });
     }
   }
@@ -340,6 +548,69 @@ export class GameDetailComponent implements OnInit {
     }
   }
 
+  loadConsoleFamily(): void {
+    if (this.game) {
+      this.consoleFamilyService.getFamily(this.game.consoleFamilyId).subscribe(
+        family => {
+          this.consoleFamily = family;
+        },
+        error => {
+          console.error('Console family not found', error);
+        }
+      );
+    }
+  }
+
+  loadBacklogs(): void {
+    if (this.game) {
+      this.backlogService.getBacklogsByGame(this.game.id).subscribe(backlogs => {
+        this.backlogs = backlogs.sort((a, b) => {
+          if (!a.completionDate) return 1;
+          if (!b.completionDate) return -1;
+          return new Date(b.completionDate).getTime() - new Date(a.completionDate).getTime();
+        });
+      });
+    }
+  }
+
+  isEditingBacklog(id: string): boolean {
+    return this.editingBacklogId === id;
+  }
+
+  startEditingBacklog(backlog: Backlog): void {
+    this.editingBacklogId = backlog.id;
+    this.editingBacklogData = {
+      completionDate: backlog.completionDate ? backlog.completionDate.split('T')[0] : '',
+      endingType: backlog.endingType,
+      completionType: backlog.completionType,
+      unknownDate: !backlog.completionDate
+    };
+  }
+
+  saveBacklogEdit(id: string): void {
+    this.backlogService.updateBacklog(id, {
+      completionDate: this.editingBacklogData.unknownDate ? null : this.editingBacklogData.completionDate,
+      endingType: this.editingBacklogData.endingType,
+      completionType: this.editingBacklogData.completionType
+    }).subscribe(() => {
+      this.editingBacklogId = null;
+      this.loadBacklogs();
+    });
+  }
+
+  cancelBacklogEdit(): void {
+    this.editingBacklogId = null;
+    this.editingBacklogData = {};
+  }
+
+  getConsoleFamilyName(): string {
+    return this.consoleFamily ? this.consoleFamily.name : 'Unknown';
+  }
+
+  getCategoriesByType(type: string): Category[] {
+    return this.gameCategories.filter(cat => cat.type === type);
+  }
+
   hasCustomAttributes(): boolean {
     return this.game ? Object.keys(this.game.customAttributes).length > 0 : false;
   }
@@ -362,6 +633,17 @@ export class GameDetailComponent implements OnInit {
     return String(value);
   }
 
+  hasBacklogAttributes(backlog: Backlog): boolean {
+    return Object.keys(backlog.customAttributes).length > 0;
+  }
+
+  getBacklogAttributesArray(backlog: Backlog): Array<{key: string, value: any}> {
+    return Object.entries(backlog.customAttributes).map(([key, value]) => ({
+      key,
+      value
+    }));
+  }
+
   editGame(): void {
     if (this.game) {
       this.router.navigate(['/edit-game', this.game.id]);
@@ -370,6 +652,19 @@ export class GameDetailComponent implements OnInit {
 
   showBacklogManager(): void {
     this.showBacklog = true;
+  }
+
+  closeBacklogManager(): void {
+    this.showBacklog = false;
+    this.loadBacklogs();
+  }
+
+  deleteBacklogEntry(id: string): void {
+    if (confirm('Are you sure you want to delete this completion entry?')) {
+      this.backlogService.deleteBacklog(id).subscribe(() => {
+        this.loadBacklogs();
+      });
+    }
   }
 
   deleteGame(): void {
