@@ -116,7 +116,10 @@ import { trigger, transition, style, animate } from '@angular/animations';
         <div class="backlog-section">
           <div class="backlog-header">
             <h2>🎯 Completion History</h2>
-            <button class="add-backlog-btn" (click)="showBacklogManager()">+ Add Entry</button>
+            <button class="add-backlog-btn" (click)="showBacklogManager()">
+              <span class="btn-icon">+</span>
+              <span class="btn-text">Add Entry</span>
+            </button>
           </div>
 
           <div *ngIf="backlogs.length > 0" class="backlog-list">
@@ -384,18 +387,28 @@ import { trigger, transition, style, animate } from '@angular/animations';
       color: #333;
     }
     .add-backlog-btn {
-      padding: 0.5rem 1rem;
-      background: #2ecc71;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: linear-gradient(135deg, #2ecc71, #27ae60);
       color: white;
       border: none;
-      border-radius: 20px;
+      border-radius: 25px;
       font-weight: 600;
+      font-size: 1rem;
       cursor: pointer;
       transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
     }
     .add-backlog-btn:hover {
-      background: #27ae60;
+      background: linear-gradient(135deg, #27ae60, #229954);
       transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(46, 204, 113, 0.4);
+    }
+    .btn-icon {
+      font-size: 1.3rem;
+      font-weight: bold;
     }
     .backlog-list {
       display: grid;
@@ -407,8 +420,14 @@ import { trigger, transition, style, animate } from '@angular/animations';
       align-items: flex-start;
       padding: 1.5rem;
       background: white;
-      border-radius: 10px;
-      border-left: 4px solid #2ecc71;
+      border-radius: 15px;
+      border-left: 5px solid #2ecc71;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      transition: all 0.3s;
+    }
+    .backlog-item:hover {
+      box-shadow: 0 4px 15px rgba(46, 204, 113, 0.2);
+      transform: translateX(5px);
     }
     .backlog-content {
       flex: 1;
@@ -447,7 +466,8 @@ import { trigger, transition, style, animate } from '@angular/animations';
       border-radius: 8px;
       font-size: 0.9rem;
     }
-    .delete-btn-small {
+    .delete-btn-small,
+    .edit-btn-small {
       background: #ff4757;
       color: white;
       border: none;
@@ -458,9 +478,16 @@ import { trigger, transition, style, animate } from '@angular/animations';
       font-size: 1rem;
       transition: all 0.3s;
     }
-    .delete-btn-small:hover {
+    .delete-btn-small:hover,
+    .edit-btn-small:hover {
       background: #ee5a6f;
       transform: scale(1.1);
+    }
+    .edit-btn-small {
+      background: #667eea;
+    }
+    .edit-btn-small:hover {
+      background: #667eea;
     }
     .empty-backlog {
       text-align: center;
@@ -468,6 +495,108 @@ import { trigger, transition, style, animate } from '@angular/animations';
       color: #999;
       font-style: italic;
     }
+    .backlog-edit-form {
+      background: #f8f9fa;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 16px 0;
+    }
+      
+    .edit-field {
+      margin-bottom: 16px;
+    }
+      
+    .edit-field label {
+      display: block;
+      font-weight: 600;
+      font-size: 14px;
+      color: #333;
+      margin-bottom: 6px;
+    }
+      
+    .edit-field input[type="text"],
+    .edit-field input[type="date"] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #d0d0d0;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+      
+    .edit-field input[type="text"]:focus,
+    .edit-field input[type="date"]:focus {
+      outline: none;
+      border-color: #4a90e2;
+      box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+    }
+      
+    .edit-field input[type="text"]:disabled,
+    .edit-field input[type="date"]:disabled {
+      background-color: #f0f0f0;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+      
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      font-weight: 400 !important;
+      margin-top: 8px;
+      cursor: pointer;
+    }
+      
+    .checkbox-label input[type="checkbox"] {
+      width: auto;
+      margin-right: 8px;
+      cursor: pointer;
+    }
+      
+    .edit-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid #e0e0e0;
+    }
+      
+    .save-btn,
+    .cancel-edit-btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s;
+    }
+      
+    .save-btn {
+      background-color: #4a90e2;
+      color: white;
+    }
+      
+    .save-btn:hover {
+      background-color: #3a7bc8;
+    }
+      
+    .save-btn:active {
+      transform: scale(0.98);
+    }
+      
+    .cancel-edit-btn {
+      background-color: #e0e0e0;
+      color: #333;
+    }
+      
+    .cancel-edit-btn:hover {
+      background-color: #d0d0d0;
+    }
+      
+    .cancel-edit-btn:active {
+      transform: scale(0.98);
+    }  
     .loading {
       text-align: center;
       padding: 4rem;

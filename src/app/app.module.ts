@@ -20,6 +20,7 @@ import { PeripheralFormComponent } from './components/peripheral-form/peripheral
 import { BacklogManagerComponent } from './components/backlog-manager/backlog-manager.component';
 
 import { ConsoleFamilyManagerComponent } from './components/console-family-manager/console-family-manager.component';
+import { ClickOutsideDirective } from './directives/click-outside.directive';
 
 const routes: Routes = [
   { path: '', component: GameListComponent },
@@ -54,6 +55,7 @@ const routes: Routes = [
     PeripheralListComponent,
     PeripheralFormComponent,
     BacklogManagerComponent,
+    ClickOutsideDirective,
   ],
   imports: [
     BrowserModule,

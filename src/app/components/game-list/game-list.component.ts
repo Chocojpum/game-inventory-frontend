@@ -52,14 +52,40 @@ import { trigger, transition, style, animate, query, stagger } from '@angular/an
           </select>
         </div>
 
-        <div class="filter-group">
-          <label>Release Date From:</label>
-          <input type="date" [(ngModel)]="dateFrom" (change)="onDateRangeChange()" class="date-input" />
-        </div>
-
-        <div class="filter-group">
-          <label>Release Date To:</label>
-          <input type="date" [(ngModel)]="dateTo" (change)="onDateRangeChange()" class="date-input" />
+        <div class="filter-group date-range-group">
+          <label>Release Date Range:</label>
+          <input 
+            type="text" 
+            [(ngModel)]="dateRangeText"
+            (focus)="showDatePicker = true"
+            placeholder="Select date range..."
+            class="date-range-input"
+            readonly
+          />
+          <div class="date-picker-dropdown" 
+               *ngIf="showDatePicker" 
+               (clickOutside)="showDatePicker = false"
+               (click)="$event.stopPropagation()">
+            <div class="date-picker-header">
+              <input 
+                type="date" 
+                [(ngModel)]="dateFrom" 
+                (ngModelChange)="updateDateRangeText()"
+                placeholder="From"
+              />
+              <span>to</span>
+              <input 
+                type="date" 
+                [(ngModel)]="dateTo" 
+                (ngModelChange)="updateDateRangeText()"
+                placeholder="To"
+              />
+            </div>
+            <div class="date-picker-actions">
+              <button class="apply-btn" (click)="applyDateRange()">Apply</button>
+              <button class="clear-btn" (click)="clearDateRange()">Clear</button>
+            </div>
+          </div>
         </div>
 
         <button class="clear-filters-btn" (click)="clearFilters()">Clear Filters</button>
@@ -142,11 +168,77 @@ import { trigger, transition, style, animate, query, stagger } from '@angular/an
       font-size: 1rem;
       cursor: pointer;
     }
-    .date-input {
+    .date-range-group {
+      position: relative;
+    }
+    .date-range-input {
       padding: 0.5rem;
       border-radius: 5px;
       border: 2px solid #667eea;
       font-size: 1rem;
+      cursor: pointer;
+      background: white;
+    }
+    .date-picker-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      margin-top: 0.5rem;
+      background: white;
+      border: 2px solid #667eea;
+      border-radius: 10px;
+      padding: 1rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      z-index: 1000;
+      min-width: 300px;
+    }
+    .date-picker-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .date-picker-header input {
+      flex: 1;
+      padding: 0.5rem;
+      border: 2px solid #e0e0e0;
+      border-radius: 5px;
+      font-size: 0.9rem;
+    }
+    .date-picker-header input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    .date-picker-header span {
+      color: #666;
+      font-weight: 600;
+    }
+    .date-picker-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .apply-btn, .clear-btn {
+      flex: 1;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .apply-btn {
+      background: #2ecc71;
+      color: white;
+    }
+    .apply-btn:hover {
+      background: #27ae60;
+    }
+    .clear-btn {
+      background: #e0e0e0;
+      color: #333;
+    }
+    .clear-btn:hover {
+      background: #d0d0d0;
     }
     .clear-filters-btn {
       padding: 0.5rem 1rem;
@@ -261,18 +353,22 @@ import { trigger, transition, style, animate, query, stagger } from '@angular/an
       height: 2.4em;
       overflow: hidden;
       position: relative;
+      width: 168px;
     }
     .title-text {
-      display: block;
+      display: inline-block;
       white-space: nowrap;
+      padding-right: 10px;
     }
     .game-card:hover .title-text {
-      animation: scrollTitle 2s linear;
-      animation-fill-mode: forwards;
+      animation: scrollTitle 8s linear infinite;
     }
     @keyframes scrollTitle {
-      0%, 10% { transform: translateX(0); }
-      90%, 100% { transform: translateX(calc(-100% + 168px)); }
+      0% { transform: translateX(0); }
+      25% { transform: translateX(calc(-100% + 168px)); }
+      50% { transform: translateX(calc(-100% + 168px)); }
+      75% { transform: translateX(0); }
+      100% { transform: translateX(0); }
     }
     .platform {
       color: #667eea;
@@ -325,6 +421,8 @@ export class GameListComponent implements OnInit {
   private activeFilters: { [key: string]: string } = {};
   dateFrom: string = '';
   dateTo: string = '';
+  dateRangeText: string = '';
+  showDatePicker: boolean = false;
   currentSort: string = 'title-asc';
 
   constructor(
@@ -398,7 +496,29 @@ export class GameListComponent implements OnInit {
     this.applyFiltersAndSort();
   }
 
-  onDateRangeChange(): void {
+  updateDateRangeText(): void {
+    if (this.dateFrom && this.dateTo) {
+      this.dateRangeText = `${this.dateFrom} to ${this.dateTo}`;
+    } else if (this.dateFrom) {
+      this.dateRangeText = `From ${this.dateFrom}`;
+    } else if (this.dateTo) {
+      this.dateRangeText = `Until ${this.dateTo}`;
+    } else {
+      this.dateRangeText = '';
+    }
+  }
+
+  applyDateRange(): void {
+    this.updateDateRangeText();
+    this.showDatePicker = false;
+    this.applyFiltersAndSort();
+  }
+
+  clearDateRange(): void {
+    this.dateFrom = '';
+    this.dateTo = '';
+    this.dateRangeText = '';
+    this.showDatePicker = false;
     this.applyFiltersAndSort();
   }
 
@@ -473,11 +593,10 @@ export class GameListComponent implements OnInit {
     this.activeFilters = {};
     this.dateFrom = '';
     this.dateTo = '';
+    this.dateRangeText = '';
     this.applyFiltersAndSort();
     const selects = document.querySelectorAll('.filter-select') as NodeListOf<HTMLSelectElement>;
     selects.forEach(select => select.value = '');
-    const dateInputs = document.querySelectorAll('.date-input') as NodeListOf<HTMLInputElement>;
-    dateInputs.forEach(input => input.value = '');
   }
 
   viewGame(id: string): void {

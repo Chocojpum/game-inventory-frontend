@@ -35,10 +35,12 @@ import { trigger, transition, style, animate, query, stagger } from '@angular/an
           (click)="editPeripheral(peripheral.id)"
           [@cardAnimation]
         >
-          <div class="peripheral-icon">🕹️</div>
+          <div class="peripheral-image">
+            <img [src]="peripheral.picture" [alt]="peripheral.name" />
+          </div>
           <div class="peripheral-info">
             <h3>{{ peripheral.name }}</h3>
-            <p class="console-name">{{ getConsoleName(peripheral.consoleId) }}</p>
+            <p class="console-name">{{ getConsoleName(peripheral.consoleFamilyId) }}</p>
             <p class="quantity">Quantity: {{ peripheral.quantity }}</p>
             <p class="color">Color: {{ peripheral.color }}</p>
           </div>
@@ -149,15 +151,21 @@ import { trigger, transition, style, animate, query, stagger } from '@angular/an
       transform: translateX(10px);
       box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
     }
-    .peripheral-icon {
-      font-size: 3rem;
-      width: 80px;
-      height: 80px;
+    .peripheral-image {
+      width: 120px;
+      height: 120px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border-radius: 15px;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      border-radius: 50%;
+      padding: 1rem;
+      flex-shrink: 0;
+    }
+    .peripheral-image img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
     }
     .peripheral-info {
       flex: 1;
@@ -258,12 +266,9 @@ export class PeripheralListComponent implements OnInit {
     });
   }
 
-  getConsoleName(consoleId: string): string {
-    const console = this.consoles.find(c => c.id === consoleId);
-    if (!console) return 'Unknown Console';
-    
-    const family = this.families.find(f => f.id === console.consoleFamilyId);
-    return family ? `${family.name} - ${console.model}` : console.model;
+  getConsoleName(familyId: string): string {
+    const family = this.families.find(f => f.id === familyId);
+    return family ? family.name : 'Unknown Console';
   }
 
   onSearch(query: string): void {
@@ -288,11 +293,7 @@ export class PeripheralListComponent implements OnInit {
   filterByFamily(peripherals: Peripheral[]): Peripheral[] {
     if (!this.selectedFamilyId) return peripherals;
     
-    const familyConsoleIds = this.consoles
-      .filter(c => c.consoleFamilyId === this.selectedFamilyId)
-      .map(c => c.id);
-    
-    return peripherals.filter(p => familyConsoleIds.includes(p.consoleId));
+    return peripherals.filter(p => p.consoleFamilyId === this.selectedFamilyId);
   }
 
   clearFilters(): void {

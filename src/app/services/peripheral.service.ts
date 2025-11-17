@@ -5,9 +5,10 @@ import { Observable } from 'rxjs';
 export interface Peripheral {
   id: string;
   name: string;
-  consoleId: string;
+  consoleFamilyId: string;
   quantity: number;
   color: string;
+  picture: string;
   customAttributes: Record<string, any>;
   createdAt: Date;
   updatedAt: Date;

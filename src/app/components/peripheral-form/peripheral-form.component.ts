@@ -45,6 +45,9 @@ import { ConsoleFamilyService, ConsoleFamily } from '../../services/console-fami
           <div class="form-group">
             <label>Picture URL *</label>
             <input type="url" formControlName="picture" placeholder="https://example.com/peripheral.jpg" />
+            <div class="picture-preview" *ngIf="form.get('picture')?.value">
+              <img [src]="form.get('picture')?.value" alt="Image preview" />
+            </div>
           </div>
         </div>
 
@@ -87,6 +90,17 @@ import { ConsoleFamilyService, ConsoleFamily } from '../../services/console-fami
     .submit-btn:disabled { background: #ccc; cursor: not-allowed; }
     .cancel-btn { background: #e0e0e0; color: #333; }
     .cancel-btn:hover { background: #d0d0d0; }
+    .picture-preview {
+      margin-top: 1rem; max-width: 500px; border-radius: 5px;
+      overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .picture-preview img { display: block; width: 100%; height: auto; }
+    .array-item { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
+    .array-item input { flex: 1; }
+    .add-btn, .remove-btn {
+      padding: 0.5rem 1rem; border: none; border-radius: 5px;
+      cursor: pointer; font-weight: 600; transition: all 0.3s;
+    }
   `]
 })
 export class PeripheralFormComponent implements OnInit {
