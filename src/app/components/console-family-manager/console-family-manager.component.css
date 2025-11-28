@@ -1,18 +1,18 @@
 .manager-container {
   max-width: 1000px;
   margin: 0 auto;
-  background: white;
+  background: var(--background-primary);
   padding: 2rem;
   border-radius: 20px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
 }
 h2 {
   margin: 0 0 1.5rem 0;
-  color: #333;
+  color: var(--text-primary);
   font-size: 2rem;
 }
 h3 {
-  color: #667eea;
+  color: var(--text-secondary);
   margin: 0 0 1rem 0;
 }
 .info-box {
@@ -27,7 +27,7 @@ h3 {
   color: #1565c0;
 }
 .add-form {
-  background: #f8f9fa;
+  background: var(--background-secondary);
   padding: 1.5rem;
   border-radius: 15px;
   margin-bottom: 2rem;
@@ -39,7 +39,7 @@ h3 {
 }
 .form-inline input {
   padding: 0.75rem;
-  border: 2px solid #e0e0e0;
+  border: 2px solid var(--disabled);
   border-radius: 8px;
   font-size: 1rem;
   flex: 1;
@@ -47,12 +47,12 @@ h3 {
 }
 .form-inline input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--accent-color);
 }
 .form-inline button {
   padding: 0.75rem 1.5rem;
-  background: #667eea;
-  color: white;
+  background: var(--background-terciary);
+  color: var(--text-primary);
   border: none;
   border-radius: 8px;
   font-weight: 600;
@@ -60,11 +60,11 @@ h3 {
   transition: all 0.3s;
 }
 .form-inline button:hover:not(:disabled) {
-  background: #5568d3;
+  background: var(--accent-color);
   transform: translateY(-2px);
 }
 .form-inline button:disabled {
-  background: #ccc;
+  background: var(--disabled);
   cursor: not-allowed;
 }
 .families-display {
@@ -79,9 +79,9 @@ h3 {
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
-  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  background: linear-gradient(135deg, var(--background-secondary), #e9ecef);
   border-radius: 10px;
-  border-left: 4px solid #667eea;
+  border-left: 4px solid var(--background-secondary);
   transition: all 0.3s;
 }
 .family-item:hover {
@@ -93,28 +93,28 @@ h3 {
 }
 .family-content strong {
   display: block;
-  color: #333;
+  color: var(--text-primary);
   font-size: 1.2rem;
   margin-bottom: 0.25rem;
 }
 .developer {
-  color: #667eea;
+  color: var(--text-secondary);
   font-weight: 600;
   margin: 0.25rem 0;
 }
 .generation {
-  color: #666;
+  color: var(--text-secondary);
   margin: 0.25rem 0;
   font-size: 0.9rem;
 }
 .date {
   font-size: 0.85rem;
-  color: #999;
+  color: var(--text-secondary);
 }
 .delete-btn {
   padding: 0.5rem 1rem;
-  background: #ff4757;
-  color: white;
+  background: var(--negative);
+  color: var(--background-primary);
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -122,7 +122,7 @@ h3 {
   font-size: 1.2rem;
 }
 .delete-btn:hover {
-  background: #ee5a6f;
+  background: var(--negative-highlight);
   transform: scale(1.1);
 }
 .empty-message {

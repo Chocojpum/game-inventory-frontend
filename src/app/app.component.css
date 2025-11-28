@@ -1,9 +1,10 @@
 .app-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  /* background: linear-gradient(135deg, Crimson 0%, var(--background-secondary) 100%); */
+  background: var(--background-terciary);
 }
 header {
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--background-primary);
   padding: 1.5rem 2rem;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
@@ -15,7 +16,7 @@ header {
 }
 h1 {
   margin: 0;
-  color: #333;
+  color: var(--text-primary);
   font-size: 2rem;
 }
 .export-buttons {
@@ -25,8 +26,8 @@ h1 {
 .export-btn,
 .import-btn {
   padding: 0.5rem 1rem;
-  background: #667eea;
-  color: white;
+  background: var(--background-secondary);
+  color: var(--text-primary);
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -35,7 +36,7 @@ h1 {
 }
 .export-btn:hover,
 .import-btn:hover {
-  background: #5568d3;
+  background: var(--accent-color);
   transform: translateY(-2px);
 }
 .import-label {
@@ -52,18 +53,18 @@ nav {
 nav a {
   padding: 0.5rem 1rem;
   text-decoration: none;
-  color: #667eea;
+  color: var(--text-secondary);
   border-radius: 5px;
   transition: all 0.3s;
   font-weight: 500;
 }
 nav a:hover {
-  background: #667eea;
-  color: white;
+  background: var(--background-secondary);
+  color: var(--text-primary);
 }
 nav a.active {
-  background: #667eea;
-  color: white;
+  background: var(--background-secondary);
+  color: var(--text-primary);
 }
 main {
   padding: 2rem;

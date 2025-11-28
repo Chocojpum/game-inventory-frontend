@@ -1,18 +1,18 @@
 .manager-container {
     max-width: 1000px;
     margin: 0 auto;
-    background: white;
+    background: var(--background-primary);
     padding: 2rem;
     border-radius: 20px;
     box-shadow: 0 8px 30px rgba(0,0,0,0.15);
 }
 h2 {
     margin: 0 0 1.5rem 0;
-    color: #333;
+    color: var(--text-primary);
     font-size: 2rem;
 }
 h3 {
-    color: #667eea;
+    color: var(--text-secondary);
     margin: 0 0 1rem 0;
 }
 .info-box {
@@ -27,7 +27,7 @@ h3 {
     color: #1565c0;
 }
 .add-attribute-form {
-    background: #f8f9fa;
+    background: var(--background-secondary);
     padding: 1.5rem;
     border-radius: 15px;
     margin-bottom: 2rem;
@@ -47,21 +47,21 @@ h3 {
 }
 label {
     margin-bottom: 0.5rem;
-    color: #333;
+    color: var(--text-primary);
     font-weight: 600;
     font-size: 0.95rem;
 }
 input[type="text"],
 select {
     padding: 0.75rem;
-    border: 2px solid #e0e0e0;
+    border: 2px solid var(--disabled);
     border-radius: 8px;
     font-size: 1rem;
     transition: border-color 0.3s;
 }
 input:focus, select:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: var(--background-secondary);
 }
 .checkbox-label {
     display: flex;
@@ -78,8 +78,8 @@ input:focus, select:focus {
 .submit-btn {
     width: 100%;
     padding: 1rem;
-    background: #667eea;
-    color: white;
+    background: var(--background-secondary);
+    color: var(--background-primary);
     border: none;
     border-radius: 10px;
     font-size: 1.1rem;
@@ -88,12 +88,12 @@ input:focus, select:focus {
     transition: all 0.3s;
 }
 .submit-btn:hover:not(:disabled) {
-    background: #5568d3;
+    background: var(--accent-color);
     transform: translateY(-2px);
     box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
 }
 .submit-btn:disabled {
-    background: #ccc;
+    background: var(--disabled);
     cursor: not-allowed;
 }
 .attributes-display {
@@ -112,9 +112,9 @@ input:focus, select:focus {
     justify-content: space-between;
     align-items: center;
     padding: 1rem;
-    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    background: linear-gradient(135deg, var(--background-secondary), #e9ecef);
     border-radius: 10px;
-    border-left: 4px solid #667eea;
+    border-left: 4px solid var(--background-secondary);
     transition: all 0.3s;
 }
 .attribute-item:hover {
@@ -129,12 +129,12 @@ input:focus, select:focus {
     flex-wrap: wrap;
 }
 .attribute-info strong {
-    color: #333;
+    color: var(--text-primary);
     font-size: 1.1rem;
 }
 .type-badge {
-    background: #667eea;
-    color: white;
+    background: var(--background-secondary);
+    color: var(--background-primary);
     padding: 0.25rem 0.75rem;
     border-radius: 15px;
     font-size: 0.85rem;
@@ -147,8 +147,8 @@ input:focus, select:focus {
 }
 .delete-btn {
     padding: 0.5rem 1rem;
-    background: #ff4757;
-    color: white;
+    background: var(--negative);
+    color: var(--background-primary);
     border: none;
     border-radius: 5px;
     cursor: pointer;
@@ -156,7 +156,7 @@ input:focus, select:focus {
     font-size: 1.2rem;
 }
 .delete-btn:hover {
-    background: #ee5a6f;
+    background: var(--negative);
     transform: scale(1.1);
 }
 .empty-message {

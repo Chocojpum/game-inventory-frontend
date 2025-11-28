@@ -1,6 +1,6 @@
 h2 {
   margin: 0;
-  color: #333;
+  color: var(--text-primary);
   font-size: 2rem;
 }
 
@@ -14,7 +14,7 @@ h2 {
   flex-wrap: wrap;
   align-items: flex-end;
   margin-bottom: 1rem;
-  background: white;
+  background: var(--background-primary);
   padding: 1.5rem;
   border-radius: 10px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -28,13 +28,11 @@ h2 {
 }
 .filter-group label {
   font-weight: 600;
-  color: #667eea;
+  color: var(--text-secondary);
   font-size: 0.9rem;
 }
 .filter-select {
   padding: 0.5rem;
-  border-radius: 5px;
-  border: 2px solid #667eea;
   font-size: 1rem;
   cursor: pointer;
 }
@@ -44,18 +42,19 @@ h2 {
 .date-range-input {
   padding: 0.5rem;
   border-radius: 5px;
-  border: 2px solid #667eea;
+  border: 2px solid var(--background-secondary);
   font-size: 1rem;
   cursor: pointer;
-  background: white;
+  background: var(--background-primary);
+  color: var(--text-primary);
 }
 .date-picker-dropdown {
   position: absolute;
   top: 100%;
   left: 0;
   margin-top: 0.5rem;
-  background: white;
-  border: 2px solid #667eea;
+  background: var(--background-primary);
+  border: 2px solid var(--background-secondary);
   border-radius: 10px;
   padding: 1rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
@@ -71,16 +70,18 @@ h2 {
 .date-picker-header input {
   flex: 1;
   padding: 0.5rem;
-  border: 2px solid #e0e0e0;
+  border: 2px solid var(--disabled);
   border-radius: 5px;
   font-size: 0.9rem;
+  background: var(--background-primary);
+  color: var(--text-primary);
 }
 .date-picker-header input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--background-secondary);
 }
 .date-picker-header span {
-  color: #666;
+  color: var(--text-secondary);
   font-weight: 600;
 }
 .date-picker-actions {
@@ -98,23 +99,23 @@ h2 {
   transition: all 0.3s;
 }
 .apply-btn {
-  background: #2ecc71;
-  color: white;
+  background: DarkGreen;
+  color: var(--text-primary);
 }
 .apply-btn:hover {
   background: #27ae60;
 }
 .clear-btn {
-  background: #e0e0e0;
-  color: #333;
+  background: gray;
+  color: var(--text-primary);
 }
 .clear-btn:hover {
-  background: #d0d0d0;
+  background: var(--disabled-highlight);
 }
 .clear-filters-btn {
   padding: 0.5rem 1rem;
-  background: #ff4757;
-  color: white;
+  background: var(--negative);
+  color: var(--text-primary);
   border: none;
   border-radius: 5px;
   font-weight: 600;
@@ -123,7 +124,7 @@ h2 {
   height: fit-content;
 }
 .clear-filters-btn:hover {
-  background: #ee5a6f;
+  background: var(--negative-highlight);
   transform: translateY(-2px);
 }
 .sort-controls {
@@ -131,46 +132,47 @@ h2 {
   gap: 0.5rem;
   align-items: center;
   margin-bottom: 2rem;
-  background: white;
+  background: var(--background-primary);
   padding: 1rem 1.5rem;
   border-radius: 10px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 .sort-controls label {
   font-weight: 600;
-  color: #333;
+  color: var(--text-primary);
   margin-right: 0.5rem;
 }
 .sort-controls button {
   padding: 0.5rem 1rem;
-  background: #f0f0f0;
-  color: #333;
-  border: 2px solid #e0e0e0;
+  background: var(--background-primary);
+  color: var(--text-primary);
+  border: 2px solid var(--accent-color);
   border-radius: 5px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s;
 }
-.sort-controls button:hover {
-  background: #e0e0e0;
-}
 .sort-controls button.active {
-  background: #667eea;
-  color: white;
-  border-color: #667eea;
+  background: var(--background-secondary);
+  color: var(--text-primary);
+  border-color: var(--text-primary);
+}
+.sort-controls button:hover {
+  /* background: var(--disabled); */
+  background: var(--accent-color);
 }
 .list-info {
   display: flex;
   justify-content: flex-end;
   margin-bottom: 1rem;
   padding: 0.5rem 1rem;
-  background: white;
+  background: var(--background-primary);
   border-radius: 10px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 .item-count {
   font-weight: 600;
-  color: #667eea;
+  color: var(--text-secondary);
 }
 .games-grid {
   display: grid;
@@ -178,7 +180,7 @@ h2 {
   gap: 2rem;
 }
 .game-card {
-  background: white;
+  background: var(--background-primary);
   overflow: hidden;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   cursor: pointer;
@@ -193,7 +195,7 @@ h2 {
   width: 100%;
   height: 280px;
   overflow: hidden;
-  background: #f0f0f0;
+  background: var(--background-primary);
   position: relative;
 }
 .game-cover img {
@@ -219,12 +221,11 @@ h2 {
 }
 .game-info h3 {
   margin: 0 0 0.5rem 0;
-  color: #333;
+  color: var(--text-primary);
   font-size: 1rem;
   height: 2.4em;
   overflow: hidden;
   position: relative;
-  width: 168px;
 }
 .title-text,
 .title-text-animated {
@@ -244,21 +245,21 @@ h2 {
   }
 }
 .platform {
-  color: #667eea;
+  color: var(--text-secondary);
   font-weight: 600;
   margin: 0.25rem 0;
   font-size: 0.85rem;
 }
 .release-date {
-  color: #999;
+  color: var(--text-secondary);
   font-size: 0.8rem;
   margin: 0.25rem 0;
 }
 .no-games {
   text-align: center;
   padding: 4rem 2rem;
-  background: white;
+  background: var(--background-primary);
   border-radius: 15px;
-  color: #999;
+  color: var(--text-secondary);
   font-size: 1.2rem;
 }
