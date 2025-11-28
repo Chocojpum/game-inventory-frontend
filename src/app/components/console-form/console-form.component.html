@@ -62,6 +62,9 @@
           formControlName="picture"
           placeholder="https://example.com/console.jpg"
         />
+        <div class="picture-preview" *ngIf="form.get('picture')?.value">
+          <img [src]="form.get('picture')?.value" alt="Image preview" />
+        </div>
       </div>
     </div>
 
