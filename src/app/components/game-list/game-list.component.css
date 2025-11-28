@@ -1,3 +1,9 @@
+h2 {
+  margin: 0;
+  color: #333;
+  font-size: 2rem;
+}
+
 .game-list-container {
   max-width: 1400px;
   margin: 0 auto;
@@ -220,26 +226,18 @@
   position: relative;
   width: 168px;
 }
-.title-text {
+.title-text,
+.title-text-animated {
   display: inline-block;
   white-space: nowrap;
   padding-right: 10px;
 }
-.game-card:hover .title-text {
+.game-card:hover .title-text-animated {
   animation: scrollTitle 8s linear infinite;
 }
 @keyframes scrollTitle {
-  0% {
-    transform: translateX(0);
-  }
-  25% {
-    transform: translateX(calc(-100% + 168px));
-  }
   50% {
-    transform: translateX(calc(-100% + 168px));
-  }
-  75% {
-    transform: translateX(0);
+    transform: translateX(-50%);
   }
   100% {
     transform: translateX(0);

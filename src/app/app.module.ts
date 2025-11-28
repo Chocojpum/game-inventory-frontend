@@ -21,6 +21,7 @@ import { BacklogManagerComponent } from './components/backlog-manager/backlog-ma
 
 import { ConsoleFamilyManagerComponent } from './components/console-family-manager/console-family-manager.component';
 import { ClickOutsideDirective } from './directives/click-outside.directive';
+import { OverflowClassDirective } from './directives/overflow-class.directive';
 
 const routes: Routes = [
   { path: '', component: GameListComponent },
@@ -56,6 +57,7 @@ const routes: Routes = [
     PeripheralFormComponent,
     BacklogManagerComponent,
     ClickOutsideDirective,
+    OverflowClassDirective,
   ],
   imports: [
     BrowserModule,

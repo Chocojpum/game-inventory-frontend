@@ -1,20 +1,20 @@
 <div class="app-container">
   <header>
     <div class="header-top">
-      <h1>🎮 My Game Inventory</h1>
+      <h1>🐣 Game Collection Inventory</h1>
       <div class="export-buttons">
-        <button class="export-btn" (click)="exportData()">
-          📥 Export Data
-        </button>
-        <label class="import-btn">
-          📤 Import Data
-          <input
-            class="import-input"
-            type="file"
-            accept=".xlsx"
-            (change)="importData($event)"
-          />
-        </label>
+        <div class="export-btn" (click)="exportData()">📁 Export Data</div>
+        <div class="import-btn">
+          <label class="import-label">
+            📂 Import Data
+            <input
+              class="import-input"
+              type="file"
+              accept=".xlsx"
+              (change)="importData($event)"
+            />
+          </label>
+        </div>
       </div>
     </div>
     <nav>
@@ -24,7 +24,6 @@
         [routerLinkActiveOptions]="{ exact: true }"
         >Games</a
       >
-      <a routerLink="/add-game" routerLinkActive="active">Add Game</a>
       <a routerLink="/console-families" routerLinkActive="active"
         >Console Families</a
       >

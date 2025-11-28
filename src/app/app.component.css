@@ -38,6 +38,9 @@ h1 {
   background: #5568d3;
   transform: translateY(-2px);
 }
+.import-label {
+    cursor: pointer;
+}
 .import-input {
   display: none;
 }

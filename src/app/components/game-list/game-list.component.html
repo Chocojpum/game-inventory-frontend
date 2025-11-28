@@ -1,4 +1,9 @@
 <div class="game-list-container">
+  <div class="header-actions">
+    <h2>💿 Game Inventory</h2>
+    <button class="add-btn" routerLink="/add-game">+ Add Game</button>
+  </div>
+
   <app-search-bar
     [placeholder]="'🔍 Search games by title...'"
     (searchQuery)="onSearch($event)"
@@ -175,7 +180,7 @@
         </div>
       </div>
       <div class="game-info">
-        <h3 [title]="game.title">
+        <h3 [title]="game.title" appOverflowClass="title-text-animated">
           <span class="title-text">{{ game.title }}</span>
         </h3>
         <p class="platform">{{ getConsoleFamilyName(game.consoleFamilyId) }}</p>
