@@ -1,1 +1,67 @@
-<p>category-manager works!</p>
+<div class="manager-container">
+  <h2>Category Manager</h2>
+
+  <div class="add-category-form">
+    <h3>Add New Category</h3>
+    <div class="form-inline">
+      <input
+        type="text"
+        [(ngModel)]="newCategory.name"
+        placeholder="Category name"
+      />
+      <select title="new-category-select" [(ngModel)]="newCategory.type">
+        <option value="franchise">Franchise</option>
+        <option value="saga">Saga</option>
+        <option value="genre">Genre</option>
+        <option value="custom">Custom</option>
+      </select>
+      <input
+        type="text"
+        [(ngModel)]="newCategory.description"
+        placeholder="Description (optional)"
+      />
+      <button (click)="addCategory()" [disabled]="!newCategory.name">
+        Add Category
+      </button>
+    </div>
+  </div>
+
+  <div class="categories-display">
+    <div class="category-group" *ngFor="let type of categoryTypes">
+      <div class="group-header">
+        <h3>{{ type | titlecase }}</h3>
+        <input
+          type="text"
+          class="search-input"
+          [(ngModel)]="searchQueries[type]"
+          (input)="onSearch(type)"
+          placeholder="Search {{ type }}..."
+        />
+      </div>
+      <div class="category-list">
+        <div
+          class="category-item"
+          *ngFor="let category of getFilteredCategories(type)"
+        >
+          <div class="category-content">
+            <strong>{{ category.name }}</strong>
+            <p *ngIf="category.description">{{ category.description }}</p>
+            <span class="date">Created: {{ category.createdAt | date }}</span>
+          </div>
+          <button
+            class="delete-btn"
+            (click)="deleteCategory(category.id, category.name)"
+          >
+            🗑️
+          </button>
+        </div>
+        <p
+          class="empty-message"
+          *ngIf="getFilteredCategories(type).length === 0"
+        >
+          No {{ type }} categories found
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

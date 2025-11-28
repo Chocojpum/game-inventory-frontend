@@ -1,1 +1,137 @@
-<p>backlog-manager works!</p>
+<div class="backlog-overlay" (click)="closeModal()">
+  <div class="backlog-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>🎯 Backlog: {{ gameTitle }}</h2>
+      <button class="close-btn" (click)="closeModal()">✕</button>
+    </div>
+
+    <div class="add-backlog-form">
+      <h3>Add Completion Entry</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Completion Date</label>
+          <input
+            type="date"
+            [(ngModel)]="newBacklog.completionDate"
+            title="completion-date-input"
+          />
+          <label class="checkbox-label">
+            <input
+              type="checkbox"
+              [(ngModel)]="unknownDate"
+              (change)="onUnknownDateChange()"
+            />
+            Unknown date
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label>Ending Type</label>
+          <input
+            type="text"
+            [(ngModel)]="newBacklog.endingType"
+            placeholder="e.g., True Ending, Bad Ending"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Completion Type *</label>
+          <select
+            [(ngModel)]="newBacklog.completionType"
+            title="completion-type-select"
+          >
+            <option value="">Select...</option>
+            <option *ngFor="let ct of completionTypes" [value]="ct.name">
+              {{ ct.name }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Add New Completion Type</label>
+          <div class="inline-add">
+            <input
+              type="text"
+              [(ngModel)]="newCompletionTypeName"
+              placeholder="New type"
+            />
+            <button
+              (click)="addCompletionType()"
+              [disabled]="!newCompletionTypeName"
+            >
+              +
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="custom-attribute-section">
+        <h4>Custom Attributes</h4>
+        <div class="inline-form">
+          <input
+            type="text"
+            [(ngModel)]="newAttributeName"
+            placeholder="Attribute name"
+          />
+          <input
+            type="text"
+            [(ngModel)]="newAttributeValue"
+            placeholder="Value"
+          />
+          <button (click)="addCustomAttribute()">Add</button>
+        </div>
+        <div
+          class="current-attributes"
+          *ngIf="customAttributesArray.length > 0"
+        >
+          <div *ngFor="let attr of customAttributesArray" class="attr-tag">
+            <strong>{{ attr.key }}:</strong> {{ attr.value }}
+            <button (click)="removeCustomAttribute(attr.key)">✕</button>
+          </div>
+        </div>
+      </div>
+
+      <button
+        class="submit-btn"
+        (click)="addBacklogEntry()"
+        [disabled]="
+          !newBacklog.completionType ||
+          (!newBacklog.completionDate && !unknownDate)
+        "
+      >
+        Add Entry
+      </button>
+    </div>
+
+    <div class="backlog-list">
+      <h3>Completion History</h3>
+      <div *ngIf="backlogs.length === 0" class="empty-message">
+        No completions recorded yet.
+      </div>
+      <div *ngFor="let backlog of backlogs" class="backlog-item">
+        <div class="backlog-content">
+          <div class="backlog-main">
+            <strong>{{ backlog.completionDate | date : "mediumDate" }}</strong>
+            <span class="completion-type-badge">{{
+              backlog.completionType
+            }}</span>
+          </div>
+          <div class="backlog-details" *ngIf="backlog.endingType">
+            <span class="label">Ending:</span> {{ backlog.endingType }}
+          </div>
+          <div class="backlog-attributes" *ngIf="hasAttributes(backlog)">
+            <div
+              *ngFor="let attr of getAttributesArray(backlog)"
+              class="attr-display"
+            >
+              <span class="attr-label">{{ attr.key }}:</span> {{ attr.value }}
+            </div>
+          </div>
+        </div>
+        <button class="delete-btn" (click)="deleteBacklog(backlog.id)">
+          🗑️
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

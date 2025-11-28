@@ -1,1 +1,126 @@
-<p>attribute-manager works!</p>
+<div class="manager-container">
+  <h2>Attribute Manager</h2>
+
+  <div class="info-box">
+    <p>
+      <strong>Global Attributes</strong> will be available for all games when
+      adding/editing.
+    </p>
+    <p>
+      <strong>Non-global Attributes</strong> are just saved as templates for
+      reference.
+    </p>
+  </div>
+
+  <div class="add-attribute-form">
+    <h3>Create New Attribute</h3>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Attribute Name</label>
+        <input
+          type="text"
+          [(ngModel)]="newAttribute.name"
+          placeholder="e.g., Developer, Completion Time"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Data Type</label>
+        <select
+          [(ngModel)]="newAttribute.type"
+          (change)="onTypeChange()"
+          title="data-type-select"
+        >
+          <option value="text">Text</option>
+          <option value="number">Number</option>
+          <option value="date">Date</option>
+          <option value="boolean">Yes/No</option>
+          <option value="select">Dropdown</option>
+        </select>
+      </div>
+
+      <div class="form-group full-width" *ngIf="newAttribute.type === 'select'">
+        <label>Options (comma-separated)</label>
+        <input
+          type="text"
+          [(ngModel)]="optionsString"
+          placeholder="e.g., Single Player, Multiplayer, Co-op"
+        />
+      </div>
+
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input type="checkbox" [(ngModel)]="newAttribute.isGlobal" />
+          Make this a global attribute (available for all games)
+        </label>
+      </div>
+    </div>
+
+    <button
+      (click)="addAttribute()"
+      [disabled]="!newAttribute.name"
+      class="submit-btn"
+    >
+      Create Attribute
+    </button>
+  </div>
+
+  <div class="attributes-display">
+    <div class="attribute-section">
+      <h3>🌐 Global Attributes</h3>
+      <div class="attribute-list">
+        <div class="attribute-item" *ngFor="let attr of getGlobalAttributes()">
+          <div class="attribute-info">
+            <strong>{{ attr.name }}</strong>
+            <span class="type-badge">{{ attr.type }}</span>
+            <span
+              class="options"
+              *ngIf="attr.options && attr.options.length > 0"
+            >
+              Options: {{ attr.options.join(", ") }}
+            </span>
+          </div>
+          <button
+            class="delete-btn"
+            (click)="deleteAttribute(attr.id, attr.name)"
+          >
+            🗑️
+          </button>
+        </div>
+        <p class="empty-message" *ngIf="getGlobalAttributes().length === 0">
+          No global attributes yet
+        </p>
+      </div>
+    </div>
+
+    <div class="attribute-section">
+      <h3>📝 Template Attributes</h3>
+      <div class="attribute-list">
+        <div
+          class="attribute-item"
+          *ngFor="let attr of getNonGlobalAttributes()"
+        >
+          <div class="attribute-info">
+            <strong>{{ attr.name }}</strong>
+            <span class="type-badge">{{ attr.type }}</span>
+            <span
+              class="options"
+              *ngIf="attr.options && attr.options.length > 0"
+            >
+              Options: {{ attr.options.join(", ") }}
+            </span>
+          </div>
+          <button
+            class="delete-btn"
+            (click)="deleteAttribute(attr.id, attr.name)"
+          >
+            🗑️
+          </button>
+        </div>
+        <p class="empty-message" *ngIf="getNonGlobalAttributes().length === 0">
+          No template attributes yet
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

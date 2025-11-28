@@ -1,1 +1,66 @@
-<p>console-family-manager works!</p>
+<div class="manager-container">
+  <h2>Console Family Manager</h2>
+
+  <div class="info-box">
+    <p>
+      <strong>Console Families</strong> represent console platforms (e.g.,
+      PlayStation 5, Nintendo Switch).
+    </p>
+    <p>
+      Create families here, then add your specific owned console instances in
+      the Consoles section.
+    </p>
+  </div>
+
+  <div class="add-form">
+    <h3>Add New Console Family</h3>
+    <div class="form-inline">
+      <input
+        type="text"
+        [(ngModel)]="newFamily.name"
+        placeholder="Console name (e.g., PlayStation 5)"
+      />
+      <input
+        type="text"
+        [(ngModel)]="newFamily.developer"
+        placeholder="Developer (e.g., Sony)"
+      />
+      <input
+        type="text"
+        [(ngModel)]="newFamily.generation"
+        placeholder="Generation (optional)"
+      />
+      <button
+        (click)="addFamily()"
+        [disabled]="!newFamily.name || !newFamily.developer"
+      >
+        Add Family
+      </button>
+    </div>
+  </div>
+
+  <div class="families-display">
+    <h3>Console Families</h3>
+    <div class="families-list">
+      <div class="family-item" *ngFor="let family of families">
+        <div class="family-content">
+          <strong>{{ family.name }}</strong>
+          <p class="developer">{{ family.developer }}</p>
+          <p class="generation" *ngIf="family.generation">
+            Generation: {{ family.generation }}
+          </p>
+          <span class="date">Created: {{ family.createdAt | date }}</span>
+        </div>
+        <button
+          class="delete-btn"
+          (click)="deleteFamily(family.id, family.name)"
+        >
+          🗑️
+        </button>
+      </div>
+      <p class="empty-message" *ngIf="families.length === 0">
+        No console families yet
+      </p>
+    </div>
+  </div>
+</div>

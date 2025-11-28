@@ -1,1 +1,57 @@
-<p>console-list works!</p>
+<div class="console-list-container">
+  <div class="header-actions">
+    <h2>🎮 Console Inventory</h2>
+    <button class="add-btn" routerLink="/add-console">+ Add Console</button>
+  </div>
+
+  <app-search-bar
+    [placeholder]="'🔍 Search consoles...'"
+    (searchQuery)="onSearch($event)"
+  ></app-search-bar>
+
+  <div class="filters">
+    <div class="filter-group">
+      <label>Console Family:</label>
+      <select
+        title="console-family-select"
+        (change)="onFamilyFilter($event)"
+        class="filter-select"
+      >
+        <option value="">All</option>
+        <option *ngFor="let family of families" [value]="family.id">
+          {{ family.name }}
+        </option>
+      </select>
+    </div>
+
+    <button class="clear-filters-btn" (click)="clearFilters()">
+      Clear Filters
+    </button>
+  </div>
+
+  <div
+    class="consoles-grid"
+    *ngIf="consoles.length > 0"
+    [@listAnimation]="consoles.length"
+  >
+    <div
+      class="console-card"
+      *ngFor="let console of consoles"
+      (click)="viewConsole(console.id)"
+      [@cardAnimation]
+    >
+      <div class="console-image">
+        <img [src]="console.picture" [alt]="getConsoleName(console)" />
+      </div>
+      <div class="console-info">
+        <h3>{{ getConsoleName(console) }}</h3>
+        <p class="model">{{ console.model }}</p>
+        <p class="region">Region: {{ console.region }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="no-consoles" *ngIf="consoles.length === 0">
+    <p>No consoles in inventory. Add your first console!</p>
+  </div>
+</div>

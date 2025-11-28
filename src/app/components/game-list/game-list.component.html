@@ -1,1 +1,190 @@
-<p>game-list works!</p>
+<div class="game-list-container">
+  <app-search-bar
+    [placeholder]="'🔍 Search games by title...'"
+    (searchQuery)="onSearch($event)"
+  ></app-search-bar>
+
+  <div class="filters">
+    <div class="filter-group">
+      <label>Genre:</label>
+      <select
+        title="genre-filter-select"
+        (change)="onCategoryFilter($event, 'genre')"
+        class="filter-select"
+      >
+        <option value="">All</option>
+        <option *ngFor="let cat of genreCategories" [value]="cat.id">
+          {{ cat.name }}
+        </option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Franchise:</label>
+      <select
+        title="franchise-filter-select"
+        (change)="onCategoryFilter($event, 'franchise')"
+        class="filter-select"
+      >
+        <option value="">All</option>
+        <option *ngFor="let cat of franchiseCategories" [value]="cat.id">
+          {{ cat.name }}
+        </option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Saga:</label>
+      <select
+        title="saga-filter-select"
+        (change)="onCategoryFilter($event, 'saga')"
+        class="filter-select"
+      >
+        <option value="">All</option>
+        <option *ngFor="let cat of sagaCategories" [value]="cat.id">
+          {{ cat.name }}
+        </option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Custom:</label>
+      <select
+        title="custom-filter-select"
+        (change)="onCategoryFilter($event, 'custom')"
+        class="filter-select"
+      >
+        <option value="">All</option>
+        <option *ngFor="let cat of customCategories" [value]="cat.id">
+          {{ cat.name }}
+        </option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Console:</label>
+      <select
+        title="console-filter-select"
+        (change)="onConsoleFamilyFilter($event)"
+        class="filter-select"
+      >
+        <option value="">All</option>
+        <option *ngFor="let family of consoleFamilies" [value]="family.id">
+          {{ family.name }}
+        </option>
+      </select>
+    </div>
+
+    <div class="filter-group date-range-group">
+      <label>Release Date Range:</label>
+      <input
+        type="text"
+        [(ngModel)]="dateRangeText"
+        (focus)="showDatePicker = true"
+        placeholder="Select date range..."
+        class="date-range-input"
+        readonly
+      />
+      <div
+        class="date-picker-dropdown"
+        *ngIf="showDatePicker"
+        (clickOutside)="showDatePicker = false"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="date-picker-header">
+          <input
+            type="date"
+            [(ngModel)]="dateFrom"
+            (ngModelChange)="updateDateRangeText()"
+            placeholder="From"
+          />
+          <span>to</span>
+          <input
+            type="date"
+            [(ngModel)]="dateTo"
+            (ngModelChange)="updateDateRangeText()"
+            placeholder="To"
+          />
+        </div>
+        <div class="date-picker-actions">
+          <button class="apply-btn" (click)="applyDateRange()">Apply</button>
+          <button class="clear-btn" (click)="clearDateRange()">Clear</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="clear-filters-btn" (click)="clearFilters()">
+      Clear Filters
+    </button>
+  </div>
+
+  <div class="list-info">
+    <span class="item-count"
+      >Showing {{ games.length }} of {{ allGames.length }} games</span
+    >
+  </div>
+
+  <div class="sort-controls">
+    <label>Sort by:</label>
+    <button
+      (click)="toggleSort('title')"
+      [class.active]="currentSort.startsWith('title')"
+    >
+      Title
+      {{
+        currentSort === "title-asc"
+          ? "↑"
+          : currentSort === "title-desc"
+          ? "↓"
+          : ""
+      }}
+    </button>
+    <button
+      (click)="toggleSort('date')"
+      [class.active]="currentSort.startsWith('date')"
+    >
+      Date
+      {{
+        currentSort === "date-asc"
+          ? "↑"
+          : currentSort === "date-desc"
+          ? "↓"
+          : ""
+      }}
+    </button>
+  </div>
+
+  <div
+    class="games-grid"
+    *ngIf="games.length > 0"
+    [@listAnimation]="games.length"
+  >
+    <div
+      class="game-card"
+      *ngFor="let game of games"
+      (click)="viewGame(game.id)"
+      [@cardAnimation]
+    >
+      <div class="game-cover">
+        <img [src]="game.coverArt" [alt]="game.title" />
+        <div
+          class="physical-badge"
+          [class.digital]="game.physicalDigital === 'digital'"
+        >
+          {{ game.physicalDigital === "physical" ? "📀" : "💾" }}
+        </div>
+      </div>
+      <div class="game-info">
+        <h3 [title]="game.title">
+          <span class="title-text">{{ game.title }}</span>
+        </h3>
+        <p class="platform">{{ getConsoleFamilyName(game.consoleFamilyId) }}</p>
+        <p class="release-date">{{ game.releaseDate | date }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="no-games" *ngIf="games.length === 0">
+    <p>No games found. Add your first game!</p>
+  </div>
+</div>

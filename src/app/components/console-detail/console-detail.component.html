@@ -1,1 +1,61 @@
-<p>console-detail works!</p>
+<div class="detail-container" *ngIf="console">
+  <button class="back-button" (click)="goBack()">← Back</button>
+
+  <div class="detail-card">
+    <div class="header">
+      <div class="image-container">
+        <img [src]="console.picture" [alt]="getConsoleName()" />
+      </div>
+
+      <div class="main-info">
+        <h1>{{ getConsoleName() }}</h1>
+        <p class="subtitle" *ngIf="family">{{ family.developer }}</p>
+
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="label">Model:</span>
+            <span class="value">{{ console.model }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Release Date:</span>
+            <span class="value">{{
+              console.releaseDate | date : "longDate"
+            }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Region:</span>
+            <span class="value">{{ console.region }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Color:</span>
+            <span class="value">{{ console.color }}</span>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="edit-button" (click)="editConsole()">✏️ Edit</button>
+          <button class="delete-button" (click)="deleteConsole()">
+            🗑️ Delete
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="custom-attributes" *ngIf="hasCustomAttributes()">
+      <h2>Additional Information</h2>
+      <div class="attributes-grid">
+        <div
+          class="attribute-item"
+          *ngFor="let attr of getCustomAttributesArray()"
+        >
+          <span class="attr-label">{{ attr.key }}:</span>
+          <span class="attr-value">{{ attr.value }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="loading" *ngIf="!console">
+  <p>Loading...</p>
+</div>

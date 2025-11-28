@@ -4,35 +4,8 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   selector: 'app-search-bar',
-  template: `
-    <div class="search-container">
-      <input 
-        type="text" 
-        class="search-input" 
-        [placeholder]="placeholder"
-        (input)="onSearchChange($event)"
-      />
-    </div>
-  `,
-  styles: [`
-    .search-container {
-      margin-bottom: 2rem;
-    }
-    .search-input {
-      width: 100%;
-      padding: 1rem 1.5rem;
-      font-size: 1.1rem;
-      border: none;
-      border-radius: 50px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-      transition: all 0.3s;
-    }
-    .search-input:focus {
-      outline: none;
-      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-      transform: translateY(-2px);
-    }
-  `]
+  templateUrl: `./search-bar.component.html`,
+  styleUrls: [`./search-bar.component.css`]
 })
 export class SearchBarComponent {
   @Input() placeholder: string = '🔍 Search...';

@@ -1,1 +1,68 @@
-<p>peripheral-list works!</p>
+<div class="peripheral-list-container">
+  <div class="header-actions">
+    <h2>🕹️ Peripheral Inventory</h2>
+    <button class="add-btn" routerLink="/add-peripheral">
+      + Add Peripheral
+    </button>
+  </div>
+
+  <app-search-bar
+    [placeholder]="'🔍 Search peripherals...'"
+    (searchQuery)="onSearch($event)"
+  ></app-search-bar>
+
+  <div class="filters">
+    <div class="filter-group">
+      <label>Console Family:</label>
+      <select
+        title="filter-select"
+        (change)="onFamilyFilter($event)"
+        class="filter-select"
+      >
+        <option value="">All</option>
+        <option *ngFor="let family of families" [value]="family.id">
+          {{ family.name }}
+        </option>
+      </select>
+    </div>
+
+    <button class="clear-filters-btn" (click)="clearFilters()">
+      Clear Filters
+    </button>
+  </div>
+
+  <div
+    class="peripherals-grid"
+    *ngIf="peripherals.length > 0"
+    [@listAnimation]="peripherals.length"
+  >
+    <div
+      class="peripheral-card"
+      *ngFor="let peripheral of peripherals"
+      (click)="editPeripheral(peripheral.id)"
+      [@cardAnimation]
+    >
+      <div class="peripheral-image">
+        <img [src]="peripheral.picture" [alt]="peripheral.name" />
+      </div>
+      <div class="peripheral-info">
+        <h3>{{ peripheral.name }}</h3>
+        <p class="console-name">
+          {{ getConsoleName(peripheral.consoleFamilyId) }}
+        </p>
+        <p class="quantity">Quantity: {{ peripheral.quantity }}</p>
+        <p class="color">Color: {{ peripheral.color }}</p>
+      </div>
+      <button
+        class="delete-btn"
+        (click)="deletePeripheral($event, peripheral.id)"
+      >
+        🗑️
+      </button>
+    </div>
+  </div>
+
+  <div class="no-peripherals" *ngIf="peripherals.length === 0">
+    <p>No peripherals in inventory. Add your first peripheral!</p>
+  </div>
+</div>

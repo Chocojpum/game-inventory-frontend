@@ -1,1 +1,255 @@
-<p>game-detail works!</p>
+<div class="game-detail-container" *ngIf="game" [@fadeIn]>
+  <button class="back-button" (click)="goBack()">← Back to Library</button>
+
+  <div class="game-detail-card">
+    <div class="game-header">
+      <div class="game-cover-large">
+        <img [src]="game.coverArt" [alt]="game.title" />
+      </div>
+
+      <div class="game-main-info">
+        <h1>{{ game.title }}</h1>
+
+        <div
+          class="alt-titles"
+          *ngIf="game.alternateTitles && game.alternateTitles.length > 0"
+        >
+          <strong>Also known as:</strong>
+          <span *ngFor="let alt of game.alternateTitles; let last = last">
+            {{ alt }}<span *ngIf="!last">, </span>
+          </span>
+        </div>
+
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="label">Console:</span>
+            <span class="value">{{ getConsoleFamilyName() }}</span>
+          </div>
+          <div class="info-item" *ngIf="gameConsole">
+            <span class="label">Owned Model:</span>
+            <span class="value">{{ gameConsole.model }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Release Date:</span>
+            <span class="value">{{
+              game.releaseDate | date : "longDate"
+            }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Developer:</span>
+            <span class="value">{{ game.developer }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Region:</span>
+            <span class="value">{{ game.region }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Format:</span>
+            <span class="value">{{ game.physicalDigital }}</span>
+          </div>
+        </div>
+
+        <div class="categories-section" *ngIf="gameCategories.length > 0">
+          <h3>Categories</h3>
+
+          <div
+            class="category-subsection"
+            *ngIf="getCategoriesByType('genre').length > 0"
+          >
+            <h4>Genres</h4>
+            <div class="category-tags">
+              <span
+                class="category-tag"
+                *ngFor="let cat of getCategoriesByType('genre')"
+              >
+                {{ cat.name }}
+              </span>
+            </div>
+          </div>
+
+          <div
+            class="category-subsection"
+            *ngIf="getCategoriesByType('franchise').length > 0"
+          >
+            <h4>Franchises</h4>
+            <div class="category-tags">
+              <span
+                class="category-tag"
+                *ngFor="let cat of getCategoriesByType('franchise')"
+              >
+                {{ cat.name }}
+              </span>
+            </div>
+          </div>
+
+          <div
+            class="category-subsection"
+            *ngIf="getCategoriesByType('saga').length > 0"
+          >
+            <h4>Sagas</h4>
+            <div class="category-tags">
+              <span
+                class="category-tag"
+                *ngFor="let cat of getCategoriesByType('saga')"
+              >
+                {{ cat.name }}
+              </span>
+            </div>
+          </div>
+
+          <div
+            class="category-subsection"
+            *ngIf="getCategoriesByType('custom').length > 0"
+          >
+            <h4>Custom</h4>
+            <div class="category-tags">
+              <span
+                class="category-tag"
+                *ngFor="let cat of getCategoriesByType('custom')"
+              >
+                {{ cat.name }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="edit-button" (click)="editGame()">✏️ Edit</button>
+          <button class="delete-button" (click)="deleteGame()">
+            🗑️ Delete
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="custom-attributes" *ngIf="hasCustomAttributes()">
+      <h2>Additional Information</h2>
+      <div class="attributes-grid">
+        <div
+          class="attribute-item"
+          *ngFor="let attr of getCustomAttributesArray()"
+        >
+          <span class="attr-label">{{ attr.key }}:</span>
+          <span class="attr-value">{{ formatAttributeValue(attr.value) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="backlog-section">
+      <div class="backlog-header">
+        <h2>🎯 Completion History</h2>
+        <button class="add-backlog-btn" (click)="showBacklogManager()">
+          <span class="btn-icon">+</span>
+          <span class="btn-text">Add Entry</span>
+        </button>
+      </div>
+
+      <div *ngIf="backlogs.length > 0" class="backlog-list">
+        <div *ngFor="let backlog of backlogs" class="backlog-item">
+          <div class="backlog-content" *ngIf="!isEditingBacklog(backlog.id)">
+            <div class="backlog-main">
+              <strong>{{
+                backlog.completionDate
+                  ? (backlog.completionDate | date : "yyyy-MM-dd")
+                  : "Unknown date"
+              }}</strong>
+              <span class="completion-type-badge">{{
+                backlog.completionType
+              }}</span>
+            </div>
+            <div class="backlog-details" *ngIf="backlog.endingType">
+              <span class="label">Ending:</span> {{ backlog.endingType }}
+            </div>
+            <div
+              class="backlog-attributes"
+              *ngIf="hasBacklogAttributes(backlog)"
+            >
+              <div
+                *ngFor="let attr of getBacklogAttributesArray(backlog)"
+                class="attr-display"
+              >
+                <span class="attr-label">{{ attr.key }}:</span> {{ attr.value }}
+              </div>
+            </div>
+          </div>
+
+          <div class="backlog-edit-form" *ngIf="isEditingBacklog(backlog.id)">
+            <div class="edit-field">
+              <label>Completion Date</label>
+              <input
+                type="date"
+                [(ngModel)]="editingBacklogData.completionDate"
+                [disabled]="editingBacklogData.unknownDate"
+                title="date-input"
+              />
+              <label class="checkbox-label">
+                <input
+                  type="checkbox"
+                  [(ngModel)]="editingBacklogData.unknownDate"
+                />
+                Unknown date
+              </label>
+            </div>
+            <div class="edit-field">
+              <label>Ending Type</label>
+              <input
+                type="text"
+                [(ngModel)]="editingBacklogData.endingType"
+                title="ending-type-input"
+              />
+            </div>
+            <div class="edit-field">
+              <label>Completion Type</label>
+              <input
+                type="text"
+                [(ngModel)]="editingBacklogData.completionType"
+                title="completion-type-input"
+              />
+            </div>
+            <div class="edit-actions">
+              <button class="save-btn" (click)="saveBacklogEdit(backlog.id)">
+                Save
+              </button>
+              <button class="cancel-edit-btn" (click)="cancelBacklogEdit()">
+                Cancel
+              </button>
+            </div>
+          </div>
+
+          <div class="backlog-actions">
+            <button
+              class="edit-btn-small"
+              (click)="startEditingBacklog(backlog)"
+              *ngIf="!isEditingBacklog(backlog.id)"
+            >
+              ✏️
+            </button>
+            <button
+              class="delete-btn-small"
+              (click)="deleteBacklogEntry(backlog.id)"
+              *ngIf="!isEditingBacklog(backlog.id)"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="backlogs.length === 0" class="empty-backlog">
+        <p>No completions recorded yet.</p>
+      </div>
+    </div>
+
+    <app-backlog-manager
+      *ngIf="showBacklog"
+      [gameId]="game.id"
+      [gameTitle]="game.title"
+      (close)="closeBacklogManager()"
+    >
+    </app-backlog-manager>
+  </div>
+</div>
+
+<div class="loading" *ngIf="!game">
+  <p>Loading game details...</p>
+</div>

@@ -1,1 +1,274 @@
-<p>game-form works!</p>
+<div class="form-container">
+  <h2>{{ isEditMode ? "Edit Game" : "Add New Game" }}</h2>
+
+  <form [formGroup]="gameForm" (ngSubmit)="onSubmit()" class="game-form">
+    <div class="form-section">
+      <h3>Basic Information</h3>
+
+      <div class="form-group">
+        <label>Title *</label>
+        <input
+          type="text"
+          formControlName="title"
+          placeholder="Enter game title"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Alternate Titles</label>
+        <div formArrayName="alternateTitles">
+          <div
+            *ngFor="let title of alternateTitles.controls; let i = index"
+            class="array-item"
+          >
+            <input
+              type="text"
+              [formControlName]="i"
+              placeholder="Alternate title"
+            />
+            <button
+              type="button"
+              class="remove-btn"
+              (click)="removeAlternateTitle(i)"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+        <button type="button" class="add-btn" (click)="addAlternateTitle()">
+          + Add Alternate Title
+        </button>
+      </div>
+
+      <div class="form-group">
+        <label>Cover Art URL *</label>
+        <input
+          type="url"
+          formControlName="coverArt"
+          placeholder="https://example.com/cover.jpg"
+        />
+        <div class="cover-preview" *ngIf="gameForm.get('coverArt')?.value">
+          <img [src]="gameForm.get('coverArt')?.value" alt="Cover preview" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Release Date *</label>
+          <input
+            title="release-date-input"
+            type="date"
+            formControlName="releaseDate"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Developer *</label>
+          <input
+            type="text"
+            formControlName="developer"
+            placeholder="e.g., Nintendo, Sony"
+          />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Console Family *</label>
+          <select
+            title="console-family-select"
+            formControlName="consoleFamilyId"
+          >
+            <option value="">Select Console</option>
+            <option *ngFor="let family of consoleFamilies" [value]="family.id">
+              {{ family.name }}
+            </option>
+          </select>
+          <p class="hint">
+            The console platform (e.g., PlayStation 5, Nintendo Switch)
+          </p>
+        </div>
+
+        <div class="form-group">
+          <label>Owned Console Instance</label>
+          <select title="console-select" formControlName="consoleId">
+            <option value="">None / Not Owned</option>
+            <option
+              *ngFor="let console of getFilteredConsoles()"
+              [value]="console.id"
+            >
+              {{ getConsoleName(console) }}
+            </option>
+          </select>
+          <p class="hint">Your specific owned console (optional)</p>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Region *</label>
+          <input
+            type="text"
+            formControlName="region"
+            placeholder="e.g., NTSC, PAL, NTSC-J"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Physical / Digital *</label>
+          <div class="radio-group">
+            <label class="radio-label">
+              <input
+                type="radio"
+                formControlName="physicalDigital"
+                value="physical"
+              />
+              📀 Physical
+            </label>
+            <label class="radio-label">
+              <input
+                type="radio"
+                formControlName="physicalDigital"
+                value="digital"
+              />
+              💾 Digital
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3>Categories</h3>
+
+      <div class="category-type-section" *ngFor="let type of categoryTypes">
+        <h4>{{ type | titlecase }}</h4>
+        <input
+          type="text"
+          class="search-input"
+          [(ngModel)]="categorySearchQueries[type]"
+          [ngModelOptions]="{ standalone: true }"
+          placeholder="Search {{ type }}..."
+        />
+        <div class="categories-list">
+          <label
+            *ngFor="let category of getFilteredCategories(type)"
+            class="checkbox-label"
+          >
+            <input
+              type="checkbox"
+              [checked]="isCategorySelected(category.id)"
+              (change)="toggleCategory(category.id)"
+            />
+            {{ category.name }}
+          </label>
+          <p class="hint" *ngIf="getFilteredCategories(type).length === 0">
+            No {{ type }} categories found
+          </p>
+        </div>
+      </div>
+
+      <p class="hint" *ngIf="categories.length === 0">
+        No categories yet. <a routerLink="/categories">Create categories</a>
+      </p>
+    </div>
+
+    <div class="form-section">
+      <h3>Custom Attributes</h3>
+
+      <div class="global-attributes" *ngIf="globalAttributes.length > 0">
+        <h4>Global Attributes</h4>
+        <div *ngFor="let attr of globalAttributes" class="form-group">
+          <label>{{ attr.name }}</label>
+          <input
+            title="global-attribute-text-input"
+            *ngIf="attr.type === 'text'"
+            type="text"
+            [value]="getAttributeValue(attr.name)"
+            (change)="setAttributeValue(attr.name, $event)"
+          />
+          <input
+            title="global-attribute-number-input"
+            *ngIf="attr.type === 'number'"
+            type="number"
+            [value]="getAttributeValue(attr.name)"
+            (change)="setAttributeValue(attr.name, $event)"
+          />
+          <input
+            title="global-attribute-date-input"
+            *ngIf="attr.type === 'date'"
+            type="date"
+            [value]="getAttributeValue(attr.name)"
+            (change)="setAttributeValue(attr.name, $event)"
+          />
+          <label *ngIf="attr.type === 'boolean'" class="checkbox-label">
+            <input
+              type="checkbox"
+              [checked]="getAttributeValue(attr.name)"
+              (change)="setAttributeValue(attr.name, $event)"
+            />
+            Yes
+          </label>
+          <select
+            title="attribute-type-select"
+            *ngIf="attr.type === 'select'"
+            [value]="getAttributeValue(attr.name)"
+            (change)="setAttributeValue(attr.name, $event)"
+          >
+            <option value="">Select...</option>
+            <option *ngFor="let opt of attr.options" [value]="opt">
+              {{ opt }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="custom-attribute-builder">
+        <h4>Add Custom Attribute for This Game</h4>
+        <div class="inline-form">
+          <input
+            type="text"
+            [(ngModel)]="newAttributeName"
+            [ngModelOptions]="{ standalone: true }"
+            placeholder="Attribute name"
+          />
+          <input
+            type="text"
+            [(ngModel)]="newAttributeValue"
+            [ngModelOptions]="{ standalone: true }"
+            placeholder="Value"
+          />
+          <button type="button" class="add-btn" (click)="addCustomAttribute()">
+            Add
+          </button>
+        </div>
+      </div>
+
+      <div
+        class="current-custom-attributes"
+        *ngIf="customAttributesArray.length > 0"
+      >
+        <h4>Current Custom Attributes</h4>
+        <div *ngFor="let attr of customAttributesArray" class="attribute-row">
+          <strong>{{ attr.key }}:</strong> {{ attr.value }}
+          <button
+            type="button"
+            class="remove-btn"
+            (click)="removeCustomAttribute(attr.key)"
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="submit-btn" [disabled]="!gameForm.valid">
+        {{ isEditMode ? "Update Game" : "Add Game" }}
+      </button>
+      <button type="button" class="cancel-btn" (click)="cancel()">
+        Cancel
+      </button>
+    </div>
+  </form>
+</div>
