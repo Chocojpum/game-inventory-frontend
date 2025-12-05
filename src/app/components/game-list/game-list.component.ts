@@ -2,8 +2,23 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { GameService, Game } from '../../services/game.service';
 import { CategoryService, Category } from '../../services/category.service';
-import { ConsoleFamilyService, ConsoleFamily } from '../../services/console-family.service';
-import { trigger, transition, style, animate, query, stagger } from '@angular/animations';
+import {
+  ConsoleFamilyService,
+  ConsoleFamily,
+} from '../../services/console-family.service';
+import {
+  trigger,
+  transition,
+  style,
+  animate,
+  query,
+  stagger,
+} from '@angular/animations';
+import {
+  PaginatedResult,
+  PaginationOptions,
+} from '../shared/pagination.interface';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-game-list',
@@ -12,21 +27,28 @@ import { trigger, transition, style, animate, query, stagger } from '@angular/an
   animations: [
     trigger('listAnimation', [
       transition('* => *', [
-        query(':enter', [
-          style({ opacity: 0, transform: 'translateY(20px)' }),
-          stagger(50, [
-            animate('300ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
-          ])
-        ], { optional: true })
-      ])
+        query(
+          ':enter',
+          [
+            style({ opacity: 0, transform: 'translateY(20px)' }),
+            stagger(50, [
+              animate(
+                '300ms ease-out',
+                style({ opacity: 1, transform: 'translateY(0)' })
+              ),
+            ]),
+          ],
+          { optional: true }
+        ),
+      ]),
     ]),
     trigger('cardAnimation', [
       transition(':enter', [
         style({ opacity: 0, transform: 'scale(0.8)' }),
-        animate('300ms ease-out', style({ opacity: 1, transform: 'scale(1)' }))
-      ])
-    ])
-  ]
+        animate('300ms ease-out', style({ opacity: 1, transform: 'scale(1)' })),
+      ]),
+    ]),
+  ],
 })
 export class GameListComponent implements OnInit {
   games: Game[] = [];
@@ -36,63 +58,112 @@ export class GameListComponent implements OnInit {
   sagaCategories: Category[] = [];
   customCategories: Category[] = [];
   consoleFamilies: ConsoleFamily[] = [];
-  allGames: Game[] = [];
-  private activeFilters: { [key: string]: string } = {};
+  currentPage: number = 1;
+  limit: number = 10;
+  totalItems: number = 0;
+  totalPages: number = 0;
+
+  private activeFilters: { [key: string]: string } = {}; // Holds Category/Console IDs
+  currentSearchQuery: string = ''; // Holds the current search term
+  currentSort: { field: 'title' | 'date' | null; direction: 'asc' | 'desc' } = {
+    field: 'title',
+    direction: 'asc',
+  };
+
   dateFrom: string = '';
   dateTo: string = '';
   dateRangeText: string = '';
   showDatePicker: boolean = false;
-  currentSort: string = 'title-asc';
 
   constructor(
     private gameService: GameService,
     private categoryService: CategoryService,
     private consoleFamilyService: ConsoleFamilyService,
     private router: Router
-  ) { }
+  ) {}
 
   ngOnInit(): void {
-    this.loadGames();
+    this.fetchGames();
     this.loadCategories();
     this.loadConsoleFamilies();
   }
 
-  loadGames(): void {
-    this.gameService.getAllGames().subscribe(games => {
-      this.allGames = games;
-      this.applyFiltersAndSort();
+  fetchGames(): void {
+    const options: PaginationOptions = {
+      page: this.currentPage,
+      limit: this.limit,
+    };
+
+    // Determine which service method to call based on active state
+    let games$: Observable<PaginatedResult<Game>>;
+
+    // 1. Prioritize Search
+    if (this.currentSearchQuery) {
+      games$ = this.gameService.searchPaginatedGames(
+        this.currentSearchQuery,
+        options
+      );
+    }
+    // 2. Combine all category/console filters
+
+    const filterParams = this.collectFilterParams();
+
+    // Fetch ALL results for the current search/primary filter
+    games$ = this.gameService.getFilteredAndPaginatedGames(
+      filterParams,
+      options
+    );
+
+    games$.subscribe((result) => {
+      this.games = result.data;
+      this.currentPage = result.page;
+      this.limit = result.limit;
+      this.totalItems = result.total;
+      this.totalPages = result.totalPages;
     });
   }
 
-  loadCategories(): void {
-    this.categoryService.getAllCategories().subscribe(categories => {
-      this.categories = categories;
-      this.genreCategories = categories.filter(c => c.type === 'genre').sort((a, b) => a.name.localeCompare(b.name));
-      this.franchiseCategories = categories.filter(c => c.type === 'franchise').sort((a, b) => a.name.localeCompare(b.name));
-      this.sagaCategories = categories.filter(c => c.type === 'saga').sort((a, b) => a.name.localeCompare(b.name));
-      this.customCategories = categories.filter(c => c.type === 'custom').sort((a, b) => a.name.localeCompare(b.name));
-    });
+  private collectFilterParams(): any {
+    const params: any = {
+      query: this.currentSearchQuery,
+      dateFrom: this.dateFrom,
+      dateTo: this.dateTo,
+      sortBy: new String(
+        this.currentSort.field + '-' + this.currentSort.direction
+      ),
+    };
+
+    // Add all active category IDs
+    Object.entries(this.activeFilters)
+      .filter(([key]) => key !== 'consoleFamily')
+      .map(([, value]) => value)
+      .forEach((id, index) => (params[`categoryId_${index}`] = id));
+
+    if (this.activeFilters['consoleFamily']) {
+      params['consoleFamilyId'] = this.activeFilters['consoleFamily'];
+    }
+
+    return params;
   }
 
-  loadConsoleFamilies(): void {
-    this.consoleFamilyService.getAllFamilies().subscribe(families => {
-      this.consoleFamilies = families.sort((a, b) => a.name.localeCompare(b.name));
-    });
+  // --- PAGINATION HANDLERS ---
+
+  goToPage(page: number): void {
+    if (page > 0 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.fetchGames();
+    }
   }
 
-  getConsoleFamilyName(familyId: string): string {
-    const family = this.consoleFamilies.find(f => f.id === familyId);
-    return family ? family.name : 'Unknown';
+  onLimitChange(): void {
+    this.currentPage = 1; // Reset to the first page when the limit changes
+    this.fetchGames();
   }
 
   onSearch(query: string): void {
-    if (query.trim() === '') {
-      this.applyFiltersAndSort();
-    } else {
-      this.gameService.searchGames(query).subscribe(games => {
-        this.games = this.sortGames(games);
-      });
-    }
+    this.currentSearchQuery = query; // Store the query
+    this.currentPage = 1; // Reset page on new search
+    this.fetchGames();
   }
 
   onCategoryFilter(event: any, type: string): void {
@@ -102,7 +173,8 @@ export class GameListComponent implements OnInit {
     } else {
       this.activeFilters[type] = categoryId;
     }
-    this.applyFiltersAndSort();
+    this.currentPage = 1; // Reset page on new filter
+    this.fetchGames();
   }
 
   onConsoleFamilyFilter(event: any): void {
@@ -112,7 +184,8 @@ export class GameListComponent implements OnInit {
     } else {
       this.activeFilters['consoleFamily'] = familyId;
     }
-    this.applyFiltersAndSort();
+    this.currentPage = 1; // Reset page on new filter
+    this.fetchGames();
   }
 
   updateDateRangeText(): void {
@@ -130,7 +203,8 @@ export class GameListComponent implements OnInit {
   applyDateRange(): void {
     this.updateDateRangeText();
     this.showDatePicker = false;
-    this.applyFiltersAndSort();
+    this.currentPage = 1; // Reset page on new date filter
+    this.fetchGames();
   }
 
   clearDateRange(): void {
@@ -138,84 +212,78 @@ export class GameListComponent implements OnInit {
     this.dateTo = '';
     this.dateRangeText = '';
     this.showDatePicker = false;
-    this.applyFiltersAndSort();
+    this.currentPage = 1; // Reset page on clearing date filter
+    this.fetchGames();
   }
 
-  applyFiltersAndSort(): void {
-    let filtered = this.allGames;
+  loadCategories(): void {
+    this.categoryService.getAllCategories().subscribe((categories) => {
+      this.categories = categories;
+      this.genreCategories = categories
+        .filter((c) => c.type === 'genre')
+        .sort((a, b) => a.name.localeCompare(b.name));
+      this.franchiseCategories = categories
+        .filter((c) => c.type === 'franchise')
+        .sort((a, b) => a.name.localeCompare(b.name));
+      this.sagaCategories = categories
+        .filter((c) => c.type === 'saga')
+        .sort((a, b) => a.name.localeCompare(b.name));
+      this.customCategories = categories
+        .filter((c) => c.type === 'custom')
+        .sort((a, b) => a.name.localeCompare(b.name));
+    });
+  }
 
-    // Apply category filters
-    const categoryFilterIds = Object.entries(this.activeFilters)
-      .filter(([key]) => key !== 'consoleFamily')
-      .map(([, value]) => value);
-
-    if (categoryFilterIds.length > 0) {
-      filtered = filtered.filter(game => 
-        categoryFilterIds.every(filterId => game.categoryIds.includes(filterId))
+  loadConsoleFamilies(): void {
+    this.consoleFamilyService.getAllFamilies().subscribe((families) => {
+      this.consoleFamilies = families.sort((a, b) =>
+        a.name.localeCompare(b.name)
       );
-    }
-
-    // Apply console family filter
-    if (this.activeFilters['consoleFamily']) {
-      filtered = filtered.filter(game => 
-        game.consoleFamilyId === this.activeFilters['consoleFamily']
-      );
-    }
-
-    // Apply date range filter
-    if (this.dateFrom) {
-      const fromDate = new Date(this.dateFrom);
-      filtered = filtered.filter(game => new Date(game.releaseDate) >= fromDate);
-    }
-    if (this.dateTo) {
-      const toDate = new Date(this.dateTo);
-      filtered = filtered.filter(game => new Date(game.releaseDate) <= toDate);
-    }
-
-    this.games = this.sortGames(filtered);
+    });
   }
 
-  sortBy(sortType: string): void {
-    this.currentSort = sortType;
-    this.games = this.sortGames(this.games);
+  getConsoleFamilyName(familyId: string): string {
+    const family = this.consoleFamilies.find((f) => f.id === familyId);
+    return family ? family.name : 'Unknown';
   }
 
-  toggleSort(type: 'title' | 'date'): void {
-    if (this.currentSort.startsWith(type)) {
-      // Toggle between asc and desc
-      this.currentSort = this.currentSort.endsWith('asc') ? `${type}-desc` : `${type}-asc`;
+  toggleSort(field: 'title' | 'date'): void {
+    let newDirection: 'asc' | 'desc';
+
+    if (this.currentSort.field === field) {
+      // Same field, just reverse the direction
+      newDirection = this.currentSort.direction === 'asc' ? 'desc' : 'asc';
     } else {
-      // Start with asc
-      this.currentSort = `${type}-asc`;
+      // New field, default to ascending
+      newDirection = 'asc';
     }
-    this.games = this.sortGames(this.games);
+
+    this.currentSort = { field: field, direction: newDirection };
+
+    // Reset to page 1 on any sort change
+    this.currentPage = 1;
+
+    this.fetchGames();
   }
 
-  sortGames(games: Game[]): Game[] {
-    const sorted = [...games];
-    
-    switch(this.currentSort) {
-      case 'title-asc':
-        return sorted.sort((a, b) => a.title.localeCompare(b.title));
-      case 'title-desc':
-        return sorted.sort((a, b) => b.title.localeCompare(a.title));
-      case 'date-asc':
-        return sorted.sort((a, b) => new Date(a.releaseDate).getTime() - new Date(b.releaseDate).getTime());
-      case 'date-desc':
-        return sorted.sort((a, b) => new Date(b.releaseDate).getTime() - new Date(a.releaseDate).getTime());
-      default:
-        return sorted;
-    }
-  }
+  // --- Utility Methods ---
 
   clearFilters(): void {
     this.activeFilters = {};
     this.dateFrom = '';
     this.dateTo = '';
     this.dateRangeText = '';
-    this.applyFiltersAndSort();
-    const selects = document.querySelectorAll('.filter-select') as NodeListOf<HTMLSelectElement>;
-    selects.forEach(select => select.value = '');
+    this.currentSearchQuery = '';
+
+    // Reset page and fetch
+    this.currentPage = 1;
+    this.fetchGames();
+
+    // Reset select inputs (client-side DOM manipulation)
+    const selects = document.querySelectorAll(
+      '.filter-select'
+    ) as NodeListOf<HTMLSelectElement>;
+    selects.forEach((select) => (select.value = ''));
   }
 
   viewGame(id: string): void {

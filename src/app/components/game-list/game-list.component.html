@@ -124,35 +124,37 @@
   </div>
 
   <div class="list-info">
-    <span class="item-count"
-      >Showing {{ games.length }} of {{ allGames.length }} games</span
-    >
+    <span class="item-count">
+      Showing **{{ games.length }}** games on page **{{ currentPage }}** of **{{
+        totalPages
+      }}** (Total: **{{ totalItems }}**)
+    </span>
   </div>
 
   <div class="sort-controls">
     <label>Sort by:</label>
     <button
       (click)="toggleSort('title')"
-      [class.active]="currentSort.startsWith('title')"
+      [class.active]="currentSort.field === 'title' "
     >
       Title
       {{
-        currentSort === "title-asc"
+        currentSort.field === "title" && currentSort.direction === "asc"
           ? "↑"
-          : currentSort === "title-desc"
+          : currentSort.field === "title" && currentSort.direction === "desc"
           ? "↓"
           : ""
       }}
     </button>
     <button
       (click)="toggleSort('date')"
-      [class.active]="currentSort.startsWith('date')"
+      [class.active]="currentSort.field === 'date'"
     >
       Date
       {{
-        currentSort === "date-asc"
+        currentSort.field === "date" && currentSort.direction === "asc"
           ? "↑"
-          : currentSort === "date-desc"
+          : currentSort.field === "date" && currentSort.direction === "desc"
           ? "↓"
           : ""
       }}
@@ -191,5 +193,38 @@
 
   <div class="no-games" *ngIf="games.length === 0">
     <p>No games found. Add your first game!</p>
+  </div>
+
+  <hr />
+
+  <div class="pagination-controls" >
+    <div class="limit-selector">
+      <label for="limit">Items per page:</label>
+      <select id="limit" [(ngModel)]="limit" (ngModelChange)="onLimitChange()">
+        <option [ngValue]="10">10</option>
+        <option [ngValue]="25">25</option>
+        <option [ngValue]="50">50</option>
+      </select>
+    </div>
+
+    <button
+      class="page-btn"
+      (click)="goToPage(currentPage - 1)"
+      [disabled]="currentPage <= 1"
+    >
+      &lt; Previous
+    </button>
+
+    <span class="page-indicator">
+      Page **{{ currentPage }}** of **{{ totalPages }}**
+    </span>
+
+    <button
+      class="page-btn"
+      (click)="goToPage(currentPage + 1)"
+      [disabled]="currentPage >= totalPages"
+    >
+      Next &gt;
+    </button>
   </div>
 </div>

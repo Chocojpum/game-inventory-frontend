@@ -263,3 +263,74 @@ h2 {
   color: var(--text-secondary);
   font-size: 1.2rem;
 }
+
+/* --- Pagination Controls Styling --- */
+
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px; /* Space between main elements */
+  padding: 20px 0;
+  margin-top: 15px;
+  background-color: var(--color-background-secondary, #2a2a2a); /* Assuming a dark theme background */
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Button Styling (Previous and Next) */
+.page-btn {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  background-color: var(--color-primary, #007bff); /* Primary action color */
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, opacity 0.2s;
+}
+
+.page-btn:hover:not([disabled]) {
+  background-color: var(--color-primary-dark, #0056b3);
+}
+
+/* Disabled state for buttons */
+.page-btn[disabled] {
+  background-color: var(--color-disabled, #555);
+  color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Page Indicator (e.g., "Page 3 of 10") */
+.page-indicator {
+  font-size: 1.1em;
+  font-weight: 500;
+  color: var(--color-text, #f0f0f0); /* Main text color */
+  min-width: 120px;
+  text-align: center;
+}
+
+/* Limit Selector (Items per page) */
+.limit-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.limit-selector label {
+  color: var(--color-text-secondary, #bbb);
+  font-size: 0.9em;
+}
+
+.limit-selector select {
+  padding: 8px;
+  border-radius: 5px;
+  border: 1px solid var(--color-border, #444);
+  background-color: var(--color-input-bg, #333);
+  color: var(--color-text, #f0f0f0);
+  cursor: pointer;
+  appearance: none; /* Removes default dropdown arrow */
+  min-width: 60px;
+  text-align: center;
+}
