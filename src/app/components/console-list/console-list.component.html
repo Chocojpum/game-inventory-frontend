@@ -29,6 +29,12 @@
     </button>
   </div>
 
+  <div class="list-info">
+    <span class="item-count">
+      Showing <strong>{{ consoles.length }}</strong> consoles on page <strong>{{ currentPage }}</strong> of <strong>{{ totalPages }}</strong> (Total: <strong>{{ totalItems }}</strong>)
+    </span>
+  </div>
+
   <div
     class="consoles-grid"
     *ngIf="consoles.length > 0"
@@ -53,5 +59,38 @@
 
   <div class="no-consoles" *ngIf="consoles.length === 0">
     <p>No consoles in inventory. Add your first console!</p>
+  </div>
+
+  <hr />
+
+  <div class="pagination-controls">
+    <div class="limit-selector">
+      <label for="console-limit">Items per page:</label>
+      <select id="console-limit" [(ngModel)]="limit" (ngModelChange)="onLimitChange()">
+        <option [ngValue]="10">10</option>
+        <option [ngValue]="25">25</option>
+        <option [ngValue]="50">50</option>
+      </select>
+    </div>
+
+    <button
+      class="page-btn"
+      (click)="goToPage(currentPage - 1)"
+      [disabled]="currentPage <= 1"
+    >
+      &lt; Previous
+    </button>
+
+    <span class="page-indicator">
+      Page <strong>{{ currentPage }}</strong> of <strong>{{ totalPages }}</strong>
+    </span>
+
+    <button
+      class="page-btn"
+      (click)="goToPage(currentPage + 1)"
+      [disabled]="currentPage >= totalPages"
+    >
+      Next &gt;
+    </button>
   </div>
 </div>

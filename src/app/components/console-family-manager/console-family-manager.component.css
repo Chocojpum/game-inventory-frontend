@@ -70,6 +70,33 @@ h3 {
 .families-display {
   margin-top: 2rem;
 }
+.families-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+.families-header h3 {
+  margin: 0;
+}
+.search-input {
+  padding: 0.6rem 0.9rem;
+  border: 2px solid var(--disabled);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  flex: 1;
+  min-width: 220px;
+  max-width: 380px;
+  background: var(--background-primary);
+  color: var(--text-primary);
+  transition: border-color 0.2s;
+}
+.search-input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+}
 .families-list {
   display: grid;
   gap: 1rem;

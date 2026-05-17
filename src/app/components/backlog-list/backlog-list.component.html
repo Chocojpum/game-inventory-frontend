@@ -1,0 +1,178 @@
+<div class="backlog-list-container">
+  <div class="header-actions">
+    <h2>🎯 Completion Log</h2>
+    <span class="subtitle">All game completions across the collection</span>
+  </div>
+
+  <app-search-bar
+    [placeholder]="'🔍 Search by game, console, developer, ending type...'"
+    (searchQuery)="onSearch($event)"
+  ></app-search-bar>
+
+  <div class="filters">
+    <div class="filter-group date-range-group">
+      <label>Completion Date Range:</label>
+      <input
+        type="text"
+        [(ngModel)]="dateRangeText"
+        (focus)="showDatePicker = true"
+        placeholder="Select date range..."
+        class="date-range-input"
+        readonly
+      />
+      <div
+        class="date-picker-dropdown"
+        *ngIf="showDatePicker"
+        (clickOutside)="showDatePicker = false"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="date-picker-header">
+          <input
+            type="date"
+            [(ngModel)]="dateFrom"
+            (ngModelChange)="updateDateRangeText()"
+            placeholder="From"
+          />
+          <span>to</span>
+          <input
+            type="date"
+            [(ngModel)]="dateTo"
+            (ngModelChange)="updateDateRangeText()"
+            placeholder="To"
+          />
+        </div>
+        <div class="date-picker-actions">
+          <button class="apply-btn" (click)="applyDateRange()">Apply</button>
+          <button class="clear-btn" (click)="clearDateRange()">Clear</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="clear-filters-btn" (click)="clearFilters()">
+      Clear Filters
+    </button>
+  </div>
+
+  <div class="sort-and-info">
+    <div class="sort-controls">
+      <label>Sort by:</label>
+      <button
+        (click)="toggleSort('date')"
+        [class.active]="currentSort.field === 'date'"
+      >
+        Date
+        {{ currentSort.field === 'date' && currentSort.direction === 'asc' ? '↑' :
+           currentSort.field === 'date' && currentSort.direction === 'desc' ? '↓' : '' }}
+      </button>
+      <button
+        (click)="toggleSort('title')"
+        [class.active]="currentSort.field === 'title'"
+      >
+        Title
+        {{ currentSort.field === 'title' && currentSort.direction === 'asc' ? '↑' :
+           currentSort.field === 'title' && currentSort.direction === 'desc' ? '↓' : '' }}
+      </button>
+    </div>
+
+    <div class="list-info">
+      <span class="item-count">
+        Showing <strong>{{ entries.length }}</strong> entries on page
+        <strong>{{ currentPage }}</strong> of <strong>{{ totalPages }}</strong>
+        (Total: <strong>{{ totalItems }}</strong>)
+      </span>
+    </div>
+  </div>
+
+  <div class="entries-list" *ngIf="entries.length > 0" [@listAnimation]="entries.length">
+    <div
+      class="backlog-entry"
+      *ngFor="let entry of entries"
+      (click)="viewGame(entry.gameId)"
+    >
+      <div class="entry-cover">
+        <img
+          [src]="entry.gameCoverArt || 'assets/placeholder.png'"
+          [alt]="entry.gameTitle"
+        />
+      </div>
+
+      <div class="entry-game">
+        <h3 class="game-title">{{ entry.gameTitle }}</h3>
+        <span class="console-badge">{{ entry.consoleFamilyName }}</span>
+        <p class="game-developer" *ngIf="entry.gameDeveloper">
+          {{ entry.gameDeveloper }}
+        </p>
+        <div class="game-attrs" *ngIf="getAttributeEntries(entry.gameCustomAttributes).length > 0">
+          <span
+            class="attr-chip"
+            *ngFor="let attr of getAttributeEntries(entry.gameCustomAttributes)"
+          >
+            {{ attr.key }}: {{ attr.value }}
+          </span>
+        </div>
+      </div>
+
+      <div class="entry-completion">
+        <div class="completion-date">
+          <span class="date-label">Completed</span>
+          <strong>{{ entry.completionDate ? (entry.completionDate | date: 'mediumDate') : '—' }}</strong>
+          <span class="unknown-label" *ngIf="!entry.completionDate">Unknown date</span>
+        </div>
+
+        <span class="completion-type-badge">{{ entry.completionType }}</span>
+
+        <div class="ending-row" *ngIf="entry.endingType">
+          <span class="label">Ending:</span>
+          <span class="ending-value">{{ entry.endingType }}</span>
+        </div>
+
+        <div class="custom-attrs" *ngIf="getAttributeEntries(entry.customAttributes).length > 0">
+          <div
+            class="attr-row"
+            *ngFor="let attr of getAttributeEntries(entry.customAttributes)"
+          >
+            <span class="attr-key">{{ attr.key }}:</span>
+            <span class="attr-val">{{ attr.value }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="no-entries" *ngIf="entries.length === 0">
+    <p>No completion entries found.</p>
+  </div>
+
+  <hr />
+
+  <div class="pagination-controls">
+    <div class="limit-selector">
+      <label for="backlog-limit">Items per page:</label>
+      <select id="backlog-limit" [(ngModel)]="limit" (ngModelChange)="onLimitChange()">
+        <option [ngValue]="10">10</option>
+        <option [ngValue]="20">20</option>
+        <option [ngValue]="50">50</option>
+      </select>
+    </div>
+
+    <button
+      class="page-btn"
+      (click)="goToPage(currentPage - 1)"
+      [disabled]="currentPage <= 1"
+    >
+      &lt; Previous
+    </button>
+
+    <span class="page-indicator">
+      Page <strong>{{ currentPage }}</strong> of <strong>{{ totalPages }}</strong>
+    </span>
+
+    <button
+      class="page-btn"
+      (click)="goToPage(currentPage + 1)"
+      [disabled]="currentPage >= totalPages"
+    >
+      Next &gt;
+    </button>
+  </div>
+</div>

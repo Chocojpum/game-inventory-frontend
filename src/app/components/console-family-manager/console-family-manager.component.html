@@ -40,9 +40,17 @@
   </div>
 
   <div class="families-display">
-    <h3>Console Families</h3>
+    <div class="families-header">
+      <h3>Console Families</h3>
+      <input
+        class="search-input"
+        type="text"
+        [(ngModel)]="searchQuery"
+        placeholder="🔍 Search by name, developer or generation..."
+      />
+    </div>
     <div class="families-list">
-      <div class="family-item" *ngFor="let family of families">
+      <div class="family-item" *ngFor="let family of getFilteredFamilies()">
         <div class="family-content">
           <strong>{{ family.name }}</strong>
           <p class="developer">{{ family.developer }}</p>
@@ -58,8 +66,8 @@
           🗑️
         </button>
       </div>
-      <p class="empty-message" *ngIf="families.length === 0">
-        No console families yet
+      <p class="empty-message" *ngIf="getFilteredFamilies().length === 0">
+        {{ searchQuery ? 'No families match your search.' : 'No console families yet.' }}
       </p>
     </div>
   </div>

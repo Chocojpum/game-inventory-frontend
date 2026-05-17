@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { PaginatedResult, PaginationOptions } from '../components/shared/pagination.interface';
 
 export interface CompletionType {
   id: string;
@@ -17,7 +19,18 @@ export class CompletionTypeService {
   constructor(private http: HttpClient) { }
 
   getAllCompletionTypes(): Observable<CompletionType[]> {
-    return this.http.get<CompletionType[]>(this.apiUrl);
+    return this.http.get<PaginatedResult<CompletionType>>(this.apiUrl, {
+      params: { limit: '9999' }
+    }).pipe(map(r => r.data));
+  }
+
+  getFilteredAndPaginatedCompletionTypes(options: PaginationOptions): Observable<PaginatedResult<CompletionType>> {
+    return this.http.get<PaginatedResult<CompletionType>>(this.apiUrl, {
+      params: {
+        page: options.page?.toString() || '1',
+        limit: options.limit?.toString() || '10',
+      }
+    });
   }
 
   getCompletionType(id: string): Observable<CompletionType> {

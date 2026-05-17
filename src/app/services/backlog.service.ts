@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { PaginatedResult, PaginationOptions } from '../components/shared/pagination.interface';
 
 export interface Backlog {
   id: string;
@@ -12,6 +14,16 @@ export interface Backlog {
   createdAt: Date;
 }
 
+export interface EnrichedBacklog extends Backlog {
+  gameTitle: string;
+  gameCoverArt: string;
+  gameDeveloper: string;
+  gameRegion: string;
+  gameCustomAttributes: Record<string, any>;
+  consoleFamilyId: string;
+  consoleFamilyName: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -20,8 +32,27 @@ export class BacklogService {
 
   constructor(private http: HttpClient) { }
 
-  getAllBacklogs(): Observable<Backlog[]> {
-    return this.http.get<Backlog[]>(this.apiUrl);
+  getAllBacklogs(): Observable<EnrichedBacklog[]> {
+    return this.http.get<PaginatedResult<EnrichedBacklog>>(this.apiUrl, {
+      params: { limit: '9999' }
+    }).pipe(map(r => r.data));
+  }
+
+  getEnrichedAndPaginatedBacklogs(
+    filters: { gameId?: string; search?: string; dateFrom?: string; dateTo?: string; sortBy?: string },
+    options: PaginationOptions
+  ): Observable<PaginatedResult<EnrichedBacklog>> {
+    let params = new HttpParams()
+      .set('page', options.page?.toString() || '1')
+      .set('limit', options.limit?.toString() || '10');
+
+    if (filters.gameId) params = params.set('gameId', filters.gameId);
+    if (filters.search) params = params.set('search', filters.search);
+    if (filters.dateFrom) params = params.set('dateFrom', filters.dateFrom);
+    if (filters.dateTo) params = params.set('dateTo', filters.dateTo);
+    if (filters.sortBy) params = params.set('sortBy', filters.sortBy);
+
+    return this.http.get<PaginatedResult<EnrichedBacklog>>(this.apiUrl, { params });
   }
 
   getBacklog(id: string): Observable<Backlog> {

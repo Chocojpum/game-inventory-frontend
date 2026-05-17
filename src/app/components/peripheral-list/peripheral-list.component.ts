@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { PeripheralService, Peripheral } from '../../services/peripheral.service';
-import { ConsoleService, Console } from '../../services/console.service';
 import { ConsoleFamilyService, ConsoleFamily } from '../../services/console-family.service';
+import { PaginatedResult, PaginationOptions } from '../shared/pagination.interface';
 import { trigger, transition, style, animate, query, stagger } from '@angular/animations';
 
 @Component({
@@ -30,34 +30,35 @@ import { trigger, transition, style, animate, query, stagger } from '@angular/an
 })
 export class PeripheralListComponent implements OnInit {
   peripherals: Peripheral[] = [];
-  consoles: Console[] = [];
   families: ConsoleFamily[] = [];
-  private allPeripherals: Peripheral[] = [];
-  private selectedFamilyId: string = '';
+  currentPage: number = 1;
+  limit: number = 10;
+  totalItems: number = 0;
+  totalPages: number = 0;
+  currentSearchQuery: string = '';
+  selectedFamilyId: string = '';
 
   constructor(
     private peripheralService: PeripheralService,
-    private consoleService: ConsoleService,
     private familyService: ConsoleFamilyService,
     private router: Router
   ) { }
 
   ngOnInit(): void {
-    this.loadPeripherals();
-    this.loadConsoles();
+    this.fetchPeripherals();
     this.loadFamilies();
   }
 
-  loadPeripherals(): void {
-    this.peripheralService.getAllPeripherals().subscribe(peripherals => {
-      this.peripherals = peripherals;
-      this.allPeripherals = peripherals;
-    });
-  }
-
-  loadConsoles(): void {
-    this.consoleService.getAllConsoles().subscribe(consoles => {
-      this.consoles = consoles;
+  fetchPeripherals(): void {
+    this.peripheralService.getFilteredAndPaginatedPeripherals(
+      { search: this.currentSearchQuery, consoleFamilyId: this.selectedFamilyId },
+      { page: this.currentPage, limit: this.limit }
+    ).subscribe((result: PaginatedResult<Peripheral>) => {
+      this.peripherals = result.data;
+      this.currentPage = result.page;
+      this.limit = result.limit;
+      this.totalItems = result.total;
+      this.totalPages = result.totalPages;
     });
   }
 
@@ -73,35 +74,36 @@ export class PeripheralListComponent implements OnInit {
   }
 
   onSearch(query: string): void {
-    if (query.trim() === '') {
-      this.applyFilter();
-    } else {
-      this.peripheralService.searchPeripherals(query).subscribe(peripherals => {
-        this.peripherals = this.filterByFamily(peripherals);
-      });
-    }
+    this.currentSearchQuery = query;
+    this.currentPage = 1;
+    this.fetchPeripherals();
   }
 
   onFamilyFilter(event: any): void {
     this.selectedFamilyId = event.target.value;
-    this.applyFilter();
+    this.currentPage = 1;
+    this.fetchPeripherals();
   }
 
-  applyFilter(): void {
-    this.peripherals = this.filterByFamily(this.allPeripherals);
+  goToPage(page: number): void {
+    if (page > 0 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.fetchPeripherals();
+    }
   }
 
-  filterByFamily(peripherals: Peripheral[]): Peripheral[] {
-    if (!this.selectedFamilyId) return peripherals;
-    
-    return peripherals.filter(p => p.consoleFamilyId === this.selectedFamilyId);
+  onLimitChange(): void {
+    this.currentPage = 1;
+    this.fetchPeripherals();
   }
 
   clearFilters(): void {
     this.selectedFamilyId = '';
-    this.peripherals = this.allPeripherals;
-    const select = document.querySelector('.filter-select') as HTMLSelectElement;
-    if (select) select.value = '';
+    this.currentSearchQuery = '';
+    this.currentPage = 1;
+    this.fetchPeripherals();
+    const selects = document.querySelectorAll('.filter-select') as NodeListOf<HTMLSelectElement>;
+    selects.forEach(select => select.value = '');
   }
 
   editPeripheral(id: string): void {
@@ -112,7 +114,7 @@ export class PeripheralListComponent implements OnInit {
     event.stopPropagation();
     if (confirm('Are you sure you want to delete this peripheral?')) {
       this.peripheralService.deletePeripheral(id).subscribe(() => {
-        this.loadPeripherals();
+        this.fetchPeripherals();
       });
     }
   }

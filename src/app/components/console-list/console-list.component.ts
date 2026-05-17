@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ConsoleService, Console } from '../../services/console.service';
 import { ConsoleFamilyService, ConsoleFamily } from '../../services/console-family.service';
+import { PaginatedResult, PaginationOptions } from '../shared/pagination.interface';
 import { trigger, transition, style, animate, query, stagger } from '@angular/animations';
 
 @Component({
@@ -30,8 +31,12 @@ import { trigger, transition, style, animate, query, stagger } from '@angular/an
 export class ConsoleListComponent implements OnInit {
   consoles: Console[] = [];
   families: ConsoleFamily[] = [];
-  private allConsoles: Console[] = [];
-  private selectedFamilyId: string = '';
+  currentPage: number = 1;
+  limit: number = 10;
+  totalItems: number = 0;
+  totalPages: number = 0;
+  currentSearchQuery: string = '';
+  selectedFamilyId: string = '';
 
   constructor(
     private consoleService: ConsoleService,
@@ -40,14 +45,20 @@ export class ConsoleListComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.loadConsoles();
+    this.fetchConsoles();
     this.loadFamilies();
   }
 
-  loadConsoles(): void {
-    this.consoleService.getAllConsoles().subscribe(consoles => {
-      this.consoles = consoles;
-      this.allConsoles = consoles;
+  fetchConsoles(): void {
+    this.consoleService.getFilteredAndPaginatedConsoles(
+      { search: this.currentSearchQuery, familyId: this.selectedFamilyId },
+      { page: this.currentPage, limit: this.limit }
+    ).subscribe((result: PaginatedResult<Console>) => {
+      this.consoles = result.data;
+      this.currentPage = result.page;
+      this.limit = result.limit;
+      this.totalItems = result.total;
+      this.totalPages = result.totalPages;
     });
   }
 
@@ -59,39 +70,40 @@ export class ConsoleListComponent implements OnInit {
 
   getConsoleName(console: Console): string {
     const family = this.families.find(f => f.id === console.consoleFamilyId);
-    return family ? `${family.name}` : 'Unknown Console';
+    return family ? family.name : 'Unknown Console';
   }
 
   onSearch(query: string): void {
-    if (query.trim() === '') {
-      this.applyFilter();
-    } else {
-      this.consoleService.searchConsoles(query).subscribe(consoles => {
-        this.consoles = this.selectedFamilyId 
-          ? consoles.filter(c => c.consoleFamilyId === this.selectedFamilyId)
-          : consoles;
-      });
-    }
+    this.currentSearchQuery = query;
+    this.currentPage = 1;
+    this.fetchConsoles();
   }
 
   onFamilyFilter(event: any): void {
     this.selectedFamilyId = event.target.value;
-    this.applyFilter();
+    this.currentPage = 1;
+    this.fetchConsoles();
   }
 
-  applyFilter(): void {
-    if (this.selectedFamilyId) {
-      this.consoles = this.allConsoles.filter(c => c.consoleFamilyId === this.selectedFamilyId);
-    } else {
-      this.consoles = this.allConsoles;
+  goToPage(page: number): void {
+    if (page > 0 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.fetchConsoles();
     }
+  }
+
+  onLimitChange(): void {
+    this.currentPage = 1;
+    this.fetchConsoles();
   }
 
   clearFilters(): void {
     this.selectedFamilyId = '';
-    this.consoles = this.allConsoles;
-    const select = document.querySelector('.filter-select') as HTMLSelectElement;
-    if (select) select.value = '';
+    this.currentSearchQuery = '';
+    this.currentPage = 1;
+    this.fetchConsoles();
+    const selects = document.querySelectorAll('.filter-select') as NodeListOf<HTMLSelectElement>;
+    selects.forEach(select => select.value = '');
   }
 
   viewConsole(id: string): void {

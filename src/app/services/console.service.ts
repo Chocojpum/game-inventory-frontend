@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { PaginatedResult, PaginationOptions } from '../components/shared/pagination.interface';
 
 export interface Console {
   id: string;
@@ -24,7 +26,23 @@ export class ConsoleService {
   constructor(private http: HttpClient) { }
 
   getAllConsoles(): Observable<Console[]> {
-    return this.http.get<Console[]>(this.apiUrl);
+    return this.http.get<PaginatedResult<Console>>(this.apiUrl, {
+      params: { limit: '9999' }
+    }).pipe(map(r => r.data));
+  }
+
+  getFilteredAndPaginatedConsoles(
+    filters: { search?: string; familyId?: string },
+    options: PaginationOptions
+  ): Observable<PaginatedResult<Console>> {
+    let params = new HttpParams()
+      .set('page', options.page?.toString() || '1')
+      .set('limit', options.limit?.toString() || '10');
+
+    if (filters.search) params = params.set('search', filters.search);
+    if (filters.familyId) params = params.set('familyId', filters.familyId);
+
+    return this.http.get<PaginatedResult<Console>>(this.apiUrl, { params });
   }
 
   getConsole(id: string): Observable<Console> {
@@ -32,11 +50,15 @@ export class ConsoleService {
   }
 
   searchConsoles(query: string): Observable<Console[]> {
-    return this.http.get<Console[]>(`${this.apiUrl}?search=${query}`);
+    return this.http.get<PaginatedResult<Console>>(this.apiUrl, {
+      params: { search: query, limit: '9999' }
+    }).pipe(map(r => r.data));
   }
 
   getConsolesByFamily(familyId: string): Observable<Console[]> {
-    return this.http.get<Console[]>(`${this.apiUrl}?familyId=${familyId}`);
+    return this.http.get<PaginatedResult<Console>>(this.apiUrl, {
+      params: { familyId, limit: '9999' }
+    }).pipe(map(r => r.data));
   }
 
   createConsole(console: Partial<Console>): Observable<Console> {

@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { PaginatedResult, PaginationOptions } from '../components/shared/pagination.interface';
 
 export interface Attribute {
   id: string;
@@ -20,7 +22,18 @@ export class AttributeService {
   constructor(private http: HttpClient) { }
 
   getAllAttributes(): Observable<Attribute[]> {
-    return this.http.get<Attribute[]>(this.apiUrl);
+    return this.http.get<PaginatedResult<Attribute>>(this.apiUrl, {
+      params: { limit: '9999' }
+    }).pipe(map(r => r.data));
+  }
+
+  getFilteredAndPaginatedAttributes(options: PaginationOptions): Observable<PaginatedResult<Attribute>> {
+    return this.http.get<PaginatedResult<Attribute>>(this.apiUrl, {
+      params: {
+        page: options.page?.toString() || '1',
+        limit: options.limit?.toString() || '10',
+      }
+    });
   }
 
   getGlobalAttributes(): Observable<Attribute[]> {

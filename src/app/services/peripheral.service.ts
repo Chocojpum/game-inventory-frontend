@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { PaginatedResult, PaginationOptions } from '../components/shared/pagination.interface';
 
 export interface Peripheral {
   id: string;
@@ -23,7 +25,23 @@ export class PeripheralService {
   constructor(private http: HttpClient) { }
 
   getAllPeripherals(): Observable<Peripheral[]> {
-    return this.http.get<Peripheral[]>(this.apiUrl);
+    return this.http.get<PaginatedResult<Peripheral>>(this.apiUrl, {
+      params: { limit: '9999' }
+    }).pipe(map(r => r.data));
+  }
+
+  getFilteredAndPaginatedPeripherals(
+    filters: { search?: string; consoleFamilyId?: string },
+    options: PaginationOptions
+  ): Observable<PaginatedResult<Peripheral>> {
+    let params = new HttpParams()
+      .set('page', options.page?.toString() || '1')
+      .set('limit', options.limit?.toString() || '10');
+
+    if (filters.search) params = params.set('search', filters.search);
+    if (filters.consoleFamilyId) params = params.set('consoleFamilyId', filters.consoleFamilyId);
+
+    return this.http.get<PaginatedResult<Peripheral>>(this.apiUrl, { params });
   }
 
   getPeripheral(id: string): Observable<Peripheral> {
@@ -31,7 +49,9 @@ export class PeripheralService {
   }
 
   searchPeripherals(query: string): Observable<Peripheral[]> {
-    return this.http.get<Peripheral[]>(`${this.apiUrl}?search=${query}`);
+    return this.http.get<PaginatedResult<Peripheral>>(this.apiUrl, {
+      params: { search: query, limit: '9999' }
+    }).pipe(map(r => r.data));
   }
 
   getPeripheralsByConsole(consoleId: string): Observable<Peripheral[]> {

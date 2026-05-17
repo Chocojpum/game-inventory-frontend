@@ -8,6 +8,7 @@ import { ConsoleFamilyService, ConsoleFamily } from '../../services/console-fami
 })
 export class ConsoleFamilyManagerComponent implements OnInit {
   families: ConsoleFamily[] = [];
+  searchQuery: string = '';
   newFamily = {
     name: '',
     developer: '',
@@ -18,6 +19,16 @@ export class ConsoleFamilyManagerComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadFamilies();
+  }
+
+  getFilteredFamilies(): ConsoleFamily[] {
+    const term = this.searchQuery.toLowerCase().trim();
+    if (!term) return this.families;
+    return this.families.filter(f =>
+      f.name.toLowerCase().includes(term) ||
+      f.developer.toLowerCase().includes(term) ||
+      (f.generation?.toLowerCase().includes(term) ?? false)
+    );
   }
 
   loadFamilies(): void {

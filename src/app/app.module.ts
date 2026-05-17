@@ -18,6 +18,7 @@ import { ConsoleFormComponent } from './components/console-form/console-form.com
 import { PeripheralListComponent } from './components/peripheral-list/peripheral-list.component';
 import { PeripheralFormComponent } from './components/peripheral-form/peripheral-form.component';
 import { BacklogManagerComponent } from './components/backlog-manager/backlog-manager.component';
+import { BacklogListComponent } from './components/backlog-list/backlog-list.component';
 
 import { ConsoleFamilyManagerComponent } from './components/console-family-manager/console-family-manager.component';
 import { ClickOutsideDirective } from './directives/click-outside.directive';
@@ -38,6 +39,7 @@ const routes: Routes = [
   { path: 'edit-peripheral/:id', component: PeripheralFormComponent },
   { path: 'categories', component: CategoryManagerComponent },
   { path: 'attributes', component: AttributeManagerComponent },
+  { path: 'backlog', component: BacklogListComponent },
 ];
 
 @NgModule({
@@ -56,6 +58,7 @@ const routes: Routes = [
     PeripheralListComponent,
     PeripheralFormComponent,
     BacklogManagerComponent,
+    BacklogListComponent,
     ClickOutsideDirective,
     OverflowClassDirective,
   ],
