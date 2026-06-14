@@ -169,7 +169,7 @@
     <div
       class="game-card"
       *ngFor="let game of games"
-      (click)="viewGame(game.id)"
+      (click)="viewGame(game)"
       [@cardAnimation]
     >
       <div class="game-cover">
@@ -180,6 +180,9 @@
         >
           {{ game.physicalDigital === "physical" ? "📀" : "💾" }}
         </div>
+        <div class="compilation-badge" *ngIf="game.isCompilation">
+          📦 Compilation
+        </div>
       </div>
       <div class="game-info">
         <h3 [title]="game.title" appOverflowClass="title-text-animated">
@@ -187,6 +190,9 @@
         </h3>
         <p class="platform">{{ getConsoleFamilyName(game.consoleFamilyId) }}</p>
         <p class="release-date">{{ game.releaseDate | date }}</p>
+        <p class="part-of-compilation" *ngIf="game.compilationId">
+          📦 Part of {{ game.compilationTitle }}
+        </p>
       </div>
     </div>
   </div>

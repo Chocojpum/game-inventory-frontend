@@ -1,0 +1,162 @@
+<div class="game-detail-container" *ngIf="game" [@fadeIn]>
+  <button class="back-button" (click)="goBack()">← Back to Library</button>
+
+  <div class="game-detail-card">
+    <div class="game-header">
+      <div class="game-cover-large">
+        <img [src]="game.coverArt" [alt]="game.title" />
+        <div class="compilation-badge-large">📦 Compilation</div>
+      </div>
+
+      <div class="game-main-info">
+        <h1>{{ game.title }}</h1>
+
+        <div
+          class="alt-titles"
+          *ngIf="game.alternateTitles && game.alternateTitles.length > 0"
+        >
+          <strong>Also known as:</strong>
+          <span *ngFor="let alt of game.alternateTitles; let last = last">
+            {{ alt }}<span *ngIf="!last">, </span>
+          </span>
+        </div>
+
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="label">Console:</span>
+            <span class="value">{{ getConsoleFamilyName(game.consoleFamilyId) }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Release Date:</span>
+            <span class="value">{{ game.releaseDate | date : "longDate" }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Developer:</span>
+            <span class="value">{{ game.developer }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Region:</span>
+            <span class="value">{{ game.region }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Format:</span>
+            <span class="value">{{ game.physicalDigital }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Games included:</span>
+            <span class="value">{{ includedGames.length }}</span>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="edit-button" (click)="editGame()">✏️ Edit</button>
+          <button class="delete-button" (click)="deleteGame()">🗑️ Delete</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="included-games-section">
+      <h2>🎮 Games in this Compilation</h2>
+      <div
+        class="games-grid"
+        *ngIf="includedGames.length > 0"
+        [@listAnimation]="includedGames.length"
+      >
+        <div
+          class="game-card"
+          *ngFor="let included of includedGames"
+          (click)="viewIncludedGame(included.id)"
+        >
+          <div class="game-cover">
+            <img [src]="included.coverArt" [alt]="included.title" />
+          </div>
+          <div class="game-info">
+            <h3 [title]="included.title" appOverflowClass="title-text-animated">
+              <span class="title-text">{{ included.title }}</span>
+            </h3>
+            <p class="platform">{{ getConsoleFamilyName(included.consoleFamilyId) }}</p>
+            <p class="release-date">{{ included.releaseDate | date }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="empty-included" *ngIf="includedGames.length === 0">
+        <p>No games have been added to this compilation yet.</p>
+      </div>
+    </div>
+
+    <div class="custom-attributes" *ngIf="hasCustomAttributes()">
+      <h2>Additional Information</h2>
+      <div class="attributes-grid">
+        <div
+          class="attribute-item"
+          *ngFor="let attr of getCustomAttributesArray()"
+        >
+          <span class="attr-label">{{ attr.key }}:</span>
+          <span class="attr-value">{{ formatAttributeValue(attr.value) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="backlog-section">
+      <div class="backlog-header">
+        <h2>🎯 Completion History</h2>
+        <button class="add-backlog-btn" (click)="showBacklogManager()">
+          <span class="btn-icon">+</span>
+          <span class="btn-text">Add Entry</span>
+        </button>
+      </div>
+
+      <p class="backlog-hint">
+        Completions here track the compilation as a whole. To log a completion for
+        a single included game, open that game and add an entry from its page.
+      </p>
+
+      <div *ngIf="backlogs.length > 0" class="backlog-list">
+        <div *ngFor="let backlog of backlogs" class="backlog-item">
+          <div class="backlog-content">
+            <div class="backlog-main">
+              <strong>{{
+                backlog.completionDate
+                  ? (backlog.completionDate | date : "yyyy-MM-dd")
+                  : "Unknown date"
+              }}</strong>
+              <span class="completion-type-badge">{{ backlog.completionType }}</span>
+            </div>
+            <div class="backlog-details" *ngIf="backlog.endingType">
+              <span class="label">Ending:</span> {{ backlog.endingType }}
+            </div>
+            <div class="backlog-attributes" *ngIf="hasBacklogAttributes(backlog)">
+              <div
+                *ngFor="let attr of getBacklogAttributesArray(backlog)"
+                class="attr-display"
+              >
+                <span class="attr-label">{{ attr.key }}:</span> {{ attr.value }}
+              </div>
+            </div>
+          </div>
+          <div class="backlog-actions">
+            <button class="delete-btn-small" (click)="deleteBacklogEntry(backlog.id)">
+              ✕
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="backlogs.length === 0" class="empty-backlog">
+        <p>No completions recorded yet.</p>
+      </div>
+    </div>
+
+    <app-backlog-manager
+      *ngIf="showBacklog"
+      [gameId]="game.id"
+      [gameTitle]="game.title"
+      (close)="closeBacklogManager()"
+    >
+    </app-backlog-manager>
+  </div>
+</div>
+
+<div class="loading" *ngIf="!game">
+  <p>Loading compilation details...</p>
+</div>

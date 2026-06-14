@@ -1,6 +1,17 @@
 <div class="manager-container">
   <h2>Attribute Manager</h2>
 
+  <div class="flow-banner" *ngIf="flow.active">
+    <span>
+      Create the global attribute you need (keep "Global" checked so it shows on
+      the form), then click Done to return.
+    </span>
+    <div class="flow-actions">
+      <button type="button" class="flow-done" (click)="finishFlow()">Done</button>
+      <button type="button" class="flow-cancel" (click)="cancelFlow()">Cancel</button>
+    </div>
+  </div>
+
   <div class="info-box">
     <p>
       <strong>Global Attributes</strong> will be available for all games when

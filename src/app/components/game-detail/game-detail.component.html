@@ -11,6 +11,15 @@
         <h1>{{ game.title }}</h1>
 
         <div
+          class="compilation-link"
+          *ngIf="game.compilationId"
+          (click)="viewCompilation()"
+        >
+          📦 Part of compilation: <strong>{{ game.compilationTitle }}</strong>
+          <span class="compilation-link-cta">— view compilation →</span>
+        </div>
+
+        <div
           class="alt-titles"
           *ngIf="game.alternateTitles && game.alternateTitles.length > 0"
         >

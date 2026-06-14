@@ -16,6 +16,11 @@ export interface Game {
   physicalDigital: 'physical' | 'digital';
   customAttributes: Record<string, any>;
   categoryIds: string[];
+  isCompilation?: boolean;
+  includedGameIds?: string[];
+  // Derived by the backend for games that belong to a compilation.
+  compilationId?: string;
+  compilationTitle?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -82,6 +87,10 @@ export class GameService {
 
   getGame(id: string): Observable<Game> {
     return this.http.get<Game>(`${this.apiUrl}/${id}`);
+  }
+
+  getIncludedGames(id: string): Observable<Game[]> {
+    return this.http.get<Game[]>(`${this.apiUrl}/${id}/included`);
   }
 
   searchPaginatedGames(query: string, options: PaginationOptions): Observable<PaginatedResult<Game>> {

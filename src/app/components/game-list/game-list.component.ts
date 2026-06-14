@@ -286,7 +286,11 @@ export class GameListComponent implements OnInit {
     selects.forEach((select) => (select.value = ''));
   }
 
-  viewGame(id: string): void {
-    this.router.navigate(['/game', id]);
+  viewGame(game: Game): void {
+    if (game.isCompilation) {
+      this.router.navigate(['/compilation', game.id]);
+    } else {
+      this.router.navigate(['/game', game.id]);
+    }
   }
 }

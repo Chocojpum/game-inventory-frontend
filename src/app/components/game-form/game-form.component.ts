@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { GameService } from '../../services/game.service';
+import { GameService, Game } from '../../services/game.service';
 import { CategoryService, Category } from '../../services/category.service';
 import { AttributeService, Attribute } from '../../services/attribute.service';
 import { ConsoleService, Console } from '../../services/console.service';
 import { ConsoleFamilyService, ConsoleFamily } from '../../services/console-family.service';
+import { CreationFlowService } from '../../services/creation-flow.service';
 
 @Component({
   selector: 'app-game-form',
@@ -25,10 +26,18 @@ export class GameFormComponent implements OnInit {
   consoleFamilies: ConsoleFamily[] = [];
   globalAttributes: Attribute[] = [];
   selectedCategoryIds: string[] = [];
+  // Compilation support
+  isCompilation = false;
+  allGames: Game[] = [];
+  selectedIncludedGameIds: string[] = [];
+  includedGameSearchQuery = '';
   customAttributesObj: Record<string, any> = {};
   customAttributesArray: Array<{key: string, value: any}> = [];
   newAttributeName = '';
   newAttributeValue = '';
+  // Set while returning from a create-flow so the owned console can be matched
+  // to its family once the consoles list has loaded.
+  private pendingConsoleId: string | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -38,7 +47,8 @@ export class GameFormComponent implements OnInit {
     private consoleService: ConsoleService,
     private consoleFamilyService: ConsoleFamilyService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    public flow: CreationFlowService
   ) {
     this.gameForm = this.fb.group({
       title: ['', Validators.required],
@@ -62,13 +72,109 @@ export class GameFormComponent implements OnInit {
     this.loadConsoles();
     this.loadConsoleFamilies();
     this.loadGlobalAttributes();
+    this.loadAllGames();
 
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.isEditMode = true;
       this.gameId = id;
+    }
+
+    const returned = this.flow.consume(this.router.url);
+    if (returned) {
+      // Coming back from a "+ New ..." flow: restore what the user had typed
+      // and apply the value(s) they just created/selected.
+      this.restoreState(returned.returnState);
+      this.applyFlowResult(returned.field, returned.resultIds);
+    } else if (id) {
       this.loadGame(id);
     }
+  }
+
+  // --- Inline creation flow ---
+
+  /** True when this Add Game view was opened to create a compilation member. */
+  get isFlowTarget(): boolean {
+    return this.flow.active && this.flow.current?.field === 'includedGameIds';
+  }
+
+  startCreate(field: string, multi: boolean, createUrl: string, context?: any): void {
+    this.flow.start({
+      returnUrl: this.router.url,
+      returnState: this.captureState(),
+      field,
+      multi,
+      context,
+      createUrl,
+    });
+  }
+
+  private captureState(): any {
+    return {
+      raw: this.gameForm.getRawValue(),
+      selectedCategoryIds: [...this.selectedCategoryIds],
+      isCompilation: this.isCompilation,
+      selectedIncludedGameIds: [...this.selectedIncludedGameIds],
+      customAttributesObj: { ...this.customAttributesObj },
+    };
+  }
+
+  private restoreState(state: any): void {
+    if (!state) return;
+
+    this.alternateTitles.clear();
+    (state.raw?.alternateTitles || []).forEach((title: string) => {
+      this.alternateTitles.push(this.fb.control(title));
+    });
+    this.gameForm.patchValue(state.raw || {});
+
+    this.selectedCategoryIds = state.selectedCategoryIds || [];
+    this.isCompilation = state.isCompilation || false;
+    this.selectedIncludedGameIds = state.selectedIncludedGameIds || [];
+    this.customAttributesObj = state.customAttributesObj || {};
+    this.updateCustomAttributesArray();
+  }
+
+  private applyFlowResult(field: string, ids: string[]): void {
+    if (!ids || ids.length === 0) return;
+    switch (field) {
+      case 'consoleFamilyId':
+        this.gameForm.patchValue({ consoleFamilyId: ids[0] });
+        break;
+      case 'consoleId':
+        // Match the new console to its family once consoles have loaded.
+        this.pendingConsoleId = ids[0];
+        this.applyPendingConsole();
+        break;
+      case 'categoryIds':
+        ids.forEach(id => {
+          if (!this.selectedCategoryIds.includes(id)) {
+            this.selectedCategoryIds.push(id);
+          }
+        });
+        break;
+      case 'includedGameIds':
+        ids.forEach(id => {
+          if (!this.selectedIncludedGameIds.includes(id)) {
+            this.selectedIncludedGameIds.push(id);
+          }
+        });
+        break;
+      case 'globalAttribute':
+        // Newly created global attributes appear via loadGlobalAttributes().
+        break;
+    }
+  }
+
+  private applyPendingConsole(): void {
+    if (!this.pendingConsoleId) return;
+    const console = this.consoles.find(c => c.id === this.pendingConsoleId);
+    if (!console) return; // consoles not loaded yet; retried after load
+    this.gameForm.patchValue({
+      consoleFamilyId: console.consoleFamilyId,
+      consoleId: console.id,
+    });
+    this.pendingConsoleId = null;
   }
 
   loadCategories(): void {
@@ -80,6 +186,7 @@ export class GameFormComponent implements OnInit {
   loadConsoles(): void {
     this.consoleService.getAllConsoles().subscribe(consoles => {
       this.consoles = consoles;
+      this.applyPendingConsole();
     });
   }
 
@@ -93,6 +200,40 @@ export class GameFormComponent implements OnInit {
     this.attributeService.getGlobalAttributes().subscribe(attributes => {
       this.globalAttributes = attributes;
     });
+  }
+
+  loadAllGames(): void {
+    // Load every game so compilations can pick their members.
+    this.gameService
+      .getFilteredAndPaginatedGames({}, { page: 1, limit: 9999 })
+      .subscribe(result => {
+        this.allGames = result.data;
+      });
+  }
+
+  // --- Compilation member selection ---
+
+  getSelectableGames(): Game[] {
+    const query = this.includedGameSearchQuery.toLowerCase().trim();
+    return this.allGames.filter(g => {
+      if (g.id === this.gameId) return false; // can't include itself
+      if (g.isCompilation) return false; // compilations can't nest
+      if (!query) return true;
+      return g.title.toLowerCase().includes(query);
+    });
+  }
+
+  isGameIncluded(gameId: string): boolean {
+    return this.selectedIncludedGameIds.includes(gameId);
+  }
+
+  toggleIncludedGame(gameId: string): void {
+    const index = this.selectedIncludedGameIds.indexOf(gameId);
+    if (index > -1) {
+      this.selectedIncludedGameIds.splice(index, 1);
+    } else {
+      this.selectedIncludedGameIds.push(gameId);
+    }
   }
 
   loadGame(id: string): void {
@@ -115,6 +256,8 @@ export class GameFormComponent implements OnInit {
       }
 
       this.selectedCategoryIds = game.categoryIds || [];
+      this.isCompilation = game.isCompilation || false;
+      this.selectedIncludedGameIds = game.includedGameIds || [];
       this.customAttributesObj = game.customAttributes || {};
       this.updateCustomAttributesArray();
     });
@@ -200,6 +343,8 @@ export class GameFormComponent implements OnInit {
         ...this.gameForm.value,
         categoryIds: this.selectedCategoryIds,
         customAttributes: this.customAttributesObj,
+        isCompilation: this.isCompilation,
+        includedGameIds: this.isCompilation ? this.selectedIncludedGameIds : [],
       };
 
       if (this.isEditMode && this.gameId) {
@@ -208,14 +353,21 @@ export class GameFormComponent implements OnInit {
         });
       } else {
         this.gameService.createGame(gameData).subscribe(game => {
-          this.router.navigate(['/game', game.id]);
+          if (this.isFlowTarget) {
+            // Created as a compilation member: hand the new game back.
+            this.flow.finish([game.id]);
+          } else {
+            this.router.navigate(['/game', game.id]);
+          }
         });
       }
     }
   }
 
   cancel(): void {
-    if (this.isEditMode && this.gameId) {
+    if (this.isFlowTarget) {
+      this.flow.abort();
+    } else if (this.isEditMode && this.gameId) {
       this.router.navigate(['/game', this.gameId]);
     } else {
       this.router.navigate(['/']);

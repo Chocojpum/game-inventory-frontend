@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AttributeService, Attribute } from '../../services/attribute.service';
+import { CreationFlowService } from '../../services/creation-flow.service';
 
 @Component({
   selector: 'app-attribute-manager',
@@ -16,7 +17,18 @@ export class AttributeManagerComponent implements OnInit {
   };
   optionsString = '';
 
-  constructor(private attributeService: AttributeService) { }
+  constructor(
+    private attributeService: AttributeService,
+    public flow: CreationFlowService
+  ) { }
+
+  finishFlow(): void {
+    this.flow.finish();
+  }
+
+  cancelFlow(): void {
+    this.flow.abort();
+  }
 
   ngOnInit(): void {
     this.loadAttributes();

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ConsoleFamilyService, ConsoleFamily } from '../../services/console-family.service';
+import { CreationFlowService } from '../../services/creation-flow.service';
 
 @Component({
   selector: 'app-console-family-manager',
@@ -15,7 +16,10 @@ export class ConsoleFamilyManagerComponent implements OnInit {
     generation: ''
   };
 
-  constructor(private familyService: ConsoleFamilyService) { }
+  constructor(
+    private familyService: ConsoleFamilyService,
+    public flow: CreationFlowService
+  ) { }
 
   ngOnInit(): void {
     this.loadFamilies();
@@ -39,8 +43,11 @@ export class ConsoleFamilyManagerComponent implements OnInit {
 
   addFamily(): void {
     if (this.newFamily.name && this.newFamily.developer) {
-      this.familyService.createFamily(this.newFamily).subscribe(() => {
+      this.familyService.createFamily(this.newFamily).subscribe(created => {
         this.loadFamilies();
+        if (this.flow.active) {
+          this.flow.select(created.id);
+        }
         this.newFamily = {
           name: '',
           developer: '',
@@ -48,6 +55,14 @@ export class ConsoleFamilyManagerComponent implements OnInit {
         };
       });
     }
+  }
+
+  finishFlow(): void {
+    this.flow.finish();
+  }
+
+  cancelFlow(): void {
+    this.flow.abort();
   }
 
   deleteFamily(id: string, name: string): void {

@@ -1,6 +1,11 @@
 <div class="form-container">
   <h2>{{ isEditMode ? "Edit Game" : "Add New Game" }}</h2>
 
+  <div class="flow-banner" *ngIf="isFlowTarget">
+    📦 You're creating a game to add to a compilation. Fill it in and click
+    <strong>Add Game</strong> to return with it selected.
+  </div>
+
   <form [formGroup]="gameForm" (ngSubmit)="onSubmit()" class="game-form">
     <div class="form-section">
       <h3>Basic Information</h3>
@@ -87,6 +92,9 @@
           <p class="hint">
             The console platform (e.g., PlayStation 5, Nintendo Switch)
           </p>
+          <button type="button" class="add-btn" (click)="startCreate('consoleFamilyId', false, '/console-families')">
+            + New console family
+          </button>
         </div>
 
         <div class="form-group">
@@ -101,6 +109,9 @@
             </option>
           </select>
           <p class="hint">Your specific owned console (optional)</p>
+          <button type="button" class="add-btn" (click)="startCreate('consoleId', false, '/add-console')">
+            + New console
+          </button>
         </div>
       </div>
 
@@ -139,6 +150,51 @@
     </div>
 
     <div class="form-section">
+      <h3>Compilation</h3>
+
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input type="checkbox" [(ngModel)]="isCompilation" [ngModelOptions]="{ standalone: true }" />
+          📦 This is a compilation game (bundles several other games)
+        </label>
+        <p class="hint">
+          A compilation appears in the game list and opens a special detail view
+          listing all the games it includes.
+        </p>
+      </div>
+
+      <div class="included-games-picker" *ngIf="isCompilation">
+        <h4>Included Games ({{ selectedIncludedGameIds.length }} selected)</h4>
+        <input
+          type="text"
+          class="search-input"
+          [(ngModel)]="includedGameSearchQuery"
+          [ngModelOptions]="{ standalone: true }"
+          placeholder="Search games to include..."
+        />
+        <div class="categories-list">
+          <label
+            *ngFor="let g of getSelectableGames()"
+            class="checkbox-label"
+          >
+            <input
+              type="checkbox"
+              [checked]="isGameIncluded(g.id)"
+              (change)="toggleIncludedGame(g.id)"
+            />
+            {{ g.title }}
+          </label>
+          <p class="hint" *ngIf="getSelectableGames().length === 0">
+            No games found to include.
+          </p>
+        </div>
+        <button type="button" class="add-btn" (click)="startCreate('includedGameIds', true, '/add-game')">
+          + New game
+        </button>
+      </div>
+    </div>
+
+    <div class="form-section">
       <h3>Categories</h3>
 
       <div class="category-type-section" *ngFor="let type of categoryTypes">
@@ -166,15 +222,18 @@
             No {{ type }} categories found
           </p>
         </div>
+        <button type="button" class="add-btn" (click)="startCreate('categoryIds', true, '/categories', { categoryType: type })">
+          + New {{ type }}
+        </button>
       </div>
-
-      <p class="hint" *ngIf="categories.length === 0">
-        No categories yet. <a routerLink="/categories">Create categories</a>
-      </p>
     </div>
 
     <div class="form-section">
       <h3>Custom Attributes</h3>
+
+      <button type="button" class="add-btn" (click)="startCreate('globalAttribute', false, '/attributes')">
+        + New global attribute
+      </button>
 
       <div class="global-attributes" *ngIf="globalAttributes.length > 0">
         <h4>Global Attributes</h4>

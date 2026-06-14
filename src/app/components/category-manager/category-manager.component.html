@@ -1,6 +1,18 @@
 <div class="manager-container">
   <h2>Category Manager</h2>
 
+  <div class="flow-banner" *ngIf="flow.active">
+    <span>
+      Adding categories to the item you're creating
+      ({{ flow.current?.resultIds?.length || 0 }} selected). Create and/or tick
+      the ones you want, then click Done.
+    </span>
+    <div class="flow-actions">
+      <button type="button" class="flow-done" (click)="finishFlow()">Done</button>
+      <button type="button" class="flow-cancel" (click)="cancelFlow()">Cancel</button>
+    </div>
+  </div>
+
   <div class="add-category-form">
     <h3>Add New Category</h3>
     <div class="form-inline">
@@ -43,6 +55,14 @@
           class="category-item"
           *ngFor="let category of getFilteredCategories(type)"
         >
+          <label *ngIf="flow.active" class="flow-select">
+            <input
+              title="select-category"
+              type="checkbox"
+              [checked]="flow.isSelected(category.id)"
+              (change)="flow.toggle(category.id)"
+            />
+          </label>
           <div class="category-content">
             <strong>{{ category.name }}</strong>
             <p *ngIf="category.description">{{ category.description }}</p>

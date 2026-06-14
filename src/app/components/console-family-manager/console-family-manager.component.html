@@ -1,6 +1,17 @@
 <div class="manager-container">
   <h2>Console Family Manager</h2>
 
+  <div class="flow-banner" *ngIf="flow.active">
+    <span>
+      Pick or create the console family for the item you're building, then click
+      Done.
+    </span>
+    <div class="flow-actions">
+      <button type="button" class="flow-done" (click)="finishFlow()">Done</button>
+      <button type="button" class="flow-cancel" (click)="cancelFlow()">Cancel</button>
+    </div>
+  </div>
+
   <div class="info-box">
     <p>
       <strong>Console Families</strong> represent console platforms (e.g.,
@@ -51,6 +62,14 @@
     </div>
     <div class="families-list">
       <div class="family-item" *ngFor="let family of getFilteredFamilies()">
+        <label *ngIf="flow.active" class="flow-select">
+          <input
+            title="select-family"
+            type="checkbox"
+            [checked]="flow.isSelected(family.id)"
+            (change)="flow.toggle(family.id)"
+          />
+        </label>
         <div class="family-content">
           <strong>{{ family.name }}</strong>
           <p class="developer">{{ family.developer }}</p>

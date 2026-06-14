@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ConsoleService } from '../../services/console.service';
 import { ConsoleFamilyService, ConsoleFamily } from '../../services/console-family.service';
+import { CreationFlowService } from '../../services/creation-flow.service';
 
 @Component({
   selector: 'app-console-form',
@@ -20,7 +21,8 @@ export class ConsoleFormComponent implements OnInit {
     private consoleService: ConsoleService,
     private familyService: ConsoleFamilyService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    public flow: CreationFlowService
   ) {
     this.form = this.fb.group({
       consoleFamilyId: ['', Validators.required],
@@ -39,8 +41,32 @@ export class ConsoleFormComponent implements OnInit {
     if (id) {
       this.isEditMode = true;
       this.consoleId = id;
+    }
+
+    const returned = this.flow.consume(this.router.url);
+    if (returned) {
+      this.form.patchValue(returned.returnState || {});
+      if (returned.field === 'consoleFamilyId' && returned.resultIds.length) {
+        this.form.patchValue({ consoleFamilyId: returned.resultIds[0] });
+      }
+    } else if (id) {
       this.loadConsole(id);
     }
+  }
+
+  /** True when this Add Console view was opened to create another form's value. */
+  get isFlowTarget(): boolean {
+    return this.flow.active && this.flow.current?.field === 'consoleId';
+  }
+
+  startCreate(field: string, multi: boolean, createUrl: string): void {
+    this.flow.start({
+      returnUrl: this.router.url,
+      returnState: this.form.getRawValue(),
+      field,
+      multi,
+      createUrl,
+    });
   }
 
   loadFamilies(): void {
@@ -72,14 +98,20 @@ export class ConsoleFormComponent implements OnInit {
         });
       } else {
         this.consoleService.createConsole(data).subscribe(console => {
-          this.router.navigate(['/console', console.id]);
+          if (this.isFlowTarget) {
+            this.flow.finish([console.id]);
+          } else {
+            this.router.navigate(['/console', console.id]);
+          }
         });
       }
     }
   }
 
   cancel(): void {
-    if (this.isEditMode && this.consoleId) {
+    if (this.isFlowTarget) {
+      this.flow.abort();
+    } else if (this.isEditMode && this.consoleId) {
       this.router.navigate(['/console', this.consoleId]);
     } else {
       this.router.navigate(['/consoles']);

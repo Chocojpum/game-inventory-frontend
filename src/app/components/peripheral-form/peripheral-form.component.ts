@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PeripheralService } from '../../services/peripheral.service';
 import { ConsoleFamilyService, ConsoleFamily } from '../../services/console-family.service';
+import { CreationFlowService } from '../../services/creation-flow.service';
 
 @Component({
   selector: 'app-peripheral-form',
@@ -20,7 +21,8 @@ export class PeripheralFormComponent implements OnInit {
     private peripheralService: PeripheralService,
     private familyService: ConsoleFamilyService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    public flow: CreationFlowService
   ) {
     this.form = this.fb.group({
       name: ['', Validators.required],
@@ -38,8 +40,27 @@ export class PeripheralFormComponent implements OnInit {
     if (id) {
       this.isEditMode = true;
       this.peripheralId = id;
+    }
+
+    const returned = this.flow.consume(this.router.url);
+    if (returned) {
+      this.form.patchValue(returned.returnState || {});
+      if (returned.field === 'consoleFamilyId' && returned.resultIds.length) {
+        this.form.patchValue({ consoleFamilyId: returned.resultIds[0] });
+      }
+    } else if (id) {
       this.loadPeripheral(id);
     }
+  }
+
+  startCreate(field: string, multi: boolean, createUrl: string): void {
+    this.flow.start({
+      returnUrl: this.router.url,
+      returnState: this.form.getRawValue(),
+      field,
+      multi,
+      createUrl,
+    });
   }
 
   loadFamilies(): void {

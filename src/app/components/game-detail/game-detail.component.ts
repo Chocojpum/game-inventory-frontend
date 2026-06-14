@@ -44,12 +44,23 @@ export class GameDetailComponent implements OnInit {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.gameService.getGame(id).subscribe(game => {
+        // Compilations have their own dedicated detail view.
+        if (game.isCompilation) {
+          this.router.navigate(['/compilation', game.id]);
+          return;
+        }
         this.game = game;
         this.loadCategories();
         this.loadConsole();
         this.loadConsoleFamily();
         this.loadBacklogs();
       });
+    }
+  }
+
+  viewCompilation(): void {
+    if (this.game?.compilationId) {
+      this.router.navigate(['/compilation', this.game.compilationId]);
     }
   }
 

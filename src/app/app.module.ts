@@ -8,6 +8,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { AppComponent } from './app.component';
 import { GameListComponent } from './components/game-list/game-list.component';
 import { GameDetailComponent } from './components/game-detail/game-detail.component';
+import { CompilationDetailComponent } from './components/compilation-detail/compilation-detail.component';
 import { GameFormComponent } from './components/game-form/game-form.component';
 import { SearchBarComponent } from './components/search-bar/search-bar.component';
 import { CategoryManagerComponent } from './components/category-manager/category-manager.component';
@@ -27,6 +28,7 @@ import { OverflowClassDirective } from './directives/overflow-class.directive';
 const routes: Routes = [
   { path: '', component: GameListComponent },
   { path: 'game/:id', component: GameDetailComponent },
+  { path: 'compilation/:id', component: CompilationDetailComponent },
   { path: 'add-game', component: GameFormComponent },
   { path: 'edit-game/:id', component: GameFormComponent },
   { path: 'console-families', component: ConsoleFamilyManagerComponent },
@@ -47,6 +49,7 @@ const routes: Routes = [
     AppComponent,
     GameListComponent,
     GameDetailComponent,
+    CompilationDetailComponent,
     GameFormComponent,
     SearchBarComponent,
     CategoryManagerComponent,
@@ -68,7 +71,7 @@ const routes: Routes = [
     HttpClientModule,
     FormsModule,
     ReactiveFormsModule,
-    RouterModule.forRoot(routes),
+    RouterModule.forRoot(routes, { scrollPositionRestoration: 'top' }),
   ],
   providers: [],
   bootstrap: [AppComponent]

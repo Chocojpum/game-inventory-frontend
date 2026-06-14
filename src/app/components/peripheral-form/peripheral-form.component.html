@@ -22,6 +22,9 @@
             {{ family.name }}
           </option>
         </select>
+        <button type="button" class="add-btn" (click)="startCreate('consoleFamilyId', false, '/console-families')">
+          + New console family
+        </button>
       </div>
 
       <div class="form-row">

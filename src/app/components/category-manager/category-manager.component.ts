@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CategoryService, Category } from '../../services/category.service';
+import { CreationFlowService } from '../../services/creation-flow.service';
 
 @Component({
   selector: 'app-category-manager',
@@ -22,10 +23,18 @@ export class CategoryManagerComponent implements OnInit {
     description: ''
   };
 
-  constructor(private categoryService: CategoryService) { }
+  constructor(
+    private categoryService: CategoryService,
+    public flow: CreationFlowService
+  ) { }
 
   ngOnInit(): void {
     this.loadCategories();
+    // When opened from a "+ New ..." flow, default the type to the one requested.
+    const type = this.flow.active ? this.flow.current?.context?.categoryType : null;
+    if (type) {
+      this.newCategory.type = type;
+    }
   }
 
   loadCategories(): void {
@@ -57,15 +66,28 @@ export class CategoryManagerComponent implements OnInit {
 
   addCategory(): void {
     if (this.newCategory.name) {
-      this.categoryService.createCategory(this.newCategory).subscribe(() => {
+      const requestedType = this.newCategory.type;
+      this.categoryService.createCategory(this.newCategory).subscribe(created => {
         this.loadCategories();
+        // In a create-flow, auto-select the new category for the return.
+        if (this.flow.active) {
+          this.flow.select(created.id);
+        }
         this.newCategory = {
           name: '',
-          type: 'genre',
+          type: this.flow.active ? requestedType : 'genre',
           description: ''
         };
       });
     }
+  }
+
+  finishFlow(): void {
+    this.flow.finish();
+  }
+
+  cancelFlow(): void {
+    this.flow.abort();
   }
 
   deleteCategory(id: string, name: string): void {

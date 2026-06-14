@@ -11,6 +11,15 @@ h2 {
   color: var(--text-primary);
   font-size: 2rem;
 }
+.flow-banner {
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  color: #7a5c00;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+}
 .form-section {
   margin-bottom: 2rem;
   padding-bottom: 2rem;

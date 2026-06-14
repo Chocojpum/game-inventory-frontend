@@ -1,6 +1,11 @@
 <div class="form-container">
   <h2>{{ isEditMode ? "Edit Console" : "Add New Console" }}</h2>
 
+  <div class="flow-banner" *ngIf="isFlowTarget">
+    🎮 You're creating a console to add to another item. Fill it in and click
+    <strong>Add Console</strong> to return with it selected.
+  </div>
+
   <form [formGroup]="form" (ngSubmit)="onSubmit()" class="item-form">
     <div class="form-section">
       <h3>Basic Information</h3>
@@ -13,6 +18,9 @@
             {{ family.name }} ({{ family.developer }})
           </option>
         </select>
+        <button type="button" class="add-btn" (click)="startCreate('consoleFamilyId', false, '/console-families')">
+          + New console family
+        </button>
       </div>
 
       <div class="form-row">
