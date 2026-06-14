@@ -59,7 +59,7 @@ export class GameListComponent implements OnInit {
   customCategories: Category[] = [];
   consoleFamilies: ConsoleFamily[] = [];
   currentPage: number = 1;
-  limit: number = 10;
+  limit: number = 12;
   totalItems: number = 0;
   totalPages: number = 0;
 
