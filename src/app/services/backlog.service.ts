@@ -39,7 +39,15 @@ export class BacklogService {
   }
 
   getEnrichedAndPaginatedBacklogs(
-    filters: { gameId?: string; search?: string; dateFrom?: string; dateTo?: string; sortBy?: string },
+    filters: {
+      gameId?: string;
+      search?: string;
+      consoleFamilyId?: string;
+      categoryIds?: string[];
+      dateFrom?: string;
+      dateTo?: string;
+      sortBy?: string;
+    },
     options: PaginationOptions
   ): Observable<PaginatedResult<EnrichedBacklog>> {
     let params = new HttpParams()
@@ -48,6 +56,13 @@ export class BacklogService {
 
     if (filters.gameId) params = params.set('gameId', filters.gameId);
     if (filters.search) params = params.set('search', filters.search);
+    if (filters.consoleFamilyId) params = params.set('consoleFamilyId', filters.consoleFamilyId);
+    if (filters.categoryIds) {
+      // Send each category as a generic key (categoryId_0, categoryId_1, ...)
+      filters.categoryIds.forEach((id, index) => {
+        params = params.set(`categoryId_${index}`, id);
+      });
+    }
     if (filters.dateFrom) params = params.set('dateFrom', filters.dateFrom);
     if (filters.dateTo) params = params.set('dateTo', filters.dateTo);
     if (filters.sortBy) params = params.set('sortBy', filters.sortBy);

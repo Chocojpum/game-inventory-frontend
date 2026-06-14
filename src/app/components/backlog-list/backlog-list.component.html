@@ -10,6 +10,76 @@
   ></app-search-bar>
 
   <div class="filters">
+    <div class="filter-group">
+      <label>Genre:</label>
+      <select
+        title="genre-filter-select"
+        (change)="onCategoryFilter($event, 'genre')"
+        class="filter-select"
+      >
+        <option value="">All</option>
+        <option *ngFor="let cat of genreCategories" [value]="cat.id">
+          {{ cat.name }}
+        </option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Franchise:</label>
+      <select
+        title="franchise-filter-select"
+        (change)="onCategoryFilter($event, 'franchise')"
+        class="filter-select"
+      >
+        <option value="">All</option>
+        <option *ngFor="let cat of franchiseCategories" [value]="cat.id">
+          {{ cat.name }}
+        </option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Saga:</label>
+      <select
+        title="saga-filter-select"
+        (change)="onCategoryFilter($event, 'saga')"
+        class="filter-select"
+      >
+        <option value="">All</option>
+        <option *ngFor="let cat of sagaCategories" [value]="cat.id">
+          {{ cat.name }}
+        </option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Custom:</label>
+      <select
+        title="custom-filter-select"
+        (change)="onCategoryFilter($event, 'custom')"
+        class="filter-select"
+      >
+        <option value="">All</option>
+        <option *ngFor="let cat of customCategories" [value]="cat.id">
+          {{ cat.name }}
+        </option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Console:</label>
+      <select
+        title="console-filter-select"
+        (change)="onConsoleFamilyFilter($event)"
+        class="filter-select"
+      >
+        <option value="">All</option>
+        <option *ngFor="let family of consoleFamilies" [value]="family.id">
+          {{ family.name }}
+        </option>
+      </select>
+    </div>
+
     <div class="filter-group date-range-group">
       <label>Completion Date Range:</label>
       <input
