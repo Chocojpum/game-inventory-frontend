@@ -5,6 +5,7 @@ import { CategoryService, Category } from '../../services/category.service';
 import { ConsoleService, Console } from '../../services/console.service';
 import { ConsoleFamilyService, ConsoleFamily } from '../../services/console-family.service';
 import { BacklogService, Backlog } from '../../services/backlog.service';
+import { DlcService, Dlc } from '../../services/dlc.service';
 import { trigger, transition, style, animate } from '@angular/animations';
 
 @Component({
@@ -30,6 +31,12 @@ export class GameDetailComponent implements OnInit {
   editingBacklogId: string | null = null;
   editingBacklogData: any = {};
 
+  dlcs: Dlc[] = [];
+  showDlcManager = false;
+  editingDlc?: Dlc;
+  backlogDlcId?: string;
+  backlogDlcTitle?: string;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -37,7 +44,8 @@ export class GameDetailComponent implements OnInit {
     private categoryService: CategoryService,
     private consoleService: ConsoleService,
     private consoleFamilyService: ConsoleFamilyService,
-    private backlogService: BacklogService
+    private backlogService: BacklogService,
+    private dlcService: DlcService
   ) { }
 
   ngOnInit(): void {
@@ -54,6 +62,7 @@ export class GameDetailComponent implements OnInit {
         this.loadConsole();
         this.loadConsoleFamily();
         this.loadBacklogs();
+        this.loadDlcs();
       });
     }
   }
@@ -190,12 +199,67 @@ export class GameDetailComponent implements OnInit {
   }
 
   showBacklogManager(): void {
+    this.backlogDlcId = undefined;
+    this.backlogDlcTitle = undefined;
     this.showBacklog = true;
   }
 
   closeBacklogManager(): void {
     this.showBacklog = false;
+    this.backlogDlcId = undefined;
+    this.backlogDlcTitle = undefined;
     this.loadBacklogs();
+  }
+
+  // --- DLCs ---
+
+  loadDlcs(): void {
+    if (this.game) {
+      this.dlcService.getDlcsByGame(this.game.id).subscribe(dlcs => {
+        this.dlcs = dlcs.sort((a, b) => a.title.localeCompare(b.title));
+      });
+    }
+  }
+
+  openAddDlc(): void {
+    this.editingDlc = undefined;
+    this.showDlcManager = true;
+  }
+
+  openEditDlc(dlc: Dlc): void {
+    this.editingDlc = dlc;
+    this.showDlcManager = true;
+  }
+
+  closeDlcManager(): void {
+    this.showDlcManager = false;
+    this.editingDlc = undefined;
+    this.loadDlcs();
+  }
+
+  deleteDlc(dlc: Dlc): void {
+    if (confirm(`Are you sure you want to delete the DLC "${dlc.title}"?`)) {
+      this.dlcService.deleteDlc(dlc.id).subscribe(() => this.loadDlcs());
+    }
+  }
+
+  addDlcCompletion(dlc: Dlc): void {
+    this.backlogDlcId = dlc.id;
+    this.backlogDlcTitle = dlc.title;
+    this.showBacklog = true;
+  }
+
+  getDlcTitle(dlcId: string): string {
+    const dlc = this.dlcs.find(d => d.id === dlcId);
+    return dlc ? dlc.title : 'DLC';
+  }
+
+  hasDlcAttributes(dlc: Dlc): boolean {
+    return Object.keys(dlc.customAttributes || {}).length > 0;
+  }
+
+  getDlcAttributesArray(dlc: Dlc): Array<{ key: string; value: any }> {
+    return Object.entries(dlc.customAttributes || {}).map(([key, value]) => ({ key, value }));
   }
 
   deleteBacklogEntry(id: string): void {

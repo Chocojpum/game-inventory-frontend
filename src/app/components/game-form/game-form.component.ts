@@ -26,6 +26,7 @@ export class GameFormComponent implements OnInit {
   consoleFamilies: ConsoleFamily[] = [];
   globalAttributes: Attribute[] = [];
   selectedCategoryIds: string[] = [];
+  canHaveDlc = false;
   // Compilation support
   isCompilation = false;
   allGames: Game[] = [];
@@ -256,6 +257,7 @@ export class GameFormComponent implements OnInit {
       }
 
       this.selectedCategoryIds = game.categoryIds || [];
+      this.canHaveDlc = game.canHaveDlc || false;
       this.isCompilation = game.isCompilation || false;
       this.selectedIncludedGameIds = game.includedGameIds || [];
       this.customAttributesObj = game.customAttributes || {};
@@ -343,6 +345,7 @@ export class GameFormComponent implements OnInit {
         ...this.gameForm.value,
         categoryIds: this.selectedCategoryIds,
         customAttributes: this.customAttributesObj,
+        canHaveDlc: this.canHaveDlc,
         isCompilation: this.isCompilation,
         includedGameIds: this.isCompilation ? this.selectedIncludedGameIds : [],
       };

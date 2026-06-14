@@ -167,7 +167,13 @@
       </div>
 
       <div class="entry-game">
-        <h3 class="game-title">{{ entry.gameTitle }}</h3>
+        <h3 class="game-title">
+          {{ entry.gameTitle }}
+          <span class="dlc-tag" *ngIf="entry.isDlc">DLC</span>
+        </h3>
+        <p class="dlc-parent" *ngIf="entry.isDlc && entry.parentGameTitle">
+          for {{ entry.parentGameTitle }}
+        </p>
         <span class="console-badge">{{ entry.consoleFamilyName }}</span>
         <p class="game-developer" *ngIf="entry.gameDeveloper">
           {{ entry.gameDeveloper }}

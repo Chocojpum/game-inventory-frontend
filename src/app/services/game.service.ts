@@ -16,6 +16,7 @@ export interface Game {
   physicalDigital: 'physical' | 'digital';
   customAttributes: Record<string, any>;
   categoryIds: string[];
+  canHaveDlc?: boolean;
   isCompilation?: boolean;
   includedGameIds?: string[];
   // Derived by the backend for games that belong to a compilation.

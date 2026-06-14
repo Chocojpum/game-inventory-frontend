@@ -1,0 +1,70 @@
+<div class="dlc-overlay" (click)="closeModal()">
+  <div class="dlc-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ isEditMode ? "✏️ Edit DLC" : "➕ Add DLC" }}</h2>
+      <button type="button" class="close-btn" (click)="closeModal()">✕</button>
+    </div>
+
+    <form [formGroup]="dlcForm" (ngSubmit)="onSubmit()" class="dlc-form">
+      <div class="form-group">
+        <label>Title *</label>
+        <input type="text" formControlName="title" placeholder="Enter DLC title" />
+      </div>
+
+      <div class="form-group">
+        <label>Alternate Titles</label>
+        <div formArrayName="alternateTitles">
+          <div
+            *ngFor="let title of alternateTitles.controls; let i = index"
+            class="array-item"
+          >
+            <input type="text" [formControlName]="i" placeholder="Alternate title" />
+            <button type="button" class="remove-btn" (click)="removeAlternateTitle(i)">✕</button>
+          </div>
+        </div>
+        <button type="button" class="add-btn" (click)="addAlternateTitle()">
+          + Add Alternate Title
+        </button>
+      </div>
+
+      <div class="form-group">
+        <label>Cover Art URL *</label>
+        <input
+          type="url"
+          formControlName="coverArt"
+          placeholder="https://example.com/cover.jpg"
+        />
+        <div class="cover-preview" *ngIf="dlcForm.get('coverArt')?.value">
+          <img [src]="dlcForm.get('coverArt')?.value" alt="Cover preview" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Release Date *</label>
+        <input title="dlc-release-date" type="date" formControlName="releaseDate" />
+      </div>
+
+      <div class="custom-attribute-section">
+        <h4>Custom Attributes</h4>
+        <div class="inline-form">
+          <input type="text" [(ngModel)]="newAttributeName" [ngModelOptions]="{ standalone: true }" placeholder="Attribute name" />
+          <input type="text" [(ngModel)]="newAttributeValue" [ngModelOptions]="{ standalone: true }" placeholder="Value" />
+          <button type="button" (click)="addCustomAttribute()">Add</button>
+        </div>
+        <div class="current-attributes" *ngIf="customAttributesArray.length > 0">
+          <div *ngFor="let attr of customAttributesArray" class="attr-tag">
+            <strong>{{ attr.key }}:</strong> {{ attr.value }}
+            <button type="button" (click)="removeCustomAttribute(attr.key)">✕</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="submit-btn" [disabled]="!dlcForm.valid">
+          {{ isEditMode ? "Update DLC" : "Add DLC" }}
+        </button>
+        <button type="button" class="cancel-btn" (click)="closeModal()">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>

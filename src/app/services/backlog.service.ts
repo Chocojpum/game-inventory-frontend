@@ -7,6 +7,7 @@ import { PaginatedResult, PaginationOptions } from '../components/shared/paginat
 export interface Backlog {
   id: string;
   gameId: string;
+  dlcId?: string;
   completionDate: string | null;
   endingType: string;
   completionType: string;
@@ -15,6 +16,8 @@ export interface Backlog {
 }
 
 export interface EnrichedBacklog extends Backlog {
+  isDlc?: boolean;
+  parentGameTitle?: string;
   gameTitle: string;
   gameCoverArt: string;
   gameDeveloper: string;
