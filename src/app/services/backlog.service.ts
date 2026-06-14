@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { PaginatedResult, PaginationOptions } from '../components/shared/pagination.interface';
 
 export interface Backlog {
@@ -34,12 +33,6 @@ export class BacklogService {
   private apiUrl = 'http://localhost:3000/backlog';
 
   constructor(private http: HttpClient) { }
-
-  getAllBacklogs(): Observable<EnrichedBacklog[]> {
-    return this.http.get<PaginatedResult<EnrichedBacklog>>(this.apiUrl, {
-      params: { limit: '9999' }
-    }).pipe(map(r => r.data));
-  }
 
   getEnrichedAndPaginatedBacklogs(
     filters: {

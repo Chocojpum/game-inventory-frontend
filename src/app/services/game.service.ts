@@ -97,10 +97,6 @@ export class GameService {
     return this.http.get<Game[]>(`${this.apiUrl}/${id}/included`);
   }
 
-  searchPaginatedGames(query: string, options: PaginationOptions): Observable<PaginatedResult<Game>> {
-    return this.getFilteredAndPaginatedGames({ 'search': query }, options);
-  }
-
   createGame(game: Partial<Game>): Observable<Game> {
     return this.http.post<Game>(this.apiUrl, game);
   }

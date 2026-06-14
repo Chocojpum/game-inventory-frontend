@@ -2,9 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GameService, Game } from '../../services/game.service';
 import { ConsoleFamilyService, ConsoleFamily } from '../../services/console-family.service';
-import { BacklogService, Backlog } from '../../services/backlog.service';
-import { DlcService, Dlc } from '../../services/dlc.service';
+import { BacklogService } from '../../services/backlog.service';
+import { DlcService } from '../../services/dlc.service';
 import { trigger, transition, style, animate, query, stagger } from '@angular/animations';
+import { GameDetailBaseComponent } from '../shared/game-detail-base.component';
 
 @Component({
   selector: 'app-compilation-detail',
@@ -29,28 +30,20 @@ import { trigger, transition, style, animate, query, stagger } from '@angular/an
     ])
   ]
 })
-export class CompilationDetailComponent implements OnInit {
-  game: Game | null = null;
+export class CompilationDetailComponent extends GameDetailBaseComponent implements OnInit {
   includedGames: Game[] = [];
-  consoleFamily: ConsoleFamily | null = null;
   consoleFamilies: ConsoleFamily[] = [];
-  backlogs: Backlog[] = [];
-  showBacklog = false;
-
-  dlcs: Dlc[] = [];
-  showDlcManager = false;
-  editingDlc?: Dlc;
-  backlogDlcId?: string;
-  backlogDlcTitle?: string;
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router,
-    private gameService: GameService,
-    private consoleFamilyService: ConsoleFamilyService,
-    private backlogService: BacklogService,
-    private dlcService: DlcService
-  ) {}
+    router: Router,
+    gameService: GameService,
+    consoleFamilyService: ConsoleFamilyService,
+    backlogService: BacklogService,
+    dlcService: DlcService
+  ) {
+    super(router, gameService, consoleFamilyService, backlogService, dlcService);
+  }
 
   ngOnInit(): void {
     this.consoleFamilyService.getAllFamilies().subscribe(families => {
@@ -82,144 +75,12 @@ export class CompilationDetailComponent implements OnInit {
     });
   }
 
-  loadConsoleFamily(): void {
-    if (this.game) {
-      this.consoleFamilyService.getFamily(this.game.consoleFamilyId).subscribe(
-        family => (this.consoleFamily = family),
-        error => console.error('Console family not found', error)
-      );
-    }
-  }
-
-  loadBacklogs(): void {
-    if (this.game) {
-      this.backlogService.getBacklogsByGame(this.game.id).subscribe(backlogs => {
-        this.backlogs = backlogs.sort((a, b) => {
-          if (!a.completionDate) return 1;
-          if (!b.completionDate) return -1;
-          return new Date(b.completionDate).getTime() - new Date(a.completionDate).getTime();
-        });
-      });
-    }
-  }
-
   getConsoleFamilyName(familyId: string): string {
     const family = this.consoleFamilies.find(f => f.id === familyId);
     return family ? family.name : 'Unknown';
   }
 
-  hasCustomAttributes(): boolean {
-    return this.game ? Object.keys(this.game.customAttributes).length > 0 : false;
-  }
-
-  getCustomAttributesArray(): Array<{ key: string; value: any }> {
-    if (!this.game) return [];
-    return Object.entries(this.game.customAttributes).map(([key, value]) => ({ key, value }));
-  }
-
-  formatAttributeValue(value: any): string {
-    if (typeof value === 'boolean') return value ? 'Yes' : 'No';
-    if (Array.isArray(value)) return value.join(', ');
-    return String(value);
-  }
-
-  hasBacklogAttributes(backlog: Backlog): boolean {
-    return Object.keys(backlog.customAttributes).length > 0;
-  }
-
-  getBacklogAttributesArray(backlog: Backlog): Array<{ key: string; value: any }> {
-    return Object.entries(backlog.customAttributes).map(([key, value]) => ({ key, value }));
-  }
-
   viewIncludedGame(gameId: string): void {
     this.router.navigate(['/game', gameId]);
-  }
-
-  editGame(): void {
-    if (this.game) {
-      this.router.navigate(['/edit-game', this.game.id]);
-    }
-  }
-
-  deleteGame(): void {
-    if (this.game && confirm(`Are you sure you want to delete "${this.game.title}"?`)) {
-      this.gameService.deleteGame(this.game.id).subscribe(() => {
-        this.router.navigate(['/']);
-      });
-    }
-  }
-
-  showBacklogManager(): void {
-    this.backlogDlcId = undefined;
-    this.backlogDlcTitle = undefined;
-    this.showBacklog = true;
-  }
-
-  closeBacklogManager(): void {
-    this.showBacklog = false;
-    this.backlogDlcId = undefined;
-    this.backlogDlcTitle = undefined;
-    this.loadBacklogs();
-  }
-
-  // --- DLCs ---
-
-  loadDlcs(): void {
-    if (this.game) {
-      this.dlcService.getDlcsByGame(this.game.id).subscribe(dlcs => {
-        this.dlcs = dlcs.sort((a, b) => a.title.localeCompare(b.title));
-      });
-    }
-  }
-
-  openAddDlc(): void {
-    this.editingDlc = undefined;
-    this.showDlcManager = true;
-  }
-
-  openEditDlc(dlc: Dlc): void {
-    this.editingDlc = dlc;
-    this.showDlcManager = true;
-  }
-
-  closeDlcManager(): void {
-    this.showDlcManager = false;
-    this.editingDlc = undefined;
-    this.loadDlcs();
-  }
-
-  deleteDlc(dlc: Dlc): void {
-    if (confirm(`Are you sure you want to delete the DLC "${dlc.title}"?`)) {
-      this.dlcService.deleteDlc(dlc.id).subscribe(() => this.loadDlcs());
-    }
-  }
-
-  addDlcCompletion(dlc: Dlc): void {
-    this.backlogDlcId = dlc.id;
-    this.backlogDlcTitle = dlc.title;
-    this.showBacklog = true;
-  }
-
-  getDlcTitle(dlcId: string): string {
-    const dlc = this.dlcs.find(d => d.id === dlcId);
-    return dlc ? dlc.title : 'DLC';
-  }
-
-  hasDlcAttributes(dlc: Dlc): boolean {
-    return Object.keys(dlc.customAttributes || {}).length > 0;
-  }
-
-  getDlcAttributesArray(dlc: Dlc): Array<{ key: string; value: any }> {
-    return Object.entries(dlc.customAttributes || {}).map(([key, value]) => ({ key, value }));
-  }
-
-  deleteBacklogEntry(id: string): void {
-    if (confirm('Are you sure you want to delete this completion entry?')) {
-      this.backlogService.deleteBacklog(id).subscribe(() => this.loadBacklogs());
-    }
-  }
-
-  goBack(): void {
-    this.router.navigate(['/']);
   }
 }
