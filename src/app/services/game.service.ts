@@ -14,6 +14,9 @@ export interface Game {
   developer: string;
   region: string;
   physicalDigital: 'physical' | 'digital';
+  // Free-form completeness/condition detail of the owned copy
+  // (e.g. "Cart only", "Complete in box", "Missing manual", "Includes goods").
+  conditionDetails?: string;
   customAttributes: Record<string, any>;
   categoryIds: string[];
   canHaveDlc?: boolean;

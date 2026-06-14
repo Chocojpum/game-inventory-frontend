@@ -56,6 +56,10 @@
             <span class="label">Format:</span>
             <span class="value">{{ game.physicalDigital }}</span>
           </div>
+          <div class="info-item" *ngIf="game.conditionDetails">
+            <span class="label">Condition:</span>
+            <span class="value">{{ game.conditionDetails }}</span>
+          </div>
         </div>
 
         <div class="categories-section" *ngIf="gameCategories.length > 0">

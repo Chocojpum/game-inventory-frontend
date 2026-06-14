@@ -61,6 +61,7 @@ export class GameFormComponent implements OnInit {
       consoleId: [''],
       region: ['', Validators.required],
       physicalDigital: ['physical', Validators.required],
+      conditionDetails: [''],
     });
   }
 
@@ -248,6 +249,7 @@ export class GameFormComponent implements OnInit {
         consoleId: game.consoleId || '',
         region: game.region,
         physicalDigital: game.physicalDigital,
+        conditionDetails: game.conditionDetails || '',
       });
 
       if (game.alternateTitles) {

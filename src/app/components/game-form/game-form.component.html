@@ -146,6 +146,24 @@
             </label>
           </div>
         </div>
+
+        <div class="form-group">
+          <label>Condition / Completeness</label>
+          <input
+            type="text"
+            formControlName="conditionDetails"
+            list="conditionDetailsOptions"
+            placeholder="e.g., Complete in box, Cart only, Missing manual"
+          />
+          <datalist id="conditionDetailsOptions">
+            <option value="Complete in box"></option>
+            <option value="Cart only"></option>
+            <option value="Loose"></option>
+            <option value="Missing manual"></option>
+            <option value="Includes goods"></option>
+            <option value="Sealed"></option>
+          </datalist>
+        </div>
       </div>
     </div>
 
