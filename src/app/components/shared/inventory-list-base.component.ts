@@ -145,10 +145,25 @@ export abstract class InventoryListBaseComponent implements OnInit {
   }
 
   goToPage(page: number): void {
-    if (page > 0 && page <= this.totalPages) {
+    if (page > 0 && page <= this.totalPages && page !== this.currentPage) {
       this.currentPage = page;
       this.fetchItems();
     }
+  }
+
+  /**
+   * Page numbers to render as direct-jump buttons, windowed around the current
+   * page so the control stays a fixed width on collections with many pages.
+   */
+  get pageNumbers(): number[] {
+    const maxButtons = 5;
+    if (this.totalPages <= maxButtons) {
+      return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+    }
+    const half = Math.floor(maxButtons / 2);
+    const end = Math.min(this.totalPages, Math.max(this.currentPage + half, maxButtons));
+    const start = Math.max(1, end - maxButtons + 1);
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   }
 
   onLimitChange(): void {

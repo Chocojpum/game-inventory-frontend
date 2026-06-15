@@ -117,7 +117,7 @@
 
       <div class="form-row">
         <div class="form-group">
-          <label>Region *</label>
+          <label>Region <span *ngIf="isRegionRequired">*</span></label>
           <input
             type="text"
             formControlName="region"

@@ -1,0 +1,72 @@
+<div class="pagination-controls">
+  <div class="limit-selector">
+    <label>
+      Items per page:
+      <select [ngModel]="limit" (ngModelChange)="limitChange.emit($event)">
+        <option *ngFor="let option of limitOptions" [ngValue]="option">{{ option }}</option>
+      </select>
+    </label>
+  </div>
+
+  <button
+    type="button"
+    class="page-btn"
+    (click)="pageChange.emit(currentPage - 1)"
+    [disabled]="currentPage <= 1"
+  >
+    &lt; Previous
+  </button>
+
+  <div class="page-numbers">
+    <ng-container *ngIf="pageNumbers[0] > 1">
+      <button type="button" class="page-btn page-number" (click)="pageChange.emit(1)">1</button>
+      <span class="page-ellipsis" *ngIf="pageNumbers[0] > 2">…</span>
+    </ng-container>
+
+    <button
+      *ngFor="let page of pageNumbers"
+      type="button"
+      class="page-btn page-number"
+      [class.active]="page === currentPage"
+      (click)="pageChange.emit(page)"
+    >
+      {{ page }}
+    </button>
+
+    <ng-container *ngIf="pageNumbers[pageNumbers.length - 1] < totalPages">
+      <span class="page-ellipsis" *ngIf="pageNumbers[pageNumbers.length - 1] < totalPages - 1">…</span>
+      <button type="button" class="page-btn page-number" (click)="pageChange.emit(totalPages)">{{ totalPages }}</button>
+    </ng-container>
+  </div>
+
+  <button
+    type="button"
+    class="page-btn"
+    (click)="pageChange.emit(currentPage + 1)"
+    [disabled]="currentPage >= totalPages"
+  >
+    Next &gt;
+  </button>
+
+  <div class="page-jump">
+    <label>
+      Go to:
+      <input
+        #jumpInput
+        type="number"
+        min="1"
+        [max]="totalPages"
+        class="page-jump-input"
+        placeholder="#"
+        (keyup.enter)="pageChange.emit(+jumpInput.value); jumpInput.value = ''"
+      />
+    </label>
+    <button
+      type="button"
+      class="page-btn"
+      (click)="pageChange.emit(+jumpInput.value); jumpInput.value = ''"
+    >
+      Go
+    </button>
+  </div>
+</div>

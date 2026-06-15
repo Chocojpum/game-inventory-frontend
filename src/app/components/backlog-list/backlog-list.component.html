@@ -153,6 +153,17 @@
     </div>
   </div>
 
+  <app-pagination-controls
+    *ngIf="totalPages > 1"
+    [currentPage]="currentPage"
+    [totalPages]="totalPages"
+    [pageNumbers]="pageNumbers"
+    [limit]="limit"
+    [limitOptions]="[10, 20, 50]"
+    (pageChange)="goToPage($event)"
+    (limitChange)="limit = $event; onLimitChange()"
+  ></app-pagination-controls>
+
   <div class="entries-list" *ngIf="entries.length > 0" [@listAnimation]="entries.length">
     <div
       class="backlog-entry"
@@ -191,7 +202,7 @@
       <div class="entry-completion">
         <div class="completion-date">
           <span class="date-label">Completed</span>
-          <strong>{{ entry.completionDate ? (entry.completionDate | date: 'mediumDate') : '—' }}</strong>
+          <strong>{{ entry.completionDate ? (entry.completionDate | date: 'yyyy-MM-dd') : '—' }}</strong>
           <span class="unknown-label" *ngIf="!entry.completionDate">Unknown date</span>
         </div>
 
@@ -221,34 +232,13 @@
 
   <hr />
 
-  <div class="pagination-controls">
-    <div class="limit-selector">
-      <label for="backlog-limit">Items per page:</label>
-      <select id="backlog-limit" [(ngModel)]="limit" (ngModelChange)="onLimitChange()">
-        <option [ngValue]="10">10</option>
-        <option [ngValue]="20">20</option>
-        <option [ngValue]="50">50</option>
-      </select>
-    </div>
-
-    <button
-      class="page-btn"
-      (click)="goToPage(currentPage - 1)"
-      [disabled]="currentPage <= 1"
-    >
-      &lt; Previous
-    </button>
-
-    <span class="page-indicator">
-      Page <strong>{{ currentPage }}</strong> of <strong>{{ totalPages }}</strong>
-    </span>
-
-    <button
-      class="page-btn"
-      (click)="goToPage(currentPage + 1)"
-      [disabled]="currentPage >= totalPages"
-    >
-      Next &gt;
-    </button>
-  </div>
+  <app-pagination-controls
+    [currentPage]="currentPage"
+    [totalPages]="totalPages"
+    [pageNumbers]="pageNumbers"
+    [limit]="limit"
+    [limitOptions]="[10, 20, 50]"
+    (pageChange)="goToPage($event)"
+    (limitChange)="limit = $event; onLimitChange()"
+  ></app-pagination-controls>
 </div>

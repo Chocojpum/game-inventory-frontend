@@ -59,6 +59,7 @@ export class GameFormComponent implements OnInit {
       developer: ['', Validators.required],
       consoleFamilyId: ['', Validators.required],
       consoleId: [''],
+      // Region is only required for physical games (see updateRegionValidator).
       region: ['', Validators.required],
       physicalDigital: ['physical', Validators.required],
       conditionDetails: [''],
@@ -75,6 +76,12 @@ export class GameFormComponent implements OnInit {
     this.loadConsoleFamilies();
     this.loadGlobalAttributes();
     this.loadAllGames();
+
+    // Region is required for physical games but optional for digital ones.
+    this.gameForm.get('physicalDigital')?.valueChanges.subscribe(() => {
+      this.updateRegionValidator();
+    });
+    this.updateRegionValidator();
 
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
@@ -339,6 +346,18 @@ export class GameFormComponent implements OnInit {
     this.customAttributesArray = Object.entries(this.customAttributesObj).map(([key, value]) => ({
       key, value
     }));
+  }
+
+  /** Region is mandatory for physical games and optional for digital ones. */
+  get isRegionRequired(): boolean {
+    return this.gameForm.get('physicalDigital')?.value === 'physical';
+  }
+
+  private updateRegionValidator(): void {
+    const region = this.gameForm.get('region');
+    if (!region) return;
+    region.setValidators(this.isRegionRequired ? [Validators.required] : []);
+    region.updateValueAndValidity({ emitEvent: false });
   }
 
   onSubmit(): void {

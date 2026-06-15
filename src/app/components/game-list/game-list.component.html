@@ -161,6 +161,17 @@
     </button>
   </div>
 
+  <app-pagination-controls
+    *ngIf="totalPages > 1"
+    [currentPage]="currentPage"
+    [totalPages]="totalPages"
+    [pageNumbers]="pageNumbers"
+    [limit]="limit"
+    [limitOptions]="[12, 25, 50]"
+    (pageChange)="goToPage($event)"
+    (limitChange)="limit = $event; onLimitChange()"
+  ></app-pagination-controls>
+
   <div
     class="games-grid"
     *ngIf="games.length > 0"
@@ -203,34 +214,13 @@
 
   <hr />
 
-  <div class="pagination-controls" >
-    <div class="limit-selector">
-      <label for="limit">Items per page:</label>
-      <select id="limit" [(ngModel)]="limit" (ngModelChange)="onLimitChange()">
-        <option [ngValue]="12">12</option>
-        <option [ngValue]="25">25</option>
-        <option [ngValue]="50">50</option>
-      </select>
-    </div>
-
-    <button
-      class="page-btn"
-      (click)="goToPage(currentPage - 1)"
-      [disabled]="currentPage <= 1"
-    >
-      &lt; Previous
-    </button>
-
-    <span class="page-indicator">
-      Page **{{ currentPage }}** of **{{ totalPages }}**
-    </span>
-
-    <button
-      class="page-btn"
-      (click)="goToPage(currentPage + 1)"
-      [disabled]="currentPage >= totalPages"
-    >
-      Next &gt;
-    </button>
-  </div>
+  <app-pagination-controls
+    [currentPage]="currentPage"
+    [totalPages]="totalPages"
+    [pageNumbers]="pageNumbers"
+    [limit]="limit"
+    [limitOptions]="[12, 25, 50]"
+    (pageChange)="goToPage($event)"
+    (limitChange)="limit = $event; onLimitChange()"
+  ></app-pagination-controls>
 </div>

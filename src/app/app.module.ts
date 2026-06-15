@@ -23,6 +23,7 @@ import { DlcManagerComponent } from './components/dlc-manager/dlc-manager.compon
 import { BacklogListComponent } from './components/backlog-list/backlog-list.component';
 
 import { ConsoleFamilyManagerComponent } from './components/console-family-manager/console-family-manager.component';
+import { PaginationControlsComponent } from './components/shared/pagination-controls/pagination-controls.component';
 import { ClickOutsideDirective } from './directives/click-outside.directive';
 import { OverflowClassDirective } from './directives/overflow-class.directive';
 
@@ -64,6 +65,7 @@ const routes: Routes = [
     BacklogManagerComponent,
     DlcManagerComponent,
     BacklogListComponent,
+    PaginationControlsComponent,
     ClickOutsideDirective,
     OverflowClassDirective,
   ],
