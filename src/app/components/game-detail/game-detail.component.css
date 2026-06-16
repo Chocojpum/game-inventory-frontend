@@ -118,6 +118,12 @@
   padding: 0.5rem 1rem;
   border-radius: 20px;
   font-size: 0.9rem;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.category-tag:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
 }
 .actions {
   display: flex;
@@ -249,9 +255,25 @@
   margin: 0 0 0.25rem 0;
   font-size: 1rem;
   color: var(--text-primary);
-  white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
+  position: relative;
+}
+.dlc-info h3 .title-text,
+.dlc-info h3 .title-text-animated {
+  display: inline-block;
+  white-space: nowrap;
+  padding-right: 10px;
+}
+.dlc-card:hover .title-text-animated {
+  animation: scrollTitle 8s linear infinite;
+}
+@keyframes scrollTitle {
+  50% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }
 .dlc-alt {
   margin: 0 0 0.25rem 0;

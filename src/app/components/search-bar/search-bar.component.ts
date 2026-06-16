@@ -9,7 +9,13 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 })
 export class SearchBarComponent {
   @Input() placeholder: string = '🔍 Search...';
+  /** Initial/restored search term; reflected in the input. */
+  @Input() set value(v: string) {
+    this.query = v ?? '';
+  }
   @Output() searchQuery = new EventEmitter<string>();
+
+  query = '';
   private searchSubject = new Subject<string>();
 
   constructor() {
@@ -21,7 +27,7 @@ export class SearchBarComponent {
     });
   }
 
-  onSearchChange(event: any) {
-    this.searchSubject.next(event.target.value);
+  onSearchChange(value: string) {
+    this.searchSubject.next(value);
   }
 }

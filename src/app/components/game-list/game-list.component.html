@@ -6,6 +6,7 @@
 
   <app-search-bar
     [placeholder]="'🔍 Search games by title...'"
+    [value]="currentSearchQuery"
     (searchQuery)="onSearch($event)"
   ></app-search-bar>
 
@@ -14,6 +15,8 @@
       <label>Genre:</label>
       <select
         title="genre-filter-select"
+        [ngModel]="activeFilters['genre'] || ''"
+        [ngModelOptions]="{ standalone: true }"
         (change)="onCategoryFilter($event, 'genre')"
         class="filter-select"
       >
@@ -28,6 +31,8 @@
       <label>Franchise:</label>
       <select
         title="franchise-filter-select"
+        [ngModel]="activeFilters['franchise'] || ''"
+        [ngModelOptions]="{ standalone: true }"
         (change)="onCategoryFilter($event, 'franchise')"
         class="filter-select"
       >
@@ -42,6 +47,8 @@
       <label>Saga:</label>
       <select
         title="saga-filter-select"
+        [ngModel]="activeFilters['saga'] || ''"
+        [ngModelOptions]="{ standalone: true }"
         (change)="onCategoryFilter($event, 'saga')"
         class="filter-select"
       >
@@ -56,6 +63,8 @@
       <label>Custom:</label>
       <select
         title="custom-filter-select"
+        [ngModel]="activeFilters['custom'] || ''"
+        [ngModelOptions]="{ standalone: true }"
         (change)="onCategoryFilter($event, 'custom')"
         class="filter-select"
       >
@@ -70,6 +79,8 @@
       <label>Console:</label>
       <select
         title="console-filter-select"
+        [ngModel]="activeFilters['consoleFamily'] || ''"
+        [ngModelOptions]="{ standalone: true }"
         (change)="onConsoleFamilyFilter($event)"
         class="filter-select"
       >

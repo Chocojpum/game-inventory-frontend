@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, ParamMap, Params, Router } from '@angular/router';
 import { GameService, Game } from '../../services/game.service';
 import { CategoryService } from '../../services/category.service';
 import { ConsoleFamilyService } from '../../services/console-family.service';
+import { ListReturnService } from '../../services/list-return.service';
 import {
   trigger,
   transition,
@@ -55,9 +56,11 @@ export class GameListComponent extends InventoryListBaseComponent {
     private gameService: GameService,
     categoryService: CategoryService,
     consoleFamilyService: ConsoleFamilyService,
-    router: Router
+    router: Router,
+    route: ActivatedRoute,
+    listReturn: ListReturnService
   ) {
-    super(router, categoryService, consoleFamilyService);
+    super(router, categoryService, consoleFamilyService, route, listReturn);
     this.limit = 12;
   }
 
@@ -95,6 +98,22 @@ export class GameListComponent extends InventoryListBaseComponent {
     }
 
     return params;
+  }
+
+  protected override extraQueryParams(): Params {
+    const sort = `${this.currentSort.field}-${this.currentSort.direction}`;
+    return { sort: sort !== 'title-asc' ? sort : null };
+  }
+
+  protected override restoreExtraState(params: ParamMap): void {
+    const sort = params.get('sort');
+    if (sort) {
+      const [field, direction] = sort.split('-');
+      this.currentSort = {
+        field: field as 'title' | 'date',
+        direction: direction as 'asc' | 'desc',
+      };
+    }
   }
 
   toggleSort(field: 'title' | 'date'): void {

@@ -75,7 +75,10 @@ const routes: Routes = [
     HttpClientModule,
     FormsModule,
     ReactiveFormsModule,
-    RouterModule.forRoot(routes, { scrollPositionRestoration: 'top' }),
+    // Scrolling to top is handled manually in AppComponent so it only happens
+    // on a real route (path) change, not when list views update their query
+    // params for pagination/filters.
+    RouterModule.forRoot(routes, { scrollPositionRestoration: 'disabled' }),
   ],
   providers: [],
   bootstrap: [AppComponent]

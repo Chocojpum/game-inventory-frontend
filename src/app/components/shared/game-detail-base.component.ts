@@ -4,6 +4,7 @@ import { GameService, Game } from '../../services/game.service';
 import { ConsoleFamilyService, ConsoleFamily } from '../../services/console-family.service';
 import { BacklogService, Backlog } from '../../services/backlog.service';
 import { DlcService, Dlc } from '../../services/dlc.service';
+import { ListReturnService } from '../../services/list-return.service';
 
 /**
  * Shared logic for the game and compilation detail views: console-family
@@ -32,6 +33,7 @@ export abstract class GameDetailBaseComponent {
     protected consoleFamilyService: ConsoleFamilyService,
     protected backlogService: BacklogService,
     protected dlcService: DlcService,
+    protected listReturn: ListReturnService,
   ) {}
 
   // --- Loading ---
@@ -171,6 +173,10 @@ export abstract class GameDetailBaseComponent {
   }
 
   goBack(): void {
-    this.router.navigate(['/']);
+    // Always return to the last list view the user was on, with its filters,
+    // search, sort and page intact (via the stored URL). Navigating explicitly
+    // rather than using browser history avoids landing on an edit form that may
+    // sit between this view and the list in the history stack.
+    this.router.navigateByUrl(this.listReturn.url ?? '/');
   }
 }

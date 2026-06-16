@@ -6,6 +6,7 @@ import { ConsoleService, Console } from '../../services/console.service';
 import { ConsoleFamilyService } from '../../services/console-family.service';
 import { BacklogService, Backlog } from '../../services/backlog.service';
 import { DlcService } from '../../services/dlc.service';
+import { ListReturnService } from '../../services/list-return.service';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { GameDetailBaseComponent } from '../shared/game-detail-base.component';
 
@@ -36,18 +37,20 @@ export class GameDetailComponent extends GameDetailBaseComponent implements OnIn
     private consoleService: ConsoleService,
     consoleFamilyService: ConsoleFamilyService,
     backlogService: BacklogService,
-    dlcService: DlcService
+    dlcService: DlcService,
+    listReturn: ListReturnService
   ) {
-    super(router, gameService, consoleFamilyService, backlogService, dlcService);
+    super(router, gameService, consoleFamilyService, backlogService, dlcService, listReturn);
   }
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.gameService.getGame(id).subscribe(game => {
-        // Compilations have their own dedicated detail view.
+        // Compilations have their own dedicated detail view. Replace the URL so
+        // "back" returns to the list rather than bouncing through this redirect.
         if (game.isCompilation) {
-          this.router.navigate(['/compilation', game.id]);
+          this.router.navigate(['/compilation', game.id], { replaceUrl: true });
           return;
         }
         this.game = game;
@@ -125,5 +128,10 @@ export class GameDetailComponent extends GameDetailBaseComponent implements OnIn
 
   getCategoriesByType(type: string): Category[] {
     return this.gameCategories.filter(cat => cat.type === type);
+  }
+
+  /** Opens the library filtered by the clicked category. */
+  filterByCategory(category: Category): void {
+    this.router.navigate(['/'], { queryParams: { [category.type]: category.id } });
   }
 }

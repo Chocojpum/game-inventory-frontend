@@ -1,4 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { ViewportScroller } from '@angular/common';
+import { NavigationEnd, Router } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { ExportService } from './services/export.service';
 
 @Component({
@@ -7,10 +10,35 @@ import { ExportService } from './services/export.service';
   styleUrls: [`./app.component.css`],
 })
 export class AppComponent implements OnInit {
-  constructor(private exportService: ExportService) {}
+  /** Path (without query params) of the last navigation, to detect real route changes. */
+  private lastPath = '';
+
+  constructor(
+    private exportService: ExportService,
+    private router: Router,
+    private viewportScroller: ViewportScroller,
+  ) {}
 
   ngOnInit(): void {
     this.importDataFirst();
+    this.scrollToTopOnRouteChange();
+  }
+
+  /**
+   * Scrolls to the top only when the route path changes, so a list view
+   * updating its query params (pagination, filters, search, sort) keeps the
+   * current scroll position.
+   */
+  private scrollToTopOnRouteChange(): void {
+    this.router.events
+      .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
+      .subscribe((event) => {
+        const path = event.urlAfterRedirects.split('?')[0];
+        if (path !== this.lastPath) {
+          this.viewportScroller.scrollToPosition([0, 0]);
+          this.lastPath = path;
+        }
+      });
   }
 
   exportData(): void {

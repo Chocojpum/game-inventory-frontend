@@ -4,6 +4,7 @@ import { GameService, Game } from '../../services/game.service';
 import { ConsoleFamilyService, ConsoleFamily } from '../../services/console-family.service';
 import { BacklogService } from '../../services/backlog.service';
 import { DlcService } from '../../services/dlc.service';
+import { ListReturnService } from '../../services/list-return.service';
 import { trigger, transition, style, animate, query, stagger } from '@angular/animations';
 import { GameDetailBaseComponent } from '../shared/game-detail-base.component';
 
@@ -40,9 +41,10 @@ export class CompilationDetailComponent extends GameDetailBaseComponent implemen
     gameService: GameService,
     consoleFamilyService: ConsoleFamilyService,
     backlogService: BacklogService,
-    dlcService: DlcService
+    dlcService: DlcService,
+    listReturn: ListReturnService
   ) {
-    super(router, gameService, consoleFamilyService, backlogService, dlcService);
+    super(router, gameService, consoleFamilyService, backlogService, dlcService, listReturn);
   }
 
   ngOnInit(): void {

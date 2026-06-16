@@ -74,6 +74,8 @@
               <span
                 class="category-tag"
                 *ngFor="let cat of getCategoriesByType('genre')"
+                (click)="filterByCategory(cat)"
+                title="Filter library by this category"
               >
                 {{ cat.name }}
               </span>
@@ -89,6 +91,8 @@
               <span
                 class="category-tag"
                 *ngFor="let cat of getCategoriesByType('franchise')"
+                (click)="filterByCategory(cat)"
+                title="Filter library by this category"
               >
                 {{ cat.name }}
               </span>
@@ -104,6 +108,8 @@
               <span
                 class="category-tag"
                 *ngFor="let cat of getCategoriesByType('saga')"
+                (click)="filterByCategory(cat)"
+                title="Filter library by this category"
               >
                 {{ cat.name }}
               </span>
@@ -119,6 +125,8 @@
               <span
                 class="category-tag"
                 *ngFor="let cat of getCategoriesByType('custom')"
+                (click)="filterByCategory(cat)"
+                title="Filter library by this category"
               >
                 {{ cat.name }}
               </span>
@@ -172,7 +180,9 @@
             <img [src]="dlc.coverArt" [alt]="dlc.title" />
           </div>
           <div class="dlc-info">
-            <h3 [title]="dlc.title">{{ dlc.title }}</h3>
+            <h3 [title]="dlc.title" appOverflowClass="title-text-animated">
+              <span class="title-text">{{ dlc.title }}</span>
+            </h3>
             <p
               class="dlc-alt"
               *ngIf="dlc.alternateTitles && dlc.alternateTitles.length > 0"

@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, ParamMap, Params, Router } from '@angular/router';
 import { BacklogService, EnrichedBacklog } from '../../services/backlog.service';
 import { CategoryService } from '../../services/category.service';
 import { ConsoleFamilyService } from '../../services/console-family.service';
+import { ListReturnService } from '../../services/list-return.service';
 import { trigger, transition, style, animate, query, stagger } from '@angular/animations';
 import { InventoryListBaseComponent } from '../shared/inventory-list-base.component';
 
@@ -34,9 +35,11 @@ export class BacklogListComponent extends InventoryListBaseComponent {
     private backlogService: BacklogService,
     categoryService: CategoryService,
     consoleFamilyService: ConsoleFamilyService,
-    router: Router
+    router: Router,
+    route: ActivatedRoute,
+    listReturn: ListReturnService
   ) {
-    super(router, categoryService, consoleFamilyService);
+    super(router, categoryService, consoleFamilyService, route, listReturn);
     this.limit = 20;
   }
 
@@ -55,6 +58,22 @@ export class BacklogListComponent extends InventoryListBaseComponent {
       this.entries = result.data;
       this.applyPagination(result);
     });
+  }
+
+  protected override extraQueryParams(): Params {
+    const sort = `${this.currentSort.field}-${this.currentSort.direction}`;
+    return { sort: sort !== 'date-desc' ? sort : null };
+  }
+
+  protected override restoreExtraState(params: ParamMap): void {
+    const sort = params.get('sort');
+    if (sort) {
+      const [field, direction] = sort.split('-');
+      this.currentSort = {
+        field: field as 'date' | 'title',
+        direction: direction as 'asc' | 'desc',
+      };
+    }
   }
 
   toggleSort(field: 'date' | 'title'): void {

@@ -4,6 +4,8 @@
     type="text"
     class="search-input"
     [placeholder]="placeholder"
-    (input)="onSearchChange($event)"
+    [ngModel]="query"
+    [ngModelOptions]="{ standalone: true }"
+    (ngModelChange)="onSearchChange($event)"
   />
 </div>
