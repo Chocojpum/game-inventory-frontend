@@ -3,6 +3,8 @@ import { Router } from '@angular/router';
 import { PeripheralService, Peripheral } from '../../services/peripheral.service';
 import { ConsoleFamilyService, ConsoleFamily } from '../../services/console-family.service';
 import { PaginatedResult, PaginationOptions } from '../shared/pagination.interface';
+import { ConfirmService } from '../../services/confirm.service';
+import { ToastService } from '../../services/toast.service';
 import { trigger, transition, style, animate, query, stagger } from '@angular/animations';
 
 @Component({
@@ -41,7 +43,9 @@ export class PeripheralListComponent implements OnInit {
   constructor(
     private peripheralService: PeripheralService,
     private familyService: ConsoleFamilyService,
-    private router: Router
+    private router: Router,
+    private confirm: ConfirmService,
+    private toast: ToastService
   ) { }
 
   ngOnInit(): void {
@@ -98,24 +102,34 @@ export class PeripheralListComponent implements OnInit {
   }
 
   clearFilters(): void {
+    // selectedFamilyId is bound via ngModel, so resetting it clears the select.
     this.selectedFamilyId = '';
     this.currentSearchQuery = '';
     this.currentPage = 1;
     this.fetchPeripherals();
-    const selects = document.querySelectorAll('.filter-select') as NodeListOf<HTMLSelectElement>;
-    selects.forEach(select => select.value = '');
   }
 
   editPeripheral(id: string): void {
     this.router.navigate(['/edit-peripheral', id]);
   }
 
-  deletePeripheral(event: Event, id: string): void {
+  async deletePeripheral(event: Event, id: string): Promise<void> {
     event.stopPropagation();
-    if (confirm('Are you sure you want to delete this peripheral?')) {
-      this.peripheralService.deletePeripheral(id).subscribe(() => {
-        this.fetchPeripherals();
-      });
+    const confirmed = await this.confirm.ask({
+      title: 'Delete peripheral?',
+      message: 'This will permanently remove the peripheral from your inventory.',
+      confirmText: 'Delete',
+      danger: true,
+    });
+    if (!confirmed) {
+      return;
     }
+    this.peripheralService.deletePeripheral(id).subscribe({
+      next: () => {
+        this.toast.success('Peripheral deleted');
+        this.fetchPeripherals();
+      },
+      error: (err) => this.toast.error('Could not delete', err?.message),
+    });
   }
 }

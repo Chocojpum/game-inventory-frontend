@@ -1,8 +1,13 @@
-<div class="peripheral-list-container">
-  <div class="header-actions">
-    <h2>🕹️ Peripheral Inventory</h2>
-    <button class="add-btn" routerLink="/add-peripheral">
-      + Add Peripheral
+<div class="mx-auto max-w-[1400px]">
+  <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+    <div>
+      <h2 class="flex items-center gap-2 text-3xl font-bold text-ink">
+        <span aria-hidden="true">🕹️</span> Peripheral Inventory
+      </h2>
+      <p class="mt-1 text-sm text-ink-muted">{{ totalItems }} peripheral{{ totalItems === 1 ? '' : 's' }} in your inventory</p>
+    </div>
+    <button class="btn btn-primary" routerLink="/add-peripheral">
+      <span aria-hidden="true">+</span> Add Peripheral
     </button>
   </div>
 
@@ -11,56 +16,64 @@
     (searchQuery)="onSearch($event)"
   ></app-search-bar>
 
-  <div class="filters">
-    <div class="filter-group">
-      <label>Console Family:</label>
-      <select
-        title="filter-select"
-        (change)="onFamilyFilter($event)"
-        class="filter-select"
+  <section class="card mb-6 p-5">
+    <div class="flex flex-wrap items-end gap-4">
+      <div class="flex flex-1 flex-col gap-1.5">
+        <label class="text-xs font-semibold text-ink-muted">Console Family</label>
+        <select
+          title="filter-select"
+          [ngModel]="selectedFamilyId"
+          (change)="onFamilyFilter($event)"
+          class="cursor-pointer px-3 py-2 text-sm"
+        >
+          <option value="">All</option>
+          <option *ngFor="let family of families" [value]="family.id">{{ family.name }}</option>
+        </select>
+      </div>
+
+      <button
+        class="btn btn-ghost !px-3 !py-2 text-sm disabled:opacity-40"
+        (click)="clearFilters()"
+        [disabled]="!selectedFamilyId && !currentSearchQuery"
       >
-        <option value="">All</option>
-        <option *ngFor="let family of families" [value]="family.id">
-          {{ family.name }}
-        </option>
-      </select>
+        Clear filters
+      </button>
     </div>
+  </section>
 
-    <button class="clear-filters-btn" (click)="clearFilters()">
-      Clear Filters
-    </button>
-  </div>
-
-  <div class="list-info">
-    <span class="item-count">
-      Showing <strong>{{ peripherals.length }}</strong> peripherals on page <strong>{{ currentPage }}</strong> of <strong>{{ totalPages }}</strong> (Total: <strong>{{ totalItems }}</strong>)
-    </span>
+  <div class="mb-6 flex justify-end rounded-2xl border border-border bg-surface px-5 py-3 shadow-card">
+    <p class="text-sm text-ink-muted">
+      Showing <span class="font-bold text-ink">{{ peripherals.length }}</span> of
+      <span class="font-bold text-ink">{{ totalItems }}</span> · page
+      <span class="font-bold text-ink">{{ currentPage }}</span>/{{ totalPages || 1 }}
+    </p>
   </div>
 
   <div
-    class="peripherals-grid"
+    class="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-7"
     *ngIf="peripherals.length > 0"
     [@listAnimation]="peripherals.length"
   >
     <div
-      class="peripheral-card"
+      class="group relative cursor-pointer overflow-hidden rounded-xl border border-border bg-surface shadow-card transition-all duration-300 hover:-translate-y-2 hover:border-brand hover:shadow-card-hover"
       *ngFor="let peripheral of peripherals"
       (click)="editPeripheral(peripheral.id)"
       [@cardAnimation]
     >
-      <div class="peripheral-image">
-        <img [src]="peripheral.picture" [alt]="peripheral.name" />
+      <div class="console-art flex h-[180px] w-full items-center justify-center p-4">
+        <img [src]="peripheral.picture" [alt]="peripheral.name" class="max-h-full max-w-full object-contain" />
       </div>
-      <div class="peripheral-info">
-        <h3>{{ peripheral.name }}</h3>
-        <p class="console-name">
-          {{ getConsoleName(peripheral.consoleFamilyId) }}
-        </p>
-        <p class="quantity">Quantity: {{ peripheral.quantity }}</p>
-        <p class="color">Color: {{ peripheral.color }}</p>
+      <div class="p-5">
+        <h3 class="mb-1 text-lg font-bold text-ink">{{ peripheral.name }}</h3>
+        <p class="font-semibold text-brand-strong">{{ getConsoleName(peripheral.consoleFamilyId) }}</p>
+        <p class="mt-1 text-sm text-ink-subtle">Quantity: {{ peripheral.quantity }}</p>
+        <p class="text-sm text-ink-subtle">Color: {{ peripheral.color }}</p>
       </div>
       <button
-        class="delete-btn"
+        type="button"
+        class="absolute right-3 top-3 rounded-full bg-black/40 px-2 py-1 text-base opacity-0 transition-opacity hover:bg-danger group-hover:opacity-100"
+        title="Delete peripheral"
+        aria-label="Delete peripheral"
         (click)="deletePeripheral($event, peripheral.id)"
       >
         🗑️
@@ -68,40 +81,47 @@
     </div>
   </div>
 
-  <div class="no-peripherals" *ngIf="peripherals.length === 0">
-    <p>No peripherals in inventory. Add your first peripheral!</p>
+  <div class="card flex flex-col items-center gap-4 px-8 py-16 text-center" *ngIf="peripherals.length === 0">
+    <span class="text-5xl" aria-hidden="true">🎛️</span>
+    <div>
+      <p class="text-lg font-semibold text-ink">No peripherals found</p>
+      <p class="mt-1 text-ink-muted">Add your first peripheral to start tracking your accessories.</p>
+    </div>
+    <button class="btn btn-primary" routerLink="/add-peripheral">+ Add your first peripheral</button>
   </div>
 
-  <hr />
-
-  <div class="pagination-controls">
-    <div class="limit-selector">
-      <label for="peripheral-limit">Items per page:</label>
-      <select id="peripheral-limit" [(ngModel)]="limit" (ngModelChange)="onLimitChange()">
+  <nav
+    *ngIf="totalPages > 1"
+    class="mt-8 flex flex-wrap items-center justify-center gap-3 rounded-2xl border border-border bg-surface px-4 py-3 shadow-card"
+    aria-label="Pagination"
+  >
+    <label class="flex items-center gap-2 text-sm font-semibold text-ink-muted">
+      Items per page:
+      <select class="rounded-lg px-2 py-1.5 text-sm text-ink" [(ngModel)]="limit" (ngModelChange)="onLimitChange()">
         <option [ngValue]="10">10</option>
         <option [ngValue]="25">25</option>
         <option [ngValue]="50">50</option>
       </select>
-    </div>
+    </label>
 
     <button
-      class="page-btn"
+      class="rounded-lg border border-border bg-surface-2 px-3 py-1.5 text-sm font-semibold text-ink transition-colors hover:enabled:border-brand hover:enabled:bg-surface-3 disabled:cursor-not-allowed disabled:opacity-40"
       (click)="goToPage(currentPage - 1)"
       [disabled]="currentPage <= 1"
     >
-      &lt; Previous
+      ‹ Prev
     </button>
 
-    <span class="page-indicator">
-      Page <strong>{{ currentPage }}</strong> of <strong>{{ totalPages }}</strong>
+    <span class="min-w-[120px] text-center text-sm font-semibold text-ink">
+      Page {{ currentPage }} of {{ totalPages }}
     </span>
 
     <button
-      class="page-btn"
+      class="rounded-lg border border-border bg-surface-2 px-3 py-1.5 text-sm font-semibold text-ink transition-colors hover:enabled:border-brand hover:enabled:bg-surface-3 disabled:cursor-not-allowed disabled:opacity-40"
       (click)="goToPage(currentPage + 1)"
       [disabled]="currentPage >= totalPages"
     >
-      Next &gt;
+      Next ›
     </button>
-  </div>
+  </nav>
 </div>

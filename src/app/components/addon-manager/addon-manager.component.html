@@ -1,69 +1,58 @@
-<div class="addon-overlay" (click)="closeModal()">
-  <div class="addon-modal" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h2>{{ isEditMode ? "✏️ Edit Addon" : "➕ Add Addon" }}</h2>
-      <button type="button" class="close-btn" (click)="closeModal()">✕</button>
+<div class="fixed inset-0 z-[1500] flex items-start justify-center overflow-y-auto bg-black/60 p-4 backdrop-blur-sm" (click)="closeModal()">
+  <div class="card my-8 w-full max-w-xl p-6" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+    <div class="mb-5 flex items-center justify-between gap-3">
+      <h2 class="text-xl font-bold text-ink">{{ isEditMode ? "✏️ Edit Addon" : "➕ Add Addon" }}</h2>
+      <button type="button" class="rounded-full px-2.5 py-0.5 text-lg leading-none text-ink-subtle transition-colors hover:bg-surface-3 hover:text-ink" aria-label="Close" (click)="closeModal()">✕</button>
     </div>
 
-    <form [formGroup]="addonForm" (ngSubmit)="onSubmit()" class="addon-form">
-      <div class="form-group">
-        <label>Title *</label>
-        <input type="text" formControlName="title" placeholder="Enter Addon title" />
+    <form [formGroup]="addonForm" (ngSubmit)="onSubmit()">
+      <div class="mb-5">
+        <label class="mb-1.5 block font-semibold text-ink">Title <span class="text-danger">*</span></label>
+        <input type="text" formControlName="title" placeholder="Enter Addon title" class="w-full px-3 py-2" />
       </div>
 
-      <div class="form-group">
-        <label>Alternate Titles</label>
+      <div class="mb-5">
+        <label class="mb-1.5 block font-semibold text-ink">Alternate Titles</label>
         <div formArrayName="alternateTitles">
-          <div
-            *ngFor="let title of alternateTitles.controls; let i = index"
-            class="array-item"
-          >
-            <input type="text" [formControlName]="i" placeholder="Alternate title" />
-            <button type="button" class="remove-btn" (click)="removeAlternateTitle(i)">✕</button>
+          <div *ngFor="let title of alternateTitles.controls; let i = index" class="mb-2 flex gap-2">
+            <input type="text" [formControlName]="i" placeholder="Alternate title" class="w-full px-3 py-2" />
+            <button type="button" class="rounded-lg border border-border px-3 text-danger transition-colors hover:bg-danger hover:text-white" (click)="removeAlternateTitle(i)">✕</button>
           </div>
         </div>
-        <button type="button" class="add-btn" (click)="addAlternateTitle()">
-          + Add Alternate Title
-        </button>
+        <button type="button" class="btn btn-ghost !px-3 !py-1.5 text-sm" (click)="addAlternateTitle()">+ Add Alternate Title</button>
       </div>
 
-      <div class="form-group">
-        <label>Cover Art URL *</label>
-        <input
-          type="url"
-          formControlName="coverArt"
-          placeholder="https://example.com/cover.jpg"
-        />
-        <div class="cover-preview" *ngIf="addonForm.get('coverArt')?.value">
-          <img [src]="addonForm.get('coverArt')?.value" alt="Cover preview" />
+      <div class="mb-5">
+        <label class="mb-1.5 block font-semibold text-ink">Cover Art URL <span class="text-danger">*</span></label>
+        <input type="url" formControlName="coverArt" placeholder="https://example.com/cover.jpg" class="w-full px-3 py-2" />
+        <div class="mt-3 max-w-[200px] overflow-hidden rounded-lg border border-border" *ngIf="addonForm.get('coverArt')?.value">
+          <img [src]="addonForm.get('coverArt')?.value" alt="Cover preview" class="block w-full" />
         </div>
       </div>
 
-      <div class="form-group">
-        <label>Release Date *</label>
-        <input title="addon-release-date" type="date" formControlName="releaseDate" />
+      <div class="mb-5">
+        <label class="mb-1.5 block font-semibold text-ink">Release Date <span class="text-danger">*</span></label>
+        <input title="addon-release-date" type="date" formControlName="releaseDate" class="w-full px-3 py-2" />
       </div>
 
-      <div class="custom-attribute-section">
-        <h4>Custom Attributes</h4>
-        <div class="inline-form">
-          <input type="text" [(ngModel)]="newAttributeName" [ngModelOptions]="{ standalone: true }" placeholder="Attribute name" />
-          <input type="text" [(ngModel)]="newAttributeValue" [ngModelOptions]="{ standalone: true }" placeholder="Value" />
-          <button type="button" (click)="addCustomAttribute()">Add</button>
+      <div class="mb-5">
+        <h4 class="mb-2 font-semibold text-ink-muted">Custom Attributes</h4>
+        <div class="flex flex-wrap gap-2">
+          <input type="text" class="min-w-[140px] flex-1 px-3 py-2" [(ngModel)]="newAttributeName" [ngModelOptions]="{ standalone: true }" placeholder="Attribute name" />
+          <input type="text" class="min-w-[140px] flex-1 px-3 py-2" [(ngModel)]="newAttributeValue" [ngModelOptions]="{ standalone: true }" placeholder="Value" />
+          <button type="button" class="btn btn-ghost" (click)="addCustomAttribute()">Add</button>
         </div>
-        <div class="current-attributes" *ngIf="customAttributesArray.length > 0">
-          <div *ngFor="let attr of customAttributesArray" class="attr-tag">
-            <strong>{{ attr.key }}:</strong> {{ attr.value }}
-            <button type="button" (click)="removeCustomAttribute(attr.key)">✕</button>
+        <div class="mt-3 flex flex-wrap gap-2" *ngIf="customAttributesArray.length > 0">
+          <div *ngFor="let attr of customAttributesArray" class="flex items-center gap-2 rounded-full bg-surface-3 px-3 py-1 text-sm text-ink">
+            <span><strong>{{ attr.key }}:</strong> {{ attr.value }}</span>
+            <button type="button" class="text-ink-subtle transition-colors hover:text-danger" (click)="removeCustomAttribute(attr.key)">✕</button>
           </div>
         </div>
       </div>
 
-      <div class="form-actions">
-        <button type="submit" class="submit-btn" [disabled]="!addonForm.valid">
-          {{ isEditMode ? "Update Addon" : "Add Addon" }}
-        </button>
-        <button type="button" class="cancel-btn" (click)="closeModal()">Cancel</button>
+      <div class="flex gap-3">
+        <button type="submit" class="btn btn-primary flex-1">{{ isEditMode ? "Update Addon" : "Add Addon" }}</button>
+        <button type="button" class="btn btn-ghost" (click)="closeModal()">Cancel</button>
       </div>
     </form>
   </div>

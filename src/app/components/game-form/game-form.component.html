@@ -349,8 +349,9 @@
       </div>
     </div>
 
+    <p class="required-legend"><span class="req">*</span> Required field</p>
     <div class="form-actions">
-      <button type="submit" class="submit-btn" [disabled]="!gameForm.valid">
+      <button type="submit" class="submit-btn">
         {{ isEditMode ? "Update Game" : "Add Game" }}
       </button>
       <button type="button" class="cancel-btn" (click)="cancel()">

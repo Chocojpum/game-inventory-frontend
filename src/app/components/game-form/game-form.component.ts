@@ -7,6 +7,7 @@ import { AttributeService, Attribute } from '../../services/attribute.service';
 import { ConsoleService, Console } from '../../services/console.service';
 import { ConsoleFamilyService, ConsoleFamily } from '../../services/console-family.service';
 import { CreationFlowService } from '../../services/creation-flow.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-game-form',
@@ -49,7 +50,8 @@ export class GameFormComponent implements OnInit {
     private consoleFamilyService: ConsoleFamilyService,
     private route: ActivatedRoute,
     private router: Router,
-    public flow: CreationFlowService
+    public flow: CreationFlowService,
+    private toast: ToastService
   ) {
     this.gameForm = this.fb.group({
       title: ['', Validators.required],
@@ -364,30 +366,48 @@ export class GameFormComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.gameForm.valid) {
-      const gameData = {
-        ...this.gameForm.value,
-        categoryIds: this.selectedCategoryIds,
-        customAttributes: this.customAttributesObj,
-        canHaveAddon: this.canHaveAddon,
-        isCompilation: this.isCompilation,
-        includedGameIds: this.isCompilation ? this.selectedIncludedGameIds : [],
-      };
+    if (this.gameForm.invalid) {
+      // Surface every problem at once instead of silently disabling submit.
+      this.gameForm.markAllAsTouched();
+      this.toast.warning(
+        'Missing information',
+        'Please fill in all required fields (marked with *) before saving.'
+      );
+      return;
+    }
 
-      if (this.isEditMode && this.gameId) {
-        this.gameService.updateGame(this.gameId, gameData).subscribe(() => {
+    const gameData = {
+      ...this.gameForm.value,
+      categoryIds: this.selectedCategoryIds,
+      customAttributes: this.customAttributesObj,
+      canHaveAddon: this.canHaveAddon,
+      isCompilation: this.isCompilation,
+      includedGameIds: this.isCompilation ? this.selectedIncludedGameIds : [],
+    };
+
+    const title = this.gameForm.value.title;
+
+    if (this.isEditMode && this.gameId) {
+      this.gameService.updateGame(this.gameId, gameData).subscribe({
+        next: () => {
+          this.toast.success('Game updated', `"${title}" was saved.`);
           this.router.navigate(['/game', this.gameId]);
-        });
-      } else {
-        this.gameService.createGame(gameData).subscribe(game => {
+        },
+        error: (err) => this.toast.error('Could not save', err?.message || 'Update failed.'),
+      });
+    } else {
+      this.gameService.createGame(gameData).subscribe({
+        next: (game) => {
           if (this.isFlowTarget) {
             // Created as a compilation member: hand the new game back.
             this.flow.finish([game.id]);
           } else {
+            this.toast.success('Game added', `"${title}" was added to your collection.`);
             this.router.navigate(['/game', game.id]);
           }
-        });
-      }
+        },
+        error: (err) => this.toast.error('Could not save', err?.message || 'Create failed.'),
+      });
     }
   }
 

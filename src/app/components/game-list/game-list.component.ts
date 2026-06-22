@@ -79,7 +79,7 @@ export class GameListComponent extends InventoryListBaseComponent {
     listReturn: ListReturnService
   ) {
     super(router, categoryService, consoleFamilyService, route, listReturn);
-    this.limit = 12;
+    this.limit = 10;
   }
 
   fetchItems(): void {
@@ -258,6 +258,13 @@ export class GameListComponent extends InventoryListBaseComponent {
     this.includeNotOwned = false;
     this.currentPage = 1;
     this.fetchItems();
+  }
+
+  override get activeFilterCount(): number {
+    let count = super.activeFilterCount;
+    if (this.includeNotOwned) count++;
+    if (this.pcFilterApplied) count++;
+    return count;
   }
 
   viewGame(game: Game): void {

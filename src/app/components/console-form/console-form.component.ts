@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ConsoleService } from '../../services/console.service';
 import { ConsoleFamilyService, ConsoleFamily } from '../../services/console-family.service';
 import { CreationFlowService } from '../../services/creation-flow.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-console-form',
@@ -22,7 +23,8 @@ export class ConsoleFormComponent implements OnInit {
     private familyService: ConsoleFamilyService,
     private route: ActivatedRoute,
     private router: Router,
-    public flow: CreationFlowService
+    public flow: CreationFlowService,
+    private toast: ToastService
   ) {
     this.form = this.fb.group({
       consoleFamilyId: ['', Validators.required],
@@ -89,22 +91,34 @@ export class ConsoleFormComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.form.valid) {
-      const data = { ...this.form.value, customAttributes: {} };
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      this.toast.warning('Missing information', 'Please fill in all required fields (marked with *).');
+      return;
+    }
 
-      if (this.isEditMode && this.consoleId) {
-        this.consoleService.updateConsole(this.consoleId, data).subscribe(() => {
+    const data = { ...this.form.value, customAttributes: {} };
+
+    if (this.isEditMode && this.consoleId) {
+      this.consoleService.updateConsole(this.consoleId, data).subscribe({
+        next: () => {
+          this.toast.success('Console updated');
           this.router.navigate(['/console', this.consoleId]);
-        });
-      } else {
-        this.consoleService.createConsole(data).subscribe(console => {
+        },
+        error: (err) => this.toast.error('Could not save', err?.message),
+      });
+    } else {
+      this.consoleService.createConsole(data).subscribe({
+        next: (console) => {
           if (this.isFlowTarget) {
             this.flow.finish([console.id]);
           } else {
+            this.toast.success('Console added');
             this.router.navigate(['/console', console.id]);
           }
-        });
-      }
+        },
+        error: (err) => this.toast.error('Could not save', err?.message),
+      });
     }
   }
 

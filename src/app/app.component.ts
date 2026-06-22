@@ -3,6 +3,8 @@ import { ViewportScroller } from '@angular/common';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { ExportService } from './services/export.service';
+import { ToastService } from './services/toast.service';
+import { ConfirmService } from './services/confirm.service';
 
 @Component({
   selector: 'app-root',
@@ -13,10 +15,15 @@ export class AppComponent implements OnInit {
   /** Path (without query params) of the last navigation, to detect real route changes. */
   private lastPath = '';
 
+  /** True while an export/import is running, to disable the data buttons. */
+  busy = false;
+
   constructor(
     private exportService: ExportService,
     private router: Router,
     private viewportScroller: ViewportScroller,
+    private toast: ToastService,
+    private confirm: ConfirmService,
   ) {}
 
   ngOnInit(): void {
@@ -42,31 +49,67 @@ export class AppComponent implements OnInit {
   }
 
   exportData(): void {
-    this.exportService.exportToExcel().subscribe(
-      (result) => {
-        alert(result);
+    if (this.busy) {
+      return;
+    }
+    this.busy = true;
+    const pending = this.toast.loading('Exporting…', 'Building your collection spreadsheet.');
+    this.exportService.exportToExcel().subscribe({
+      next: (result) => {
+        this.toast.dismiss(pending);
+        this.toast.success('Export complete', typeof result === 'string' ? result : undefined);
+        this.busy = false;
       },
-      (error) => {
-        alert('Import failed: ' + error.message);
-      }
-    );
+      error: (error) => {
+        this.toast.dismiss(pending);
+        this.toast.error('Export failed', error?.message || 'Something went wrong while exporting.');
+        this.busy = false;
+      },
+    });
   }
 
-  importData(event: any): void {
-    const file = event.target.files[0];
-    if (file) {
-      this.exportService.importFromExcel(file).subscribe(
-        (result) => {
-          alert(
-            `Import successful!\nGames: ${result.imported.games}\nConsoles: ${result.imported.consoles}\nPeripherals: ${result.imported.peripherals}\nBacklog: ${result.imported.backlogs}\nCategories: ${result.imported.categories}\nAttributes: ${result.imported.attributes}`
-          );
-          window.location.reload();
-        },
-        (error) => {
-          alert('Import failed: ' + error.message);
-        }
-      );
+  async importData(event: any): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) {
+      return;
     }
+
+    const confirmed = await this.confirm.ask({
+      title: 'Import and replace data?',
+      message:
+        `Importing "${file.name}" will merge its contents into your collection ` +
+        `and reload the app. This cannot be undone.`,
+      confirmText: 'Import',
+      cancelText: 'Cancel',
+    });
+
+    // Allow re-selecting the same file later whether or not we proceed.
+    input.value = '';
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.busy = true;
+    const pending = this.toast.loading('Importing…', `Reading ${file.name}.`);
+    this.exportService.importFromExcel(file).subscribe({
+      next: (result) => {
+        this.toast.dismiss(pending);
+        const i = result.imported;
+        this.toast.success(
+          'Import successful',
+          `Games ${i.games} · Consoles ${i.consoles} · Peripherals ${i.peripherals} · ` +
+            `Backlog ${i.backlogs} · Categories ${i.categories} · Attributes ${i.attributes}. Reloading…`
+        );
+        setTimeout(() => window.location.reload(), 1200);
+      },
+      error: (error) => {
+        this.toast.dismiss(pending);
+        this.toast.error('Import failed', error?.message || 'The file could not be imported.');
+        this.busy = false;
+      },
+    });
   }
 
   importDataFirst(): void {

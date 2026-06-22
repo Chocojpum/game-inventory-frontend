@@ -98,12 +98,11 @@ export class ConsoleListComponent implements OnInit {
   }
 
   clearFilters(): void {
+    // selectedFamilyId is bound via ngModel, so resetting it clears the select.
     this.selectedFamilyId = '';
     this.currentSearchQuery = '';
     this.currentPage = 1;
     this.fetchConsoles();
-    const selects = document.querySelectorAll('.filter-select') as NodeListOf<HTMLSelectElement>;
-    selects.forEach(select => select.value = '');
   }
 
   viewConsole(id: string): void {

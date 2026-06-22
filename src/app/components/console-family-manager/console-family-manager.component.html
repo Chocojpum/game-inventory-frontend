@@ -1,93 +1,50 @@
-<div class="manager-container">
-  <h2>Console Family Manager</h2>
+<div class="mx-auto max-w-4xl">
+  <h2 class="mb-6 text-3xl font-bold text-ink">Console Family Manager</h2>
 
-  <div class="flow-banner" *ngIf="flow.active">
-    <span>
-      Pick or create the console family for the item you're building, then click
-      Done.
-    </span>
-    <div class="flow-actions">
-      <button type="button" class="flow-done" (click)="finishFlow()">Done</button>
-      <button type="button" class="flow-cancel" (click)="cancelFlow()">Cancel</button>
+  <div class="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-info/40 bg-info/10 px-4 py-3" *ngIf="flow.active">
+    <span class="text-sm text-ink">Pick or create the console family for the item you're building, then click Done.</span>
+    <div class="flex gap-2">
+      <button type="button" class="btn btn-success !px-4 !py-1.5 text-sm" (click)="finishFlow()">Done</button>
+      <button type="button" class="btn btn-ghost !px-4 !py-1.5 text-sm" (click)="cancelFlow()">Cancel</button>
     </div>
   </div>
 
-  <div class="info-box">
-    <p>
-      <strong>Console Families</strong> represent console platforms (e.g.,
-      PlayStation 5, Nintendo Switch).
-    </p>
-    <p>
-      Create families here, then add your specific owned console instances in
-      the Consoles section.
-    </p>
+  <div class="mb-6 rounded-xl border border-border bg-surface-2 px-4 py-3 text-sm text-ink-muted">
+    <p><strong class="text-ink">Console Families</strong> represent console platforms (e.g., PlayStation 5, Nintendo Switch).</p>
+    <p>Create families here, then add your specific owned console instances in the Consoles section.</p>
   </div>
 
-  <div class="add-form">
-    <h3>Add New Console Family</h3>
-    <div class="form-inline">
-      <input
-        type="text"
-        [(ngModel)]="newFamily.name"
-        placeholder="Console name (e.g., PlayStation 5)"
-      />
-      <input
-        type="text"
-        [(ngModel)]="newFamily.developer"
-        placeholder="Developer (e.g., Sony)"
-      />
-      <input
-        type="text"
-        [(ngModel)]="newFamily.generation"
-        placeholder="Generation (optional)"
-      />
-      <button
-        (click)="addFamily()"
-        [disabled]="!newFamily.name || !newFamily.developer"
-      >
-        Add Family
-      </button>
+  <section class="card mb-6 p-5">
+    <h3 class="mb-3 text-lg font-bold text-accent">Add New Console Family</h3>
+    <div class="flex flex-wrap gap-3">
+      <input type="text" class="min-w-[160px] flex-1 px-3 py-2" [(ngModel)]="newFamily.name" placeholder="Console name (e.g., PlayStation 5)" />
+      <input type="text" class="min-w-[160px] flex-1 px-3 py-2" [(ngModel)]="newFamily.developer" placeholder="Developer (e.g., Sony)" />
+      <input type="text" class="min-w-[160px] flex-1 px-3 py-2" [(ngModel)]="newFamily.generation" placeholder="Generation (optional)" />
+      <button type="button" class="btn btn-primary" (click)="addFamily()" [disabled]="!newFamily.name || !newFamily.developer">Add Family</button>
     </div>
-  </div>
+  </section>
 
-  <div class="families-display">
-    <div class="families-header">
-      <h3>Console Families</h3>
-      <input
-        class="search-input"
-        type="text"
-        [(ngModel)]="searchQuery"
-        placeholder="🔍 Search by name, developer or generation..."
-      />
+  <section class="card p-5">
+    <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+      <h3 class="text-lg font-bold text-ink">Console Families</h3>
+      <input class="w-full px-3 py-2 text-sm sm:w-72" type="text" [(ngModel)]="searchQuery" placeholder="🔍 Search by name, developer or generation..." />
     </div>
-    <div class="families-list">
-      <div class="family-item" *ngFor="let family of getFilteredFamilies()">
-        <label *ngIf="flow.active" class="flow-select">
-          <input
-            title="select-family"
-            type="checkbox"
-            [checked]="flow.isSelected(family.id)"
-            (change)="flow.toggle(family.id)"
-          />
+    <div class="flex flex-col gap-2">
+      <div class="flex items-center gap-3 rounded-lg border border-border bg-surface-2 p-3" *ngFor="let family of getFilteredFamilies()">
+        <label *ngIf="flow.active" class="flex items-center">
+          <input title="select-family" type="checkbox" class="h-4 w-4 cursor-pointer" [checked]="flow.isSelected(family.id)" (change)="flow.toggle(family.id)" />
         </label>
-        <div class="family-content">
-          <strong>{{ family.name }}</strong>
-          <p class="developer">{{ family.developer }}</p>
-          <p class="generation" *ngIf="family.generation">
-            Generation: {{ family.generation }}
-          </p>
-          <span class="date">Created: {{ family.createdAt | date : 'yyyy-MM-dd' }}</span>
+        <div class="min-w-0 flex-1">
+          <strong class="text-ink">{{ family.name }}</strong>
+          <p class="text-sm font-semibold text-brand-strong">{{ family.developer }}</p>
+          <p class="text-xs text-ink-subtle" *ngIf="family.generation">Generation: {{ family.generation }}</p>
+          <span class="text-xs text-ink-subtle">Created: {{ family.createdAt | date : 'yyyy-MM-dd' }}</span>
         </div>
-        <button
-          class="delete-btn"
-          (click)="deleteFamily(family.id, family.name)"
-        >
-          🗑️
-        </button>
+        <button type="button" class="shrink-0 rounded-lg border border-border px-2.5 py-1 text-sm text-danger transition-colors hover:bg-danger hover:text-white" title="Delete family" (click)="deleteFamily(family.id, family.name)">🗑️</button>
       </div>
-      <p class="empty-message" *ngIf="getFilteredFamilies().length === 0">
+      <p class="rounded-lg border border-dashed border-border px-4 py-8 text-center text-ink-muted" *ngIf="getFilteredFamilies().length === 0">
         {{ searchQuery ? 'No families match your search.' : 'No console families yet.' }}
       </p>
     </div>
-  </div>
+  </section>
 </div>

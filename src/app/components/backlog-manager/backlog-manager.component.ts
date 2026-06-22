@@ -1,6 +1,8 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, HostListener } from '@angular/core';
 import { BacklogService, Backlog } from '../../services/backlog.service';
 import { CompletionTypeService, CompletionType } from '../../services/completion-type.service';
+import { ConfirmService } from '../../services/confirm.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-backlog-manager',
@@ -29,8 +31,15 @@ export class BacklogManagerComponent implements OnInit {
 
   constructor(
     private backlogService: BacklogService,
-    private completionTypeService: CompletionTypeService
+    private completionTypeService: CompletionTypeService,
+    private confirm: ConfirmService,
+    private toast: ToastService
   ) {}
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    this.closeModal();
+  }
 
   ngOnInit(): void {
     this.loadBacklogs();
@@ -100,26 +109,39 @@ export class BacklogManagerComponent implements OnInit {
         endingType: this.newBacklog.endingType,
         completionType: this.newBacklog.completionType,
         customAttributes: this.customAttributesObj
-      }).subscribe(() => {
-        this.newBacklog = {
-          completionDate: '',
-          endingType: '',
-          completionType: ''
-        };
-        this.unknownDate = false;
-        this.customAttributesObj = {};
-        this.customAttributesArray = [];
-        this.closeModal();
+      }).subscribe({
+        next: () => {
+          this.toast.success('Completion logged', `Added to "${this.gameTitle}".`);
+          this.newBacklog = {
+            completionDate: '',
+            endingType: '',
+            completionType: ''
+          };
+          this.unknownDate = false;
+          this.customAttributesObj = {};
+          this.customAttributesArray = [];
+          this.closeModal();
+        },
+        error: (err) => this.toast.error('Could not save', err?.message),
       });
     }
   }
 
-  deleteBacklog(id: string): void {
-    if (confirm('Are you sure you want to delete this completion entry?')) {
-      this.backlogService.deleteBacklog(id).subscribe(() => {
+  async deleteBacklog(id: string): Promise<void> {
+    const ok = await this.confirm.ask({
+      title: 'Delete completion entry?',
+      message: 'This completion record will be permanently removed.',
+      confirmText: 'Delete',
+      danger: true,
+    });
+    if (!ok) return;
+    this.backlogService.deleteBacklog(id).subscribe({
+      next: () => {
+        this.toast.success('Completion entry deleted');
         this.loadBacklogs();
-      });
-    }
+      },
+      error: (err) => this.toast.error('Could not delete', err?.message),
+    });
   }
 
   hasAttributes(backlog: Backlog): boolean {

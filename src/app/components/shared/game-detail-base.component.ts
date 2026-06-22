@@ -5,6 +5,8 @@ import { ConsoleFamilyService, ConsoleFamily } from '../../services/console-fami
 import { BacklogService, Backlog } from '../../services/backlog.service';
 import { AddonService, Addon } from '../../services/addon.service';
 import { ListReturnService } from '../../services/list-return.service';
+import { ConfirmService } from '../../services/confirm.service';
+import { ToastService } from '../../services/toast.service';
 
 /**
  * Shared logic for the game and compilation detail views: console-family
@@ -34,6 +36,8 @@ export abstract class GameDetailBaseComponent {
     protected backlogService: BacklogService,
     protected addonService: AddonService,
     protected listReturn: ListReturnService,
+    protected confirm: ConfirmService,
+    protected toast: ToastService,
   ) {}
 
   // --- Loading ---
@@ -115,10 +119,21 @@ export abstract class GameDetailBaseComponent {
     this.loadBacklogs();
   }
 
-  deleteBacklogEntry(id: string): void {
-    if (confirm('Are you sure you want to delete this completion entry?')) {
-      this.backlogService.deleteBacklog(id).subscribe(() => this.loadBacklogs());
-    }
+  async deleteBacklogEntry(id: string): Promise<void> {
+    const ok = await this.confirm.ask({
+      title: 'Delete completion entry?',
+      message: 'This completion record will be permanently removed.',
+      confirmText: 'Delete',
+      danger: true,
+    });
+    if (!ok) return;
+    this.backlogService.deleteBacklog(id).subscribe({
+      next: () => {
+        this.toast.success('Completion entry deleted');
+        this.loadBacklogs();
+      },
+      error: (err) => this.toast.error('Could not delete', err?.message),
+    });
   }
 
   // --- Addon panel ---
@@ -139,10 +154,21 @@ export abstract class GameDetailBaseComponent {
     this.loadAddons();
   }
 
-  deleteAddon(addon: Addon): void {
-    if (confirm(`Are you sure you want to delete the Addon "${addon.title}"?`)) {
-      this.addonService.deleteAddon(addon.id).subscribe(() => this.loadAddons());
-    }
+  async deleteAddon(addon: Addon): Promise<void> {
+    const ok = await this.confirm.ask({
+      title: 'Delete addon?',
+      message: `"${addon.title}" will be permanently removed.`,
+      confirmText: 'Delete',
+      danger: true,
+    });
+    if (!ok) return;
+    this.addonService.deleteAddon(addon.id).subscribe({
+      next: () => {
+        this.toast.success('Addon deleted');
+        this.loadAddons();
+      },
+      error: (err) => this.toast.error('Could not delete', err?.message),
+    });
   }
 
   addAddonCompletion(addon: Addon): void {
@@ -164,12 +190,23 @@ export abstract class GameDetailBaseComponent {
     }
   }
 
-  deleteGame(): void {
-    if (this.game && confirm(`Are you sure you want to delete "${this.game.title}"?`)) {
-      this.gameService.deleteGame(this.game.id).subscribe(() => {
+  async deleteGame(): Promise<void> {
+    if (!this.game) return;
+    const title = this.game.title;
+    const ok = await this.confirm.ask({
+      title: 'Delete game?',
+      message: `"${title}" and its completion history will be permanently removed.`,
+      confirmText: 'Delete',
+      danger: true,
+    });
+    if (!ok) return;
+    this.gameService.deleteGame(this.game.id).subscribe({
+      next: () => {
+        this.toast.success('Game deleted', `"${title}" was removed from your collection.`);
         this.router.navigate(['/']);
-      });
-    }
+      },
+      error: (err) => this.toast.error('Could not delete', err?.message),
+    });
   }
 
   goBack(): void {

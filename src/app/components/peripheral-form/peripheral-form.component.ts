@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { PeripheralService } from '../../services/peripheral.service';
 import { ConsoleFamilyService, ConsoleFamily } from '../../services/console-family.service';
 import { CreationFlowService } from '../../services/creation-flow.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-peripheral-form',
@@ -22,7 +23,8 @@ export class PeripheralFormComponent implements OnInit {
     private familyService: ConsoleFamilyService,
     private route: ActivatedRoute,
     private router: Router,
-    public flow: CreationFlowService
+    public flow: CreationFlowService,
+    private toast: ToastService
   ) {
     this.form = this.fb.group({
       name: ['', Validators.required],
@@ -76,18 +78,30 @@ export class PeripheralFormComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.form.valid) {
-      const data = { ...this.form.value, customAttributes: {} };
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      this.toast.warning('Missing information', 'Please fill in all required fields (marked with *).');
+      return;
+    }
 
-      if (this.isEditMode && this.peripheralId) {
-        this.peripheralService.updatePeripheral(this.peripheralId, data).subscribe(() => {
+    const data = { ...this.form.value, customAttributes: {} };
+
+    if (this.isEditMode && this.peripheralId) {
+      this.peripheralService.updatePeripheral(this.peripheralId, data).subscribe({
+        next: () => {
+          this.toast.success('Peripheral updated');
           this.router.navigate(['/peripherals']);
-        });
-      } else {
-        this.peripheralService.createPeripheral(data).subscribe(() => {
+        },
+        error: (err) => this.toast.error('Could not save', err?.message),
+      });
+    } else {
+      this.peripheralService.createPeripheral(data).subscribe({
+        next: () => {
+          this.toast.success('Peripheral added');
           this.router.navigate(['/peripherals']);
-        });
-      }
+        },
+        error: (err) => this.toast.error('Could not save', err?.message),
+      });
     }
   }
 

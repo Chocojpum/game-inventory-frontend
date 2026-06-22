@@ -6,6 +6,8 @@ import { ConsoleFamilyService, ConsoleFamily } from '../../services/console-fami
 import { BacklogService } from '../../services/backlog.service';
 import { AddonService } from '../../services/addon.service';
 import { ListReturnService } from '../../services/list-return.service';
+import { ConfirmService } from '../../services/confirm.service';
+import { ToastService } from '../../services/toast.service';
 import { trigger, transition, style, animate, query, stagger } from '@angular/animations';
 import { GameDetailBaseComponent } from '../shared/game-detail-base.component';
 
@@ -45,9 +47,11 @@ export class CompilationDetailComponent extends GameDetailBaseComponent implemen
     consoleFamilyService: ConsoleFamilyService,
     backlogService: BacklogService,
     addonService: AddonService,
-    listReturn: ListReturnService
+    listReturn: ListReturnService,
+    confirm: ConfirmService,
+    toast: ToastService
   ) {
-    super(router, gameService, consoleFamilyService, backlogService, addonService, listReturn);
+    super(router, gameService, consoleFamilyService, backlogService, addonService, listReturn, confirm, toast);
   }
 
   ngOnInit(): void {

@@ -1,6 +1,7 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, HostListener } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { AddonService, Addon } from '../../services/addon.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-addon-manager',
@@ -20,13 +21,18 @@ export class AddonManagerComponent implements OnInit {
   customAttributesObj: Record<string, any> = {};
   customAttributesArray: Array<{ key: string; value: any }> = [];
 
-  constructor(private fb: FormBuilder, private addonService: AddonService) {
+  constructor(private fb: FormBuilder, private addonService: AddonService, private toast: ToastService) {
     this.addonForm = this.fb.group({
       title: ['', Validators.required],
       alternateTitles: this.fb.array([]),
       coverArt: ['', Validators.required],
       releaseDate: ['', Validators.required],
     });
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    this.closeModal();
   }
 
   get alternateTitles(): FormArray {
@@ -79,7 +85,11 @@ export class AddonManagerComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (!this.addonForm.valid) return;
+    if (this.addonForm.invalid) {
+      this.addonForm.markAllAsTouched();
+      this.toast.warning('Missing information', 'Please fill in all required fields (marked with *).');
+      return;
+    }
 
     const payload: Partial<Addon> = {
       gameId: this.gameId,
@@ -88,14 +98,22 @@ export class AddonManagerComponent implements OnInit {
     };
 
     if (this.isEditMode && this.addon) {
-      this.addonService.updateAddon(this.addon.id, payload).subscribe(() => {
-        this.saved.emit();
-        this.close.emit();
+      this.addonService.updateAddon(this.addon.id, payload).subscribe({
+        next: () => {
+          this.toast.success('Addon updated');
+          this.saved.emit();
+          this.close.emit();
+        },
+        error: (err) => this.toast.error('Could not save', err?.message),
       });
     } else {
-      this.addonService.createAddon(payload).subscribe(() => {
-        this.saved.emit();
-        this.close.emit();
+      this.addonService.createAddon(payload).subscribe({
+        next: () => {
+          this.toast.success('Addon added');
+          this.saved.emit();
+          this.close.emit();
+        },
+        error: (err) => this.toast.error('Could not save', err?.message),
       });
     }
   }

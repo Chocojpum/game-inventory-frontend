@@ -270,6 +270,19 @@ export abstract class InventoryListBaseComponent implements OnInit {
     this.fetchItems();
   }
 
+  /** Number of filters currently narrowing the list (drives the "Clear" UI). */
+  get activeFilterCount(): number {
+    let count = Object.keys(this.activeFilters).length;
+    if (this.currentSearchQuery) count++;
+    if (this.dateFrom || this.dateTo) count++;
+    if (this.physicalDigital) count++;
+    return count;
+  }
+
+  get hasActiveFilters(): boolean {
+    return this.activeFilterCount > 0;
+  }
+
   /**
    * Resets the filters shared by every list view. The filter-select and search
    * inputs are bound to this state, so they clear via change detection.

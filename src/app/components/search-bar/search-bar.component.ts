@@ -30,4 +30,9 @@ export class SearchBarComponent {
   onSearchChange(value: string) {
     this.searchSubject.next(value);
   }
+
+  clear() {
+    this.query = '';
+    this.searchSubject.next('');
+  }
 }

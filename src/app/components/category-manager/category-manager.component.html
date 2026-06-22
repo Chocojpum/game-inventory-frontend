@@ -1,93 +1,59 @@
-<div class="manager-container">
-  <h2>Category Manager</h2>
+<div class="mx-auto max-w-4xl">
+  <h2 class="mb-6 text-3xl font-bold text-ink">Category Manager</h2>
 
-  <div class="flow-banner" *ngIf="flow.active">
-    <span>
-      Adding categories to the item you're creating
-      ({{ flow.current?.resultIds?.length || 0 }} selected). Create and/or tick
-      the ones you want, then click Done.
+  <div class="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-info/40 bg-info/10 px-4 py-3" *ngIf="flow.active">
+    <span class="text-sm text-ink">
+      Adding categories to the item you're creating ({{ flow.current?.resultIds?.length || 0 }} selected).
+      Create and/or tick the ones you want, then click Done.
     </span>
-    <div class="flow-actions">
-      <button type="button" class="flow-done" (click)="finishFlow()">Done</button>
-      <button type="button" class="flow-cancel" (click)="cancelFlow()">Cancel</button>
+    <div class="flex gap-2">
+      <button type="button" class="btn btn-success !px-4 !py-1.5 text-sm" (click)="finishFlow()">Done</button>
+      <button type="button" class="btn btn-ghost !px-4 !py-1.5 text-sm" (click)="cancelFlow()">Cancel</button>
     </div>
   </div>
 
-  <div class="category-tabs">
+  <div class="mb-6 flex flex-wrap gap-2">
     <button
       type="button"
-      class="category-tab"
+      class="rounded-full px-4 py-2 text-sm font-semibold transition-colors"
       *ngFor="let type of categoryTypes"
-      [class.active]="activeType === type"
+      [ngClass]="activeType === type ? 'bg-brand text-ink shadow-card' : 'bg-surface-2 text-ink-muted hover:bg-surface-3 hover:text-ink'"
       (click)="setActiveType(type)"
     >
       {{ type | titlecase }}
     </button>
   </div>
 
-  <div class="add-category-form">
-    <h3>Add New {{ activeType | titlecase }}</h3>
-    <div class="form-inline">
-      <input
-        type="text"
-        [(ngModel)]="newCategory.name"
-        placeholder="{{ activeType | titlecase }} name"
-      />
-      <input
-        type="text"
-        [(ngModel)]="newCategory.description"
-        placeholder="Description (optional)"
-      />
-      <button (click)="addCategory()" [disabled]="!newCategory.name">
-        Add {{ activeType | titlecase }}
-      </button>
+  <section class="card mb-6 p-5">
+    <h3 class="mb-3 text-lg font-bold text-accent">Add New {{ activeType | titlecase }}</h3>
+    <div class="flex flex-wrap gap-3">
+      <input type="text" class="min-w-[180px] flex-1 px-3 py-2" [(ngModel)]="newCategory.name" placeholder="{{ activeType | titlecase }} name" />
+      <input type="text" class="min-w-[180px] flex-1 px-3 py-2" [(ngModel)]="newCategory.description" placeholder="Description (optional)" />
+      <button type="button" class="btn btn-primary" (click)="addCategory()" [disabled]="!newCategory.name">Add {{ activeType | titlecase }}</button>
     </div>
-  </div>
+  </section>
 
-  <div class="categories-display">
-    <div class="category-group">
-      <div class="group-header">
-        <h3>{{ activeType | titlecase }}</h3>
-        <input
-          type="text"
-          class="search-input"
-          [(ngModel)]="searchQueries[activeType]"
-          (input)="onSearch(activeType)"
-          placeholder="Search {{ activeType }}..."
-        />
-      </div>
-      <div class="category-list">
-        <div
-          class="category-item"
-          *ngFor="let category of getFilteredCategories(activeType)"
-        >
-          <label *ngIf="flow.active" class="flow-select">
-            <input
-              title="select-category"
-              type="checkbox"
-              [checked]="flow.isSelected(category.id)"
-              (change)="flow.toggle(category.id)"
-            />
-          </label>
-          <div class="category-content">
-            <strong>{{ category.name }}</strong>
-            <p *ngIf="category.description">{{ category.description }}</p>
-            <span class="date">Created: {{ category.createdAt | date : 'yyyy-MM-dd' }}</span>
-          </div>
-          <button
-            class="delete-btn"
-            (click)="deleteCategory(category.id, category.name)"
-          >
-            🗑️
-          </button>
-        </div>
-        <p
-          class="empty-message"
-          *ngIf="getFilteredCategories(activeType).length === 0"
-        >
-          No {{ activeType }} categories found
-        </p>
-      </div>
+  <section class="card p-5">
+    <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+      <h3 class="text-lg font-bold text-ink">{{ activeType | titlecase }}</h3>
+      <input type="text" class="w-full px-3 py-2 text-sm sm:w-64" [(ngModel)]="searchQueries[activeType]" (input)="onSearch(activeType)" placeholder="Search {{ activeType }}..." />
     </div>
-  </div>
+
+    <div class="flex flex-col gap-2">
+      <div class="flex items-center gap-3 rounded-lg border border-border bg-surface-2 p-3" *ngFor="let category of getFilteredCategories(activeType)">
+        <label *ngIf="flow.active" class="flex items-center">
+          <input title="select-category" type="checkbox" class="h-4 w-4 cursor-pointer" [checked]="flow.isSelected(category.id)" (change)="flow.toggle(category.id)" />
+        </label>
+        <div class="min-w-0 flex-1">
+          <strong class="text-ink">{{ category.name }}</strong>
+          <p class="text-sm text-ink-muted" *ngIf="category.description">{{ category.description }}</p>
+          <span class="text-xs text-ink-subtle">Created: {{ category.createdAt | date : 'yyyy-MM-dd' }}</span>
+        </div>
+        <button type="button" class="shrink-0 rounded-lg border border-border px-2.5 py-1 text-sm text-danger transition-colors hover:bg-danger hover:text-white" title="Delete category" (click)="deleteCategory(category.id, category.name)">🗑️</button>
+      </div>
+      <p class="rounded-lg border border-dashed border-border px-4 py-8 text-center text-ink-muted" *ngIf="getFilteredCategories(activeType).length === 0">
+        No {{ activeType }} categories found
+      </p>
+    </div>
+  </section>
 </div>

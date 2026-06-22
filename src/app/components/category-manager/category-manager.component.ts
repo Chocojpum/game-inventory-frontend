@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CategoryService, Category } from '../../services/category.service';
 import { CreationFlowService } from '../../services/creation-flow.service';
+import { ConfirmService } from '../../services/confirm.service';
+import { ToastService } from '../../services/toast.service';
 
 type CategoryType = 'franchise' | 'saga' | 'genre' | 'custom';
 
@@ -29,7 +31,9 @@ export class CategoryManagerComponent implements OnInit {
 
   constructor(
     private categoryService: CategoryService,
-    public flow: CreationFlowService
+    public flow: CreationFlowService,
+    private confirm: ConfirmService,
+    private toast: ToastService
   ) { }
 
   ngOnInit(): void {
@@ -78,17 +82,21 @@ export class CategoryManagerComponent implements OnInit {
     if (this.newCategory.name) {
       // Always add to the active tab's type.
       this.newCategory.type = this.activeType;
-      this.categoryService.createCategory(this.newCategory).subscribe(created => {
-        this.loadCategories();
-        // In a create-flow, auto-select the new category for the return.
-        if (this.flow.active) {
-          this.flow.select(created.id);
-        }
-        this.newCategory = {
-          name: '',
-          type: this.activeType,
-          description: ''
-        };
+      this.categoryService.createCategory(this.newCategory).subscribe({
+        next: (created) => {
+          this.toast.success('Category added', `"${created.name}" was created.`);
+          this.loadCategories();
+          // In a create-flow, auto-select the new category for the return.
+          if (this.flow.active) {
+            this.flow.select(created.id);
+          }
+          this.newCategory = {
+            name: '',
+            type: this.activeType,
+            description: ''
+          };
+        },
+        error: (err) => this.toast.error('Could not add category', err?.message),
       });
     }
   }
@@ -101,11 +109,20 @@ export class CategoryManagerComponent implements OnInit {
     this.flow.abort();
   }
 
-  deleteCategory(id: string, name: string): void {
-    if (confirm(`Are you sure you want to delete the category "${name}"?`)) {
-      this.categoryService.deleteCategory(id).subscribe(() => {
+  async deleteCategory(id: string, name: string): Promise<void> {
+    const ok = await this.confirm.ask({
+      title: 'Delete category?',
+      message: `"${name}" will be removed. Games tagged with it will lose this category.`,
+      confirmText: 'Delete',
+      danger: true,
+    });
+    if (!ok) return;
+    this.categoryService.deleteCategory(id).subscribe({
+      next: () => {
+        this.toast.success('Category deleted');
         this.loadCategories();
-      });
-    }
+      },
+      error: (err) => this.toast.error('Could not delete', err?.message),
+    });
   }
 }

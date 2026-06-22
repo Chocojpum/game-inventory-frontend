@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ConsoleService, Console } from '../../services/console.service';
 import { ConsoleFamilyService, ConsoleFamily } from '../../services/console-family.service';
+import { ConfirmService } from '../../services/confirm.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-console-detail',
@@ -16,7 +18,9 @@ export class ConsoleDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private consoleService: ConsoleService,
-    private familyService: ConsoleFamilyService
+    private familyService: ConsoleFamilyService,
+    private confirm: ConfirmService,
+    private toast: ToastService
   ) { }
 
   ngOnInit(): void {
@@ -57,12 +61,22 @@ export class ConsoleDetailComponent implements OnInit {
     }
   }
 
-  deleteConsole(): void {
-    if (this.console && confirm(`Are you sure you want to delete this console?`)) {
-      this.consoleService.deleteConsole(this.console.id).subscribe(() => {
+  async deleteConsole(): Promise<void> {
+    if (!this.console) return;
+    const ok = await this.confirm.ask({
+      title: 'Delete console?',
+      message: 'This console will be permanently removed from your inventory.',
+      confirmText: 'Delete',
+      danger: true,
+    });
+    if (!ok) return;
+    this.consoleService.deleteConsole(this.console.id).subscribe({
+      next: () => {
+        this.toast.success('Console deleted');
         this.router.navigate(['/consoles']);
-      });
-    }
+      },
+      error: (err) => this.toast.error('Could not delete', err?.message),
+    });
   }
 
   goBack(): void {

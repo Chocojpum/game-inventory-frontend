@@ -1,41 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   Design tokens
+   ------------------------------------------------------------
+   The new semantic --c-* tokens are the single source of truth
+   for the palette. The legacy --background-* / --text-* / etc.
+   names are kept and re-pointed at the new values so the 18
+   components that still use hand-written CSS pick up the refined
+   palette automatically.
+   ============================================================ */
 :root {
-  --background-terciary: linear-gradient(135deg, #1a1a1d 0%, #3b1c32 100%);
-  --background-secondary: #a64d79;
-  --background-primary: linear-gradient(135deg, #3b1c32 0%, #6a1e55 100%);
-  --text-primary: #f0f0f0;
-  --text-secondary: #b0b0b0;
-  --accent-color: #ae92c8;
-  --negative: DarkRed;
-  --negative-highlight: #ff4757;
-  --disabled: Darkgray;
-  --disabled-highlight: gray;
-}
+  /* Surfaces */
+  --c-base: #16121c;
+  --c-surface: #241828;
+  --c-surface-2: #2e1d33;
+  --c-surface-3: #3a2440;
+  --c-border: #4a2f50;
 
-body {
-  background-color: var(--background-primary);
-  color: var(--text-primary);
-}
+  /* Brand (keeps the magenta identity) */
+  --c-brand: #a64d79;
+  --c-brand-strong: #c75d92;
+  --c-brand-soft: rgba(166, 77, 121, 0.16);
+  --c-accent: #c8a8e0;
 
-::placeholder {
-  color: var(--text-primary);
-}
+  /* Text (tuned for AA contrast on dark plum surfaces) */
+  --c-text: #f3eef6;
+  --c-text-muted: #c4b5cf;
+  --c-text-subtle: #9a87a6;
 
-input,
-textarea,
-select {
-  background: var(--background-primary);
-  color: var(--text-primary);
-  border-radius: 5px;
-  border: 2px solid var(--background-secondary);
-}
-option {
-  background: var(--background-secondary);
-}
-option:checked, 
-option:hover,
-option:focus {
-    background: var(--accent-color) !important;
-    color: var(--text-primary) !important;
+  /* Semantic */
+  --c-success: #3ec98b;
+  --c-warning: #e6a23c;
+  --c-danger: #e5484d;
+  --c-info: #5b9dd9;
+
+  /* RGB channels for the same colors, consumed by Tailwind so opacity
+     modifiers (e.g. bg-warning/10) actually apply an alpha. Keep these in
+     sync with the hex values above. */
+  --c-brand-rgb: 166 77 121;
+  --c-accent-rgb: 200 168 224;
+  --c-success-rgb: 62 201 139;
+  --c-warning-rgb: 230 162 60;
+  --c-danger-rgb: 229 72 77;
+  --c-info-rgb: 91 157 217;
+
+  --c-focus-ring: rgba(200, 168, 224, 0.55);
+
+  --app-gradient: linear-gradient(160deg, #16121c 0%, #241828 58%, #2b1830 100%);
+
+  /* ---- Legacy aliases (re-pointed to the refined palette) ---- */
+  --background-terciary: var(--app-gradient);
+  --background-secondary: var(--c-brand);
+  --background-primary: var(--c-surface);
+  --text-primary: var(--c-text);
+  --text-secondary: var(--c-text-muted);
+  --accent-color: var(--c-accent);
+  --negative: #b3322f;
+  --negative-highlight: var(--c-danger);
+  --disabled: #5a4a60;
+  --disabled-highlight: #7a6880;
 }
 
 * {
@@ -44,52 +69,211 @@ option:focus {
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
     "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
-  margin: 0;
-  padding: 0;
+  background: var(--c-base);
+  color: var(--c-text);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
+::selection {
+  background: var(--c-brand);
+  color: var(--c-text);
+}
+
+/* Visible keyboard focus everywhere (accessibility / "user control") */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--c-focus-ring);
+  border-radius: 8px;
+}
+
+/* ---- Form controls ---- */
+input,
+textarea,
+select {
+  background: var(--c-surface-3);
+  color: var(--c-text);
+  border-radius: 8px;
+  border: 1px solid var(--c-border);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+input:hover,
+textarea:hover,
+select:hover {
+  border-color: var(--c-brand);
+}
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--c-accent);
+  box-shadow: 0 0 0 3px var(--c-focus-ring);
+}
+
+/* Invalid + touched reactive-form controls glow red so users can see exactly
+   what needs fixing (heuristic: help users recognise & recover from errors). */
+input.ng-invalid.ng-touched,
+select.ng-invalid.ng-touched,
+textarea.ng-invalid.ng-touched {
+  border-color: var(--c-danger);
+}
+
+/* Lower-contrast placeholder so real input is distinguishable from the hint */
+::placeholder {
+  color: var(--c-text-subtle);
+  opacity: 1;
+}
+
+option {
+  background: var(--c-surface-2);
+  color: var(--c-text);
+}
+option:checked,
+option:hover,
+option:focus {
+  background: var(--c-brand) !important;
+  color: var(--c-text) !important;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: var(--c-brand);
+}
+
+/* ---- Custom scrollbar (visibility / aesthetic) ---- */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--c-border) transparent;
+}
+::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--c-border);
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--c-brand);
+  background-clip: padding-box;
+}
+
+/* ============================================================
+   Reusable component primitives (consistency heuristic).
+   Used by the reworked views; available to any component.
+   ============================================================ */
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5
+           font-semibold cursor-pointer transition-all duration-200 border
+           border-transparent select-none disabled:opacity-50
+           disabled:cursor-not-allowed;
+  }
+  .btn-primary {
+    background: var(--c-brand);
+    color: var(--c-text);
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: var(--c-brand-strong);
+    transform: translateY(-2px);
+  }
+  .btn-ghost {
+    background: var(--c-surface-2);
+    color: var(--c-text);
+    border-color: var(--c-border);
+  }
+  .btn-ghost:hover:not(:disabled) {
+    border-color: var(--c-brand);
+    background: var(--c-surface-3);
+  }
+  .btn-danger {
+    background: var(--c-danger);
+    color: #fff;
+  }
+  .btn-danger:hover:not(:disabled) {
+    filter: brightness(1.08);
+    transform: translateY(-2px);
+  }
+  .btn-success {
+    background: var(--c-success);
+    color: #06281a;
+  }
+  .btn-success:hover:not(:disabled) {
+    filter: brightness(1.06);
+    transform: translateY(-2px);
+  }
+
+  .card {
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: 1rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold;
+    background: var(--c-brand-soft);
+    color: var(--c-accent);
+  }
+}
+
+/* ============================================================
+   Legacy global helpers kept for the not-yet-migrated views,
+   restyled against the refined tokens.
+   ============================================================ */
 .header-actions {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
   margin-bottom: 2rem;
-  background: var(--background-primary);
-  padding: 1.5rem 2rem;
-  border-radius: 15px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  padding: 1.25rem 1.75rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
 }
 
 .add-btn {
-  padding: 0.75rem 1.5rem;
-  background: var(--background-secondary);
-  color: var(--text-primary);
+  padding: 0.7rem 1.4rem;
+  background: var(--c-brand);
+  color: var(--c-text);
   border: none;
-  border-radius: 25px;
+  border-radius: 999px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.2s ease;
 }
 .add-btn:hover {
-  background: var(--accent-color);
+  background: var(--c-brand-strong);
   transform: translateY(-2px);
 }
 
 .back-button {
-  background: var(--background-primary);
-  color: var(--text-primary);
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 25px;
+  background: var(--c-surface-2);
+  color: var(--c-text);
+  border: 1px solid var(--c-border);
+  padding: 0.6rem 1.3rem;
+  border-radius: 999px;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 0.95rem;
   margin-bottom: 1.5rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s;
+  transition: all 0.2s ease;
 }
 .back-button:hover {
-  transform: translateX(-5px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  border-color: var(--c-brand);
+  transform: translateX(-4px);
 }

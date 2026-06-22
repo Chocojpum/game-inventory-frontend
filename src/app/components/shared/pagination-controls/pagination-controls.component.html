@@ -1,72 +1,94 @@
-<div class="pagination-controls">
-  <div class="limit-selector">
-    <label>
-      Items per page:
-      <select [ngModel]="limit" (ngModelChange)="limitChange.emit($event)">
-        <option *ngFor="let option of limitOptions" [ngValue]="option">{{ option }}</option>
-      </select>
-    </label>
-  </div>
+<nav
+  class="flex flex-wrap items-center justify-center gap-2 rounded-2xl border border-border bg-surface px-4 py-3 shadow-card"
+  aria-label="Pagination"
+>
+  <label class="mr-1 flex items-center gap-2 text-sm font-semibold text-ink-muted">
+    Items per page:
+    <select
+      class="rounded-lg px-2 py-1.5 text-sm text-ink"
+      [ngModel]="limit"
+      (ngModelChange)="limitChange.emit($event)"
+    >
+      <option *ngFor="let option of limitOptions" [ngValue]="option">{{ option }}</option>
+    </select>
+  </label>
 
   <button
     type="button"
-    class="page-btn"
+    class="rounded-lg border border-border bg-surface-2 px-3 py-1.5 text-sm font-semibold text-ink transition-colors hover:enabled:border-brand hover:enabled:bg-surface-3 disabled:cursor-not-allowed disabled:opacity-40"
     (click)="pageChange.emit(currentPage - 1)"
     [disabled]="currentPage <= 1"
+    aria-label="Previous page"
   >
-    &lt; Previous
+    ‹ Prev
   </button>
 
-  <div class="page-numbers">
+  <div class="flex flex-wrap items-center gap-1.5">
     <ng-container *ngIf="pageNumbers[0] > 1">
-      <button type="button" class="page-btn page-number" (click)="pageChange.emit(1)">1</button>
-      <span class="page-ellipsis" *ngIf="pageNumbers[0] > 2">…</span>
+      <button
+        type="button"
+        class="min-w-[2.25rem] rounded-lg border border-border bg-surface-2 px-2.5 py-1.5 text-sm font-semibold text-ink transition-colors hover:border-brand hover:bg-surface-3"
+        (click)="pageChange.emit(1)"
+      >
+        1
+      </button>
+      <span class="px-1 text-ink-subtle" *ngIf="pageNumbers[0] > 2">…</span>
     </ng-container>
 
     <button
       *ngFor="let page of pageNumbers"
       type="button"
-      class="page-btn page-number"
-      [class.active]="page === currentPage"
+      class="min-w-[2.25rem] rounded-lg border px-2.5 py-1.5 text-sm font-semibold transition-colors"
+      [ngClass]="
+        page === currentPage
+          ? 'border-brand bg-brand text-ink shadow-card'
+          : 'border-border bg-surface-2 text-ink hover:border-brand hover:bg-surface-3'
+      "
+      [attr.aria-current]="page === currentPage ? 'page' : null"
       (click)="pageChange.emit(page)"
     >
       {{ page }}
     </button>
 
     <ng-container *ngIf="pageNumbers[pageNumbers.length - 1] < totalPages">
-      <span class="page-ellipsis" *ngIf="pageNumbers[pageNumbers.length - 1] < totalPages - 1">…</span>
-      <button type="button" class="page-btn page-number" (click)="pageChange.emit(totalPages)">{{ totalPages }}</button>
+      <span class="px-1 text-ink-subtle" *ngIf="pageNumbers[pageNumbers.length - 1] < totalPages - 1">…</span>
+      <button
+        type="button"
+        class="min-w-[2.25rem] rounded-lg border border-border bg-surface-2 px-2.5 py-1.5 text-sm font-semibold text-ink transition-colors hover:border-brand hover:bg-surface-3"
+        (click)="pageChange.emit(totalPages)"
+      >
+        {{ totalPages }}
+      </button>
     </ng-container>
   </div>
 
   <button
     type="button"
-    class="page-btn"
+    class="rounded-lg border border-border bg-surface-2 px-3 py-1.5 text-sm font-semibold text-ink transition-colors hover:enabled:border-brand hover:enabled:bg-surface-3 disabled:cursor-not-allowed disabled:opacity-40"
     (click)="pageChange.emit(currentPage + 1)"
     [disabled]="currentPage >= totalPages"
+    aria-label="Next page"
   >
-    Next &gt;
+    Next ›
   </button>
 
-  <div class="page-jump">
-    <label>
-      Go to:
-      <input
-        #jumpInput
-        type="number"
-        min="1"
-        [max]="totalPages"
-        class="page-jump-input"
-        placeholder="#"
-        (keyup.enter)="pageChange.emit(+jumpInput.value); jumpInput.value = ''"
-      />
-    </label>
-    <button
-      type="button"
-      class="page-btn"
-      (click)="pageChange.emit(+jumpInput.value); jumpInput.value = ''"
-    >
-      Go
-    </button>
-  </div>
-</div>
+  <label class="ml-1 flex items-center gap-2 text-sm font-semibold text-ink-muted">
+    Go to:
+    <input
+      #jumpInput
+      type="number"
+      min="1"
+      [max]="totalPages"
+      class="w-16 rounded-lg px-2 py-1.5 text-sm text-ink"
+      placeholder="#"
+      (keyup.enter)="pageChange.emit(+jumpInput.value); jumpInput.value = ''"
+    />
+  </label>
+  <button
+    type="button"
+    class="rounded-lg border border-border bg-surface-2 px-3 py-1.5 text-sm font-semibold text-ink transition-colors hover:border-brand hover:bg-surface-3"
+    (click)="pageChange.emit(+jumpInput.value); jumpInput.value = ''"
+  >
+    Go
+  </button>
+</nav>

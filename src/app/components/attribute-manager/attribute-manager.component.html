@@ -1,47 +1,31 @@
-<div class="manager-container">
-  <h2>Attribute Manager</h2>
+<div class="mx-auto max-w-4xl">
+  <h2 class="mb-6 text-3xl font-bold text-ink">Attribute Manager</h2>
 
-  <div class="flow-banner" *ngIf="flow.active">
-    <span>
-      Create the global attribute you need (keep "Global" checked so it shows on
-      the form), then click Done to return.
+  <div class="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-info/40 bg-info/10 px-4 py-3" *ngIf="flow.active">
+    <span class="text-sm text-ink">
+      Create the global attribute you need (keep "Global" checked so it shows on the form), then click Done to return.
     </span>
-    <div class="flow-actions">
-      <button type="button" class="flow-done" (click)="finishFlow()">Done</button>
-      <button type="button" class="flow-cancel" (click)="cancelFlow()">Cancel</button>
+    <div class="flex gap-2">
+      <button type="button" class="btn btn-success !px-4 !py-1.5 text-sm" (click)="finishFlow()">Done</button>
+      <button type="button" class="btn btn-ghost !px-4 !py-1.5 text-sm" (click)="cancelFlow()">Cancel</button>
     </div>
   </div>
 
-  <div class="info-box">
-    <p>
-      <strong>Global Attributes</strong> will be available for all games when
-      adding/editing.
-    </p>
-    <p>
-      <strong>Non-global Attributes</strong> are just saved as templates for
-      reference.
-    </p>
+  <div class="mb-6 rounded-xl border border-border bg-surface-2 px-4 py-3 text-sm text-ink-muted">
+    <p><strong class="text-ink">Global Attributes</strong> will be available for all games when adding/editing.</p>
+    <p><strong class="text-ink">Non-global Attributes</strong> are just saved as templates for reference.</p>
   </div>
 
-  <div class="add-attribute-form">
-    <h3>Create New Attribute</h3>
-    <div class="form-grid">
-      <div class="form-group">
-        <label>Attribute Name</label>
-        <input
-          type="text"
-          [(ngModel)]="newAttribute.name"
-          placeholder="e.g., Developer, Completion Time"
-        />
+  <section class="card mb-6 p-5">
+    <h3 class="mb-4 text-lg font-bold text-accent">Create New Attribute</h3>
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div>
+        <label class="mb-1.5 block font-semibold text-ink">Attribute Name</label>
+        <input type="text" class="w-full px-3 py-2" [(ngModel)]="newAttribute.name" placeholder="e.g., Developer, Completion Time" />
       </div>
-
-      <div class="form-group">
-        <label>Data Type</label>
-        <select
-          [(ngModel)]="newAttribute.type"
-          (change)="onTypeChange()"
-          title="data-type-select"
-        >
+      <div>
+        <label class="mb-1.5 block font-semibold text-ink">Data Type</label>
+        <select class="w-full px-3 py-2" [(ngModel)]="newAttribute.type" (change)="onTypeChange()" title="data-type-select">
           <option value="text">Text</option>
           <option value="number">Number</option>
           <option value="date">Date</option>
@@ -49,89 +33,49 @@
           <option value="select">Dropdown</option>
         </select>
       </div>
-
-      <div class="form-group full-width" *ngIf="newAttribute.type === 'select'">
-        <label>Options (comma-separated)</label>
-        <input
-          type="text"
-          [(ngModel)]="optionsString"
-          placeholder="e.g., Single Player, Multiplayer, Co-op"
-        />
+      <div class="sm:col-span-2" *ngIf="newAttribute.type === 'select'">
+        <label class="mb-1.5 block font-semibold text-ink">Options (comma-separated)</label>
+        <input type="text" class="w-full px-3 py-2" [(ngModel)]="optionsString" placeholder="e.g., Single Player, Multiplayer, Co-op" />
       </div>
-
-      <div class="form-group">
-        <label class="checkbox-label">
-          <input type="checkbox" [(ngModel)]="newAttribute.isGlobal" />
+      <div class="sm:col-span-2">
+        <label class="flex cursor-pointer items-center gap-2 text-sm text-ink">
+          <input type="checkbox" class="h-4 w-4" [(ngModel)]="newAttribute.isGlobal" />
           Make this a global attribute (available for all games)
         </label>
       </div>
     </div>
+    <button type="button" class="btn btn-primary mt-4" (click)="addAttribute()" [disabled]="!newAttribute.name">Create Attribute</button>
+  </section>
 
-    <button
-      (click)="addAttribute()"
-      [disabled]="!newAttribute.name"
-      class="submit-btn"
-    >
-      Create Attribute
-    </button>
-  </div>
-
-  <div class="attributes-display">
-    <div class="attribute-section">
-      <h3>🌐 Global Attributes</h3>
-      <div class="attribute-list">
-        <div class="attribute-item" *ngFor="let attr of getGlobalAttributes()">
-          <div class="attribute-info">
-            <strong>{{ attr.name }}</strong>
-            <span class="type-badge">{{ attr.type }}</span>
-            <span
-              class="options"
-              *ngIf="attr.options && attr.options.length > 0"
-            >
-              Options: {{ attr.options.join(", ") }}
-            </span>
+  <div class="grid gap-6 md:grid-cols-2">
+    <section class="card p-5">
+      <h3 class="mb-4 text-lg font-bold text-ink">🌐 Global Attributes</h3>
+      <div class="flex flex-col gap-2">
+        <div class="flex items-center gap-3 rounded-lg border border-border bg-surface-2 p-3" *ngFor="let attr of getGlobalAttributes()">
+          <div class="min-w-0 flex-1">
+            <strong class="text-ink">{{ attr.name }}</strong>
+            <span class="ml-2 rounded-full bg-brand-soft px-2 py-0.5 text-xs font-semibold text-accent">{{ attr.type }}</span>
+            <span class="mt-1 block text-xs text-ink-subtle" *ngIf="attr.options && attr.options.length > 0">Options: {{ attr.options.join(", ") }}</span>
           </div>
-          <button
-            class="delete-btn"
-            (click)="deleteAttribute(attr.id, attr.name)"
-          >
-            🗑️
-          </button>
+          <button type="button" class="shrink-0 rounded-lg border border-border px-2.5 py-1 text-sm text-danger transition-colors hover:bg-danger hover:text-white" title="Delete attribute" (click)="deleteAttribute(attr.id, attr.name)">🗑️</button>
         </div>
-        <p class="empty-message" *ngIf="getGlobalAttributes().length === 0">
-          No global attributes yet
-        </p>
+        <p class="rounded-lg border border-dashed border-border px-4 py-6 text-center text-sm text-ink-muted" *ngIf="getGlobalAttributes().length === 0">No global attributes yet</p>
       </div>
-    </div>
+    </section>
 
-    <div class="attribute-section">
-      <h3>📝 Template Attributes</h3>
-      <div class="attribute-list">
-        <div
-          class="attribute-item"
-          *ngFor="let attr of getNonGlobalAttributes()"
-        >
-          <div class="attribute-info">
-            <strong>{{ attr.name }}</strong>
-            <span class="type-badge">{{ attr.type }}</span>
-            <span
-              class="options"
-              *ngIf="attr.options && attr.options.length > 0"
-            >
-              Options: {{ attr.options.join(", ") }}
-            </span>
+    <section class="card p-5">
+      <h3 class="mb-4 text-lg font-bold text-ink">📝 Template Attributes</h3>
+      <div class="flex flex-col gap-2">
+        <div class="flex items-center gap-3 rounded-lg border border-border bg-surface-2 p-3" *ngFor="let attr of getNonGlobalAttributes()">
+          <div class="min-w-0 flex-1">
+            <strong class="text-ink">{{ attr.name }}</strong>
+            <span class="ml-2 rounded-full bg-brand-soft px-2 py-0.5 text-xs font-semibold text-accent">{{ attr.type }}</span>
+            <span class="mt-1 block text-xs text-ink-subtle" *ngIf="attr.options && attr.options.length > 0">Options: {{ attr.options.join(", ") }}</span>
           </div>
-          <button
-            class="delete-btn"
-            (click)="deleteAttribute(attr.id, attr.name)"
-          >
-            🗑️
-          </button>
+          <button type="button" class="shrink-0 rounded-lg border border-border px-2.5 py-1 text-sm text-danger transition-colors hover:bg-danger hover:text-white" title="Delete attribute" (click)="deleteAttribute(attr.id, attr.name)">🗑️</button>
         </div>
-        <p class="empty-message" *ngIf="getNonGlobalAttributes().length === 0">
-          No template attributes yet
-        </p>
+        <p class="rounded-lg border border-dashed border-border px-4 py-6 text-center text-sm text-ink-muted" *ngIf="getNonGlobalAttributes().length === 0">No template attributes yet</p>
       </div>
-    </div>
+    </section>
   </div>
 </div>

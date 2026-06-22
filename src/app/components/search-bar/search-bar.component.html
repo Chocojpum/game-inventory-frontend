@@ -1,11 +1,21 @@
-<div class="search-container">
+<div class="relative mb-8">
   <input
     title="searchbar-input"
-    type="text"
-    class="search-input"
+    type="search"
+    class="w-full rounded-full border border-border bg-surface px-6 py-3.5 pr-12 text-base text-ink shadow-card transition-all placeholder:text-ink-subtle focus:-translate-y-0.5 focus:border-accent focus:shadow-card-hover focus:outline-none"
     [placeholder]="placeholder"
     [ngModel]="query"
     [ngModelOptions]="{ standalone: true }"
     (ngModelChange)="onSearchChange($event)"
   />
+  <button
+    *ngIf="query"
+    type="button"
+    class="absolute right-3 top-1/2 -translate-y-1/2 rounded-full px-2.5 py-1 text-lg leading-none text-ink-subtle transition-colors hover:bg-surface-3 hover:text-ink"
+    aria-label="Clear search"
+    title="Clear search"
+    (click)="clear()"
+  >
+    ×
+  </button>
 </div>

@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ConsoleFamilyService, ConsoleFamily } from '../../services/console-family.service';
 import { CreationFlowService } from '../../services/creation-flow.service';
+import { ConfirmService } from '../../services/confirm.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-console-family-manager',
@@ -18,7 +20,9 @@ export class ConsoleFamilyManagerComponent implements OnInit {
 
   constructor(
     private familyService: ConsoleFamilyService,
-    public flow: CreationFlowService
+    public flow: CreationFlowService,
+    private confirm: ConfirmService,
+    private toast: ToastService
   ) { }
 
   ngOnInit(): void {
@@ -43,16 +47,20 @@ export class ConsoleFamilyManagerComponent implements OnInit {
 
   addFamily(): void {
     if (this.newFamily.name && this.newFamily.developer) {
-      this.familyService.createFamily(this.newFamily).subscribe(created => {
-        this.loadFamilies();
-        if (this.flow.active) {
-          this.flow.select(created.id);
-        }
-        this.newFamily = {
-          name: '',
-          developer: '',
-          generation: ''
-        };
+      this.familyService.createFamily(this.newFamily).subscribe({
+        next: (created) => {
+          this.toast.success('Console family added', `"${created.name}" was created.`);
+          this.loadFamilies();
+          if (this.flow.active) {
+            this.flow.select(created.id);
+          }
+          this.newFamily = {
+            name: '',
+            developer: '',
+            generation: ''
+          };
+        },
+        error: (err) => this.toast.error('Could not add family', err?.message),
       });
     }
   }
@@ -65,11 +73,20 @@ export class ConsoleFamilyManagerComponent implements OnInit {
     this.flow.abort();
   }
 
-  deleteFamily(id: string, name: string): void {
-    if (confirm(`Are you sure you want to delete the console family "${name}"?`)) {
-      this.familyService.deleteFamily(id).subscribe(() => {
+  async deleteFamily(id: string, name: string): Promise<void> {
+    const ok = await this.confirm.ask({
+      title: 'Delete console family?',
+      message: `"${name}" will be removed. Consoles and games referencing it may be affected.`,
+      confirmText: 'Delete',
+      danger: true,
+    });
+    if (!ok) return;
+    this.familyService.deleteFamily(id).subscribe({
+      next: () => {
+        this.toast.success('Console family deleted');
         this.loadFamilies();
-      });
-    }
+      },
+      error: (err) => this.toast.error('Could not delete', err?.message),
+    });
   }
 }

@@ -1,21 +1,22 @@
 .form-container {
   max-width: 900px;
   margin: 0 auto;
-  background: var(--background-primary);
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
   padding: 2rem;
-  border-radius: 20px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  border-radius: 1.25rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
 }
 h2 {
   margin: 0 0 2rem 0;
-  color: var(--text-primary);
+  color: var(--c-text);
   font-size: 2rem;
 }
 .flow-banner {
-  background: #fff8e1;
-  border: 1px solid #ffe082;
-  color: #7a5c00;
-  padding: 0.75rem 1rem;
+  background: rgba(230, 162, 60, 0.12);
+  border: 1px solid var(--c-warning);
+  color: var(--c-text);
+  padding: 0.85rem 1rem;
   border-radius: 10px;
   margin-bottom: 1.5rem;
   font-size: 0.95rem;
@@ -23,19 +24,20 @@ h2 {
 .form-section {
   margin-bottom: 2rem;
   padding-bottom: 2rem;
-  border-bottom: 2px solid var(--background-primary);
+  border-bottom: 1px solid var(--c-border);
 }
 .form-section:last-of-type {
   border-bottom: none;
 }
 h3 {
-  color: var(--background-secondary);
+  color: var(--c-accent);
   margin: 0 0 1.5rem 0;
+  font-size: 1.25rem;
 }
 h4 {
-  color: #555;
+  color: var(--c-text-muted);
   margin: 1rem 0 0.75rem 0;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
 }
 .form-group {
   margin-bottom: 1.5rem;
@@ -45,10 +47,15 @@ h4 {
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
 }
+@media (max-width: 640px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
 label {
   display: block;
   margin-bottom: 0.5rem;
-  color: var(--text-primary);
+  color: var(--c-text);
   font-weight: 600;
 }
 input[type="text"],
@@ -57,46 +64,64 @@ input[type="date"],
 input[type="number"],
 select {
   width: 100%;
-  padding: 0.75rem;
-  border: 2px solid var(--disabled);
+  padding: 0.7rem 0.85rem;
+  background: var(--c-surface-3);
+  color: var(--c-text);
+  border: 1px solid var(--c-border);
   border-radius: 8px;
   font-size: 1rem;
-  transition: border-color 0.3s;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 input:focus,
 select:focus {
   outline: none;
-  border-color: var(--background-secondary);
+  border-color: var(--c-accent);
+  box-shadow: 0 0 0 3px var(--c-focus-ring);
 }
+
+/* Field-level error feedback: invalid + touched controls glow red so the user
+   can see exactly what needs fixing (heuristic: recognise & recover from errors). */
+.ng-invalid.ng-touched:not(form):not([formArrayName]):not([formGroupName]) {
+  border-color: var(--c-danger) !important;
+}
+
 .radio-group {
   display: flex;
-  gap: 1.5rem;
+  gap: 1rem;
   margin-top: 0.5rem;
 }
-.radio-label {
+.radio-label,
+.checkbox-label {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-weight: normal;
+  font-weight: 500;
   cursor: pointer;
-  padding: 0.75rem 1rem;
-  background: var(--background-secondary);
+  padding: 0.6rem 0.9rem;
+  background: var(--c-surface-2);
+  border: 1px solid var(--c-border);
   border-radius: 8px;
-  transition: background 0.3s;
+  color: var(--c-text);
+  transition: border-color 0.2s, background 0.2s;
 }
-.radio-label:hover {
-  background: #e9ecef;
+.radio-label:hover,
+.checkbox-label:hover {
+  border-color: var(--c-brand);
+  background: var(--c-surface-3);
 }
-.radio-label input[type="radio"] {
+.radio-label input[type="radio"],
+.checkbox-label input[type="checkbox"] {
   width: auto;
   cursor: pointer;
+  accent-color: var(--c-brand);
 }
 .cover-preview {
   margin-top: 1rem;
   max-width: 200px;
-  border-radius: 5px;
+  border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--c-border);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.35);
 }
 .cover-preview img {
   display: block;
@@ -115,34 +140,35 @@ select:focus {
 .remove-btn {
   padding: 0.5rem 1rem;
   border: none;
-  border-radius: 5px;
+  border-radius: 999px;
   cursor: pointer;
   font-weight: 600;
-  transition: all 0.3s;
+  transition: all 0.2s ease;
 }
 .add-btn {
-  background: var(--background-secondary);
-  color: var(--background-primary);
+  background: var(--c-brand);
+  color: var(--c-text);
   margin-top: 0.5rem;
 }
 .add-btn:hover {
-  background: var(--accent-color);
+  background: var(--c-brand-strong);
+  transform: translateY(-1px);
 }
 .remove-btn {
-  background: var(--negative);
-  color: var(--background-primary);
+  background: var(--c-danger);
+  color: #fff;
+  padding: 0.5rem 0.75rem;
 }
 .remove-btn:hover {
-  background: var(--negative);
+  filter: brightness(1.1);
 }
 .hint {
-  color: #999;
+  color: var(--c-text-subtle);
   font-size: 0.85rem;
-  margin-top: 0.25rem;
-  font-style: italic;
+  margin-top: 0.35rem;
 }
 .hint a {
-  color: var(--background-secondary);
+  color: var(--c-accent);
   text-decoration: underline;
 }
 .category-type-section {
@@ -150,96 +176,101 @@ select:focus {
 }
 .search-input {
   width: 100%;
-  padding: 0.5rem 1rem;
-  border: 2px solid var(--disabled);
+  padding: 0.55rem 1rem;
+  background: var(--c-surface-3);
+  color: var(--c-text);
+  border: 1px solid var(--c-border);
   border-radius: 8px;
   margin-bottom: 1rem;
   font-size: 0.95rem;
 }
 .search-input:focus {
   outline: none;
-  border-color: var(--background-secondary);
+  border-color: var(--c-accent);
+  box-shadow: 0 0 0 3px var(--c-focus-ring);
 }
 .categories-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 0.75rem;
-  max-height: 200px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.6rem;
+  max-height: 220px;
   overflow-y: auto;
   padding: 0.5rem;
-}
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem;
-  background: var(--background-secondary);
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.3s;
-  font-weight: normal;
-}
-.checkbox-label:hover {
-  background: #e9ecef;
-}
-.checkbox-label input[type="checkbox"] {
-  width: auto;
-  cursor: pointer;
+  background: var(--c-base);
+  border: 1px solid var(--c-border);
+  border-radius: 10px;
 }
 .inline-form {
   display: flex;
   gap: 0.5rem;
   margin-bottom: 1rem;
+  flex-wrap: wrap;
 }
 .inline-form input {
   flex: 1;
+  min-width: 140px;
 }
 .attribute-row {
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 0.75rem;
-  background: var(--background-secondary);
+  padding: 0.75rem 1rem;
+  background: var(--c-surface-2);
+  border: 1px solid var(--c-border);
   border-radius: 8px;
   margin-bottom: 0.5rem;
+  color: var(--c-text);
 }
 .attribute-row strong {
-  color: var(--background-secondary);
+  color: var(--c-accent);
   min-width: 150px;
+}
+.included-games-picker h4,
+.category-type-section h4 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.required-legend {
+  color: var(--c-text-subtle);
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+.required-legend .req,
+label .req {
+  color: var(--c-danger);
+  font-weight: 700;
 }
 .form-actions {
   display: flex;
   gap: 1rem;
-  margin-top: 2rem;
+  margin-top: 1rem;
 }
 .submit-btn,
 .cancel-btn {
-  padding: 1rem 2rem;
+  padding: 0.9rem 2rem;
   border: none;
-  border-radius: 25px;
-  font-size: 1.1rem;
+  border-radius: 999px;
+  font-size: 1.05rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.2s ease;
 }
 .submit-btn {
-  background: var(--background-secondary);
-  color: var(--background-primary);
+  background: var(--c-brand);
+  color: var(--c-text);
   flex: 1;
 }
-.submit-btn:hover:not(:disabled) {
-  background: var(--accent-color);
+.submit-btn:hover {
+  background: var(--c-brand-strong);
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-}
-.submit-btn:disabled {
-  background: var(--disabled);
-  cursor: not-allowed;
 }
 .cancel-btn {
-  background: var(--disabled);
-  color: var(--text-primary);
+  background: var(--c-surface-2);
+  color: var(--c-text);
+  border: 1px solid var(--c-border);
 }
 .cancel-btn:hover {
-  background: var(--disabled-highlight);
+  border-color: var(--c-brand);
+  background: var(--c-surface-3);
 }

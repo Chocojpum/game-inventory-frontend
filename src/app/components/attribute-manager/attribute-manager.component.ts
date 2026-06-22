@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { AttributeService, Attribute } from '../../services/attribute.service';
 import { CreationFlowService } from '../../services/creation-flow.service';
+import { ConfirmService } from '../../services/confirm.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-attribute-manager',
@@ -19,7 +21,9 @@ export class AttributeManagerComponent implements OnInit {
 
   constructor(
     private attributeService: AttributeService,
-    public flow: CreationFlowService
+    public flow: CreationFlowService,
+    private confirm: ConfirmService,
+    private toast: ToastService
   ) { }
 
   finishFlow(): void {
@@ -66,24 +70,37 @@ export class AttributeManagerComponent implements OnInit {
           .filter(opt => opt.length > 0);
       }
 
-      this.attributeService.createAttribute(attributeData).subscribe(() => {
-        this.loadAttributes();
-        this.newAttribute = {
-          name: '',
-          type: 'text',
-          options: [],
-          isGlobal: true
-        };
-        this.optionsString = '';
+      this.attributeService.createAttribute(attributeData).subscribe({
+        next: () => {
+          this.toast.success('Attribute created', `"${attributeData.name}" was added.`);
+          this.loadAttributes();
+          this.newAttribute = {
+            name: '',
+            type: 'text',
+            options: [],
+            isGlobal: true
+          };
+          this.optionsString = '';
+        },
+        error: (err) => this.toast.error('Could not create attribute', err?.message),
       });
     }
   }
 
-  deleteAttribute(id: string, name: string): void {
-    if (confirm(`Are you sure you want to delete the attribute "${name}"?`)) {
-      this.attributeService.deleteAttribute(id).subscribe(() => {
+  async deleteAttribute(id: string, name: string): Promise<void> {
+    const ok = await this.confirm.ask({
+      title: 'Delete attribute?',
+      message: `"${name}" will be removed.`,
+      confirmText: 'Delete',
+      danger: true,
+    });
+    if (!ok) return;
+    this.attributeService.deleteAttribute(id).subscribe({
+      next: () => {
+        this.toast.success('Attribute deleted');
         this.loadAttributes();
-      });
-    }
+      },
+      error: (err) => this.toast.error('Could not delete', err?.message),
+    });
   }
 }

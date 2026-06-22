@@ -1,137 +1,88 @@
-<div class="backlog-overlay" (click)="closeModal()">
-  <div class="backlog-modal" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h2>🎯 Backlog: {{ gameTitle }}</h2>
-      <button class="close-btn" (click)="closeModal()">✕</button>
+<div class="fixed inset-0 z-[1500] flex items-start justify-center overflow-y-auto bg-black/60 p-4 backdrop-blur-sm" (click)="closeModal()">
+  <div class="card my-8 w-full max-w-2xl p-6" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+    <div class="mb-5 flex items-center justify-between gap-3">
+      <h2 class="text-xl font-bold text-ink">🎯 Backlog: {{ gameTitle }}</h2>
+      <button type="button" class="rounded-full px-2.5 py-0.5 text-lg leading-none text-ink-subtle transition-colors hover:bg-surface-3 hover:text-ink" aria-label="Close" (click)="closeModal()">✕</button>
     </div>
 
-    <div class="add-backlog-form">
-      <h3>Add Completion Entry</h3>
-      <div class="form-grid">
-        <div class="form-group">
-          <label>Completion Date</label>
-          <input
-            type="date"
-            [(ngModel)]="newBacklog.completionDate"
-            title="completion-date-input"
-          />
-          <label class="checkbox-label">
-            <input
-              type="checkbox"
-              [(ngModel)]="unknownDate"
-              (change)="onUnknownDateChange()"
-            />
-            Unknown date
+    <section class="mb-6 rounded-xl border border-border bg-surface-2 p-5">
+      <h3 class="mb-4 text-lg font-bold text-accent">Add Completion Entry</h3>
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label class="mb-1.5 block font-semibold text-ink">Completion Date</label>
+          <input type="date" class="w-full px-3 py-2" [(ngModel)]="newBacklog.completionDate" [disabled]="unknownDate" title="completion-date-input" />
+          <label class="mt-2 flex cursor-pointer items-center gap-2 text-sm text-ink-muted">
+            <input type="checkbox" [(ngModel)]="unknownDate" (change)="onUnknownDateChange()" /> Unknown date
           </label>
         </div>
 
-        <div class="form-group">
-          <label>Ending Type</label>
-          <input
-            type="text"
-            [(ngModel)]="newBacklog.endingType"
-            placeholder="e.g., True Ending, Bad Ending"
-          />
+        <div>
+          <label class="mb-1.5 block font-semibold text-ink">Ending Type</label>
+          <input type="text" class="w-full px-3 py-2" [(ngModel)]="newBacklog.endingType" placeholder="e.g., True Ending, Bad Ending" />
         </div>
 
-        <div class="form-group">
-          <label>Completion Type *</label>
-          <select
-            [(ngModel)]="newBacklog.completionType"
-            title="completion-type-select"
-          >
+        <div>
+          <label class="mb-1.5 block font-semibold text-ink">Completion Type <span class="text-danger">*</span></label>
+          <select class="w-full px-3 py-2" [(ngModel)]="newBacklog.completionType" title="completion-type-select">
             <option value="">Select...</option>
-            <option *ngFor="let ct of completionTypes" [value]="ct.name">
-              {{ ct.name }}
-            </option>
+            <option *ngFor="let ct of completionTypes" [value]="ct.name">{{ ct.name }}</option>
           </select>
         </div>
 
-        <div class="form-group">
-          <label>Add New Completion Type</label>
-          <div class="inline-add">
-            <input
-              type="text"
-              [(ngModel)]="newCompletionTypeName"
-              placeholder="New type"
-            />
-            <button
-              (click)="addCompletionType()"
-              [disabled]="!newCompletionTypeName"
-            >
-              +
-            </button>
+        <div>
+          <label class="mb-1.5 block font-semibold text-ink">Add New Completion Type</label>
+          <div class="flex gap-2">
+            <input type="text" class="w-full px-3 py-2" [(ngModel)]="newCompletionTypeName" placeholder="New type" />
+            <button type="button" class="btn btn-ghost !px-4" (click)="addCompletionType()" [disabled]="!newCompletionTypeName">+</button>
           </div>
         </div>
       </div>
 
-      <div class="custom-attribute-section">
-        <h4>Custom Attributes</h4>
-        <div class="inline-form">
-          <input
-            type="text"
-            [(ngModel)]="newAttributeName"
-            placeholder="Attribute name"
-          />
-          <input
-            type="text"
-            [(ngModel)]="newAttributeValue"
-            placeholder="Value"
-          />
-          <button (click)="addCustomAttribute()">Add</button>
+      <div class="mt-5">
+        <h4 class="mb-2 font-semibold text-ink-muted">Custom Attributes</h4>
+        <div class="flex flex-wrap gap-2">
+          <input type="text" class="min-w-[140px] flex-1 px-3 py-2" [(ngModel)]="newAttributeName" placeholder="Attribute name" />
+          <input type="text" class="min-w-[140px] flex-1 px-3 py-2" [(ngModel)]="newAttributeValue" placeholder="Value" />
+          <button type="button" class="btn btn-ghost" (click)="addCustomAttribute()">Add</button>
         </div>
-        <div
-          class="current-attributes"
-          *ngIf="customAttributesArray.length > 0"
-        >
-          <div *ngFor="let attr of customAttributesArray" class="attr-tag">
-            <strong>{{ attr.key }}:</strong> {{ attr.value }}
-            <button (click)="removeCustomAttribute(attr.key)">✕</button>
+        <div class="mt-3 flex flex-wrap gap-2" *ngIf="customAttributesArray.length > 0">
+          <div *ngFor="let attr of customAttributesArray" class="flex items-center gap-2 rounded-full bg-surface-3 px-3 py-1 text-sm text-ink">
+            <span><strong>{{ attr.key }}:</strong> {{ attr.value }}</span>
+            <button type="button" class="text-ink-subtle transition-colors hover:text-danger" (click)="removeCustomAttribute(attr.key)">✕</button>
           </div>
         </div>
       </div>
 
       <button
-        class="submit-btn"
+        type="button"
+        class="btn btn-primary mt-5"
         (click)="addBacklogEntry()"
-        [disabled]="
-          !newBacklog.completionType ||
-          (!newBacklog.completionDate && !unknownDate)
-        "
+        [disabled]="!newBacklog.completionType || (!newBacklog.completionDate && !unknownDate)"
       >
         Add Entry
       </button>
-    </div>
+    </section>
 
-    <div class="backlog-list">
-      <h3>Completion History</h3>
-      <div *ngIf="backlogs.length === 0" class="empty-message">
+    <section>
+      <h3 class="mb-3 text-lg font-bold text-ink">Completion History</h3>
+      <div *ngIf="backlogs.length === 0" class="rounded-xl border border-dashed border-border px-4 py-8 text-center text-ink-muted">
         No completions recorded yet.
       </div>
-      <div *ngFor="let backlog of backlogs" class="backlog-item">
-        <div class="backlog-content">
-          <div class="backlog-main">
-            <strong>{{ backlog.completionDate | date : "yyyy-MM-dd" }}</strong>
-            <span class="completion-type-badge">{{
-              backlog.completionType
-            }}</span>
-          </div>
-          <div class="backlog-details" *ngIf="backlog.endingType">
-            <span class="label">Ending:</span> {{ backlog.endingType }}
-          </div>
-          <div class="backlog-attributes" *ngIf="hasAttributes(backlog)">
-            <div
-              *ngFor="let attr of getAttributesArray(backlog)"
-              class="attr-display"
-            >
-              <span class="attr-label">{{ attr.key }}:</span> {{ attr.value }}
+      <div class="flex flex-col gap-2">
+        <div *ngFor="let backlog of backlogs" class="flex items-start justify-between gap-3 rounded-xl border border-border bg-surface-2 p-4">
+          <div class="min-w-0 flex-1">
+            <div class="flex flex-wrap items-center gap-2">
+              <strong class="text-ink">{{ backlog.completionDate ? (backlog.completionDate | date : "yyyy-MM-dd") : "Unknown date" }}</strong>
+              <span class="rounded-full bg-success/15 px-2.5 py-0.5 text-xs font-semibold text-success">{{ backlog.completionType }}</span>
+            </div>
+            <div class="mt-1 text-sm text-ink-muted" *ngIf="backlog.endingType"><span class="text-ink-subtle">Ending:</span> {{ backlog.endingType }}</div>
+            <div class="mt-1 flex flex-col gap-0.5" *ngIf="hasAttributes(backlog)">
+              <div *ngFor="let attr of getAttributesArray(backlog)" class="text-xs text-ink-muted"><span class="text-ink-subtle">{{ attr.key }}:</span> {{ attr.value }}</div>
             </div>
           </div>
+          <button type="button" class="shrink-0 rounded-lg border border-border px-2.5 py-1 text-sm text-danger transition-colors hover:bg-danger hover:text-white" title="Delete entry" (click)="deleteBacklog(backlog.id)">🗑️</button>
         </div>
-        <button class="delete-btn" (click)="deleteBacklog(backlog.id)">
-          🗑️
-        </button>
       </div>
-    </div>
+    </section>
   </div>
 </div>

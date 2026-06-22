@@ -24,6 +24,8 @@ import { BacklogListComponent } from './components/backlog-list/backlog-list.com
 
 import { ConsoleFamilyManagerComponent } from './components/console-family-manager/console-family-manager.component';
 import { PaginationControlsComponent } from './components/shared/pagination-controls/pagination-controls.component';
+import { ToastContainerComponent } from './components/shared/toast/toast-container.component';
+import { ConfirmDialogComponent } from './components/shared/confirm-dialog/confirm-dialog.component';
 import { ClickOutsideDirective } from './directives/click-outside.directive';
 import { OverflowClassDirective } from './directives/overflow-class.directive';
 
@@ -66,6 +68,8 @@ const routes: Routes = [
     AddonManagerComponent,
     BacklogListComponent,
     PaginationControlsComponent,
+    ToastContainerComponent,
+    ConfirmDialogComponent,
     ClickOutsideDirective,
     OverflowClassDirective,
   ],
