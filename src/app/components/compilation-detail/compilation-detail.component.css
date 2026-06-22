@@ -81,6 +81,39 @@
   font-size: 1.1rem;
   text-transform: capitalize;
 }
+.categories-section {
+  margin: 2rem 0;
+}
+.categories-section h3 {
+  margin: 0 0 1rem 0;
+  color: var(--text-primary);
+}
+.category-subsection {
+  margin-bottom: 1rem;
+}
+.category-subsection h4 {
+  margin: 0 0 0.5rem 0;
+  color: var(--background-secondary);
+  font-size: 1rem;
+}
+.category-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.category-tag {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: var(--background-primary);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.category-tag:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+}
 .actions {
   display: flex;
   gap: 1rem;
@@ -222,8 +255,8 @@
   font-size: 1.05rem;
 }
 
-/* DLC */
-.dlc-button {
+/* Addon */
+.addon-button {
   background: linear-gradient(135deg, #9b59b6, #8e44ad);
   color: var(--background-primary);
   padding: 0.75rem 1.5rem;
@@ -234,24 +267,24 @@
   font-weight: 600;
   transition: all 0.3s;
 }
-.dlc-button:hover {
+.addon-button:hover {
   transform: translateY(-2px);
 }
-.dlc-section {
+.addon-section {
   padding: 2rem;
   border-top: 1px solid var(--disabled);
 }
-.dlc-section-header {
+.addon-section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
 }
-.dlc-section-header h2 {
+.addon-section-header h2 {
   margin: 0;
   color: var(--text-primary);
 }
-.add-dlc-btn {
+.add-addon-btn {
   background: linear-gradient(135deg, #9b59b6, #8e44ad);
   color: #fff;
   border: none;
@@ -260,12 +293,12 @@
   font-weight: 600;
   cursor: pointer;
 }
-.dlc-grid {
+.addon-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 1.25rem;
 }
-.dlc-card {
+.addon-card {
   display: flex;
   gap: 1rem;
   background: var(--background-primary);
@@ -274,17 +307,17 @@
   padding: 1rem;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
 }
-.dlc-cover img {
+.addon-cover img {
   width: 80px;
   height: 80px;
   object-fit: cover;
   border-radius: 8px;
 }
-.dlc-info {
+.addon-info {
   flex: 1;
   min-width: 0;
 }
-.dlc-info h3 {
+.addon-info h3 {
   margin: 0 0 0.25rem 0;
   font-size: 1rem;
   color: var(--text-primary);
@@ -292,36 +325,36 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.dlc-alt {
+.addon-alt {
   margin: 0 0 0.25rem 0;
   font-size: 0.8rem;
   font-style: italic;
   color: #888;
 }
-.dlc-date {
+.addon-date {
   margin: 0 0 0.5rem 0;
   font-size: 0.82rem;
   color: #888;
 }
-.dlc-attributes {
+.addon-attributes {
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
   margin-bottom: 0.5rem;
 }
-.dlc-attr {
+.addon-attr {
   background: var(--background-secondary);
   padding: 0.2rem 0.5rem;
   border-radius: 6px;
   font-size: 0.78rem;
 }
-.dlc-actions {
+.addon-actions {
   display: flex;
   gap: 0.4rem;
   align-items: center;
   flex-wrap: wrap;
 }
-.dlc-action {
+.addon-action {
   background: var(--background-secondary);
   color: var(--text-primary);
   border: none;
@@ -330,15 +363,15 @@
   cursor: pointer;
   font-size: 0.8rem;
 }
-.dlc-action.complete {
+.addon-action.complete {
   background: linear-gradient(135deg, #2ecc71, #27ae60);
   color: #fff;
 }
-.dlc-action.delete {
+.addon-action.delete {
   background: var(--negative);
   color: #fff;
 }
-.dlc-entry-badge {
+.addon-entry-badge {
   background: #9b59b6;
   color: #fff;
   padding: 0.25rem 0.6rem;

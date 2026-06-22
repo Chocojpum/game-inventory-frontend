@@ -111,7 +111,7 @@
       <div *ngFor="let backlog of backlogs" class="backlog-item">
         <div class="backlog-content">
           <div class="backlog-main">
-            <strong>{{ backlog.completionDate | date : "mediumDate" }}</strong>
+            <strong>{{ backlog.completionDate | date : "yyyy-MM-dd" }}</strong>
             <span class="completion-type-badge">{{
               backlog.completionType
             }}</span>

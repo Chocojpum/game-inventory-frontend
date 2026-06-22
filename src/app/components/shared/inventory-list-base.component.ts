@@ -35,6 +35,9 @@ export abstract class InventoryListBaseComponent implements OnInit {
   dateRangeText = '';
   showDatePicker = false;
 
+  /** Format filter: '' (all), 'physical' or 'digital'. */
+  physicalDigital = '';
+
   categories: Category[] = [];
   genreCategories: Category[] = [];
   franchiseCategories: Category[] = [];
@@ -84,6 +87,7 @@ export abstract class InventoryListBaseComponent implements OnInit {
       dateFrom: this.dateFrom || null,
       dateTo: this.dateTo || null,
       console: this.activeFilters['consoleFamily'] || null,
+      pd: this.physicalDigital || null,
       ...this.extraQueryParams(),
     };
     for (const key of CATEGORY_FILTER_KEYS) {
@@ -123,6 +127,8 @@ export abstract class InventoryListBaseComponent implements OnInit {
     const consoleFamily = params.get('console');
     if (consoleFamily) this.activeFilters['consoleFamily'] = consoleFamily;
 
+    this.physicalDigital = params.get('pd') ?? '';
+
     this.restoreExtraState(params);
   }
 
@@ -156,8 +162,12 @@ export abstract class InventoryListBaseComponent implements OnInit {
   loadConsoleFamilies(): void {
     this.consoleFamilyService.getAllFamilies().subscribe((families) => {
       this.consoleFamilies = families.sort((a, b) => a.name.localeCompare(b.name));
+      this.onConsoleFamiliesLoaded();
     });
   }
+
+  /** Hook run after the console families load; overridden by subclasses. */
+  protected onConsoleFamiliesLoaded(): void {}
 
   getConsoleFamilyName(familyId: string): string {
     const family = this.consoleFamilies.find((f) => f.id === familyId);
@@ -188,6 +198,12 @@ export abstract class InventoryListBaseComponent implements OnInit {
     } else {
       this.activeFilters['consoleFamily'] = familyId;
     }
+    this.currentPage = 1;
+    this.fetchItems();
+  }
+
+  onPhysicalDigitalFilter(event: any): void {
+    this.physicalDigital = event.target.value;
     this.currentPage = 1;
     this.fetchItems();
   }
@@ -264,5 +280,6 @@ export abstract class InventoryListBaseComponent implements OnInit {
     this.dateFrom = '';
     this.dateTo = '';
     this.dateRangeText = '';
+    this.physicalDigital = '';
   }
 }

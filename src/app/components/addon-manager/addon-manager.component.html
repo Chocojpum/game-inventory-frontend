@@ -1,14 +1,14 @@
-<div class="dlc-overlay" (click)="closeModal()">
-  <div class="dlc-modal" (click)="$event.stopPropagation()">
+<div class="addon-overlay" (click)="closeModal()">
+  <div class="addon-modal" (click)="$event.stopPropagation()">
     <div class="modal-header">
-      <h2>{{ isEditMode ? "✏️ Edit DLC" : "➕ Add DLC" }}</h2>
+      <h2>{{ isEditMode ? "✏️ Edit Addon" : "➕ Add Addon" }}</h2>
       <button type="button" class="close-btn" (click)="closeModal()">✕</button>
     </div>
 
-    <form [formGroup]="dlcForm" (ngSubmit)="onSubmit()" class="dlc-form">
+    <form [formGroup]="addonForm" (ngSubmit)="onSubmit()" class="addon-form">
       <div class="form-group">
         <label>Title *</label>
-        <input type="text" formControlName="title" placeholder="Enter DLC title" />
+        <input type="text" formControlName="title" placeholder="Enter Addon title" />
       </div>
 
       <div class="form-group">
@@ -34,14 +34,14 @@
           formControlName="coverArt"
           placeholder="https://example.com/cover.jpg"
         />
-        <div class="cover-preview" *ngIf="dlcForm.get('coverArt')?.value">
-          <img [src]="dlcForm.get('coverArt')?.value" alt="Cover preview" />
+        <div class="cover-preview" *ngIf="addonForm.get('coverArt')?.value">
+          <img [src]="addonForm.get('coverArt')?.value" alt="Cover preview" />
         </div>
       </div>
 
       <div class="form-group">
         <label>Release Date *</label>
-        <input title="dlc-release-date" type="date" formControlName="releaseDate" />
+        <input title="addon-release-date" type="date" formControlName="releaseDate" />
       </div>
 
       <div class="custom-attribute-section">
@@ -60,8 +60,8 @@
       </div>
 
       <div class="form-actions">
-        <button type="submit" class="submit-btn" [disabled]="!dlcForm.valid">
-          {{ isEditMode ? "Update DLC" : "Add DLC" }}
+        <button type="submit" class="submit-btn" [disabled]="!addonForm.valid">
+          {{ isEditMode ? "Update Addon" : "Add Addon" }}
         </button>
         <button type="button" class="cancel-btn" (click)="closeModal()">Cancel</button>
       </div>

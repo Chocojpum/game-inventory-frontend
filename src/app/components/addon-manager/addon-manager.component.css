@@ -1,4 +1,4 @@
-.dlc-overlay {
+.addon-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -11,7 +11,7 @@
   z-index: 1000;
   padding: 1rem;
 }
-.dlc-modal {
+.addon-modal {
   background: var(--background-primary);
   border-radius: 16px;
   width: 100%;
@@ -42,7 +42,7 @@
   cursor: pointer;
   color: var(--text-secondary);
 }
-.dlc-form {
+.addon-form {
   padding: 1.5rem;
 }
 .form-group {

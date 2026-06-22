@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { ActivatedRoute, ParamMap, Params, Router } from '@angular/router';
 import { GameService, Game } from '../../services/game.service';
 import { CategoryService } from '../../services/category.service';
-import { ConsoleFamilyService } from '../../services/console-family.service';
+import { ConsoleFamilyService, ConsoleFamily } from '../../services/console-family.service';
 import { ListReturnService } from '../../services/list-return.service';
 import {
   trigger,
@@ -52,6 +52,24 @@ export class GameListComponent extends InventoryListBaseComponent {
     direction: 'asc',
   };
 
+  /** PC-platform console families (bare "PC" plus storefronts like "PC (Steam)"). */
+  pcFamilies: ConsoleFamily[] = [];
+  /** IDs of PC platforms currently excluded from the list (unchecked). */
+  excludedPcFamilyIds = new Set<string>();
+  /** Whether the PC platform filter panel is expanded. */
+  showPcFilter = false;
+  /**
+   * When true, also show not-owned games (those without a console attached).
+   * Default false: only owned games are listed.
+   */
+  includeNotOwned = false;
+  /**
+   * True once the URL or the user explicitly drives the PC filter. While false,
+   * the backend applies its default of hiding the pirated bare-"PC" games, so we
+   * don't send the filter (and the URL stays clean).
+   */
+  private pcFilterApplied = false;
+
   constructor(
     private gameService: GameService,
     categoryService: CategoryService,
@@ -97,12 +115,98 @@ export class GameListComponent extends InventoryListBaseComponent {
       params['consoleFamilyId'] = this.activeFilters['consoleFamily'];
     }
 
+    if (this.physicalDigital) {
+      params['physicalDigital'] = this.physicalDigital;
+    }
+
+    // By default the backend returns only owned games; opt into the not-owned ones.
+    if (this.includeNotOwned) {
+      params['includeNotOwned'] = '1';
+    }
+
+    // Only send the PC filter once it's explicitly driven; otherwise the backend
+    // applies its default (hide the pirated bare-"PC" games).
+    if (this.pcFilterApplied) {
+      params['pcFilter'] = '1';
+      let i = 0;
+      this.excludedPcFamilyIds.forEach(
+        (id) => (params[`excludeConsoleFamilyId_${i++}`] = id),
+      );
+    }
+
     return params;
+  }
+
+  /** A console family on a PC platform (bare "PC" or a "PC (Store)" variant). */
+  private isPcFamily(family: ConsoleFamily): boolean {
+    const name = family.name.trim().toLowerCase();
+    return name === 'pc' || name.startsWith('pc (');
+  }
+
+  /** The bare "PC" platform — the pirated, legacy-backlog games hidden by default. */
+  isBarePcFamily(family: ConsoleFamily): boolean {
+    return family.name.trim().toLowerCase() === 'pc';
+  }
+
+  /** IDs hidden by default: the pirated bare-"PC" platforms. */
+  private defaultExcludedPcFamilyIds(): Set<string> {
+    return new Set(
+      this.pcFamilies.filter((f) => this.isBarePcFamily(f)).map((f) => f.id),
+    );
+  }
+
+  protected override onConsoleFamiliesLoaded(): void {
+    this.pcFamilies = this.consoleFamilies.filter((f) => this.isPcFamily(f));
+    // Reflect the backend default in the checkboxes unless the URL/user already
+    // took control (in which case the restored selection stands).
+    if (!this.pcFilterApplied) {
+      this.excludedPcFamilyIds = this.defaultExcludedPcFamilyIds();
+    }
+  }
+
+  isPcFamilyIncluded(familyId: string): boolean {
+    return !this.excludedPcFamilyIds.has(familyId);
+  }
+
+  togglePcFamily(familyId: string): void {
+    this.pcFilterApplied = true;
+    if (this.excludedPcFamilyIds.has(familyId)) {
+      this.excludedPcFamilyIds.delete(familyId);
+    } else {
+      this.excludedPcFamilyIds.add(familyId);
+    }
+    this.currentPage = 1;
+    this.fetchItems();
+  }
+
+  /** Excludes every PC platform — "show everything except PC games". */
+  hideAllPcFamilies(): void {
+    this.pcFilterApplied = true;
+    this.excludedPcFamilyIds = new Set(this.pcFamilies.map((f) => f.id));
+    this.currentPage = 1;
+    this.fetchItems();
+  }
+
+  /** Includes every PC platform, pirated bare-"PC" ones included. */
+  showAllPcFamilies(): void {
+    this.pcFilterApplied = true;
+    this.excludedPcFamilyIds = new Set();
+    this.currentPage = 1;
+    this.fetchItems();
   }
 
   protected override extraQueryParams(): Params {
     const sort = `${this.currentSort.field}-${this.currentSort.direction}`;
-    return { sort: sort !== 'title-asc' ? sort : null };
+    return {
+      sort: sort !== 'title-asc' ? sort : null,
+      // 'none' distinguishes "explicitly exclude nothing" from the default (absent).
+      pcx: this.pcFilterApplied
+        ? this.excludedPcFamilyIds.size
+          ? [...this.excludedPcFamilyIds].join(',')
+          : 'none'
+        : null,
+      notowned: this.includeNotOwned ? '1' : null,
+    };
   }
 
   protected override restoreExtraState(params: ParamMap): void {
@@ -114,6 +218,21 @@ export class GameListComponent extends InventoryListBaseComponent {
         direction: direction as 'asc' | 'desc',
       };
     }
+
+    const pcx = params.get('pcx');
+    if (pcx !== null) {
+      this.pcFilterApplied = true;
+      this.excludedPcFamilyIds =
+        pcx === 'none' ? new Set() : new Set(pcx.split(','));
+    }
+
+    this.includeNotOwned = params.get('notowned') === '1';
+  }
+
+  toggleIncludeNotOwned(): void {
+    this.includeNotOwned = !this.includeNotOwned;
+    this.currentPage = 1;
+    this.fetchItems();
   }
 
   toggleSort(field: 'title' | 'date'): void {
@@ -133,6 +252,10 @@ export class GameListComponent extends InventoryListBaseComponent {
 
   clearFilters(): void {
     this.resetCommonFilters();
+    // Back to the default: backend hides pirated bare-"PC" games, panel reflects it.
+    this.pcFilterApplied = false;
+    this.excludedPcFamilyIds = this.defaultExcludedPcFamilyIds();
+    this.includeNotOwned = false;
     this.currentPage = 1;
     this.fetchItems();
   }

@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CategoryService, Category } from '../../services/category.service';
 import { CreationFlowService } from '../../services/creation-flow.service';
 
+type CategoryType = 'franchise' | 'saga' | 'genre' | 'custom';
+
 @Component({
   selector: 'app-category-manager',
   templateUrl: `./category-manager.component.html`,
@@ -10,7 +12,9 @@ import { CreationFlowService } from '../../services/creation-flow.service';
 export class CategoryManagerComponent implements OnInit {
   categories: Category[] = [];
   filteredCategories: { [key: string]: Category[] } = {};
-  categoryTypes = ['franchise', 'saga', 'genre', 'custom'];
+  categoryTypes: CategoryType[] = ['franchise', 'saga', 'genre', 'custom'];
+  /** The currently selected tab; drives both the list shown and the add form. */
+  activeType: CategoryType = 'genre';
   searchQueries: { [key: string]: string } = {
     franchise: '',
     saga: '',
@@ -19,7 +23,7 @@ export class CategoryManagerComponent implements OnInit {
   };
   newCategory = {
     name: '',
-    type: 'genre' as 'franchise' | 'saga' | 'genre' | 'custom',
+    type: 'genre' as CategoryType,
     description: ''
   };
 
@@ -30,11 +34,17 @@ export class CategoryManagerComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadCategories();
-    // When opened from a "+ New ..." flow, default the type to the one requested.
+    // When opened from a "+ New ..." flow, default the tab to the one requested.
     const type = this.flow.active ? this.flow.current?.context?.categoryType : null;
     if (type) {
-      this.newCategory.type = type;
+      this.setActiveType(type);
     }
+  }
+
+  /** Switches the active tab; the add form adds to this type too. */
+  setActiveType(type: CategoryType): void {
+    this.activeType = type;
+    this.newCategory.type = type;
   }
 
   loadCategories(): void {
@@ -66,7 +76,8 @@ export class CategoryManagerComponent implements OnInit {
 
   addCategory(): void {
     if (this.newCategory.name) {
-      const requestedType = this.newCategory.type;
+      // Always add to the active tab's type.
+      this.newCategory.type = this.activeType;
       this.categoryService.createCategory(this.newCategory).subscribe(created => {
         this.loadCategories();
         // In a create-flow, auto-select the new category for the return.
@@ -75,7 +86,7 @@ export class CategoryManagerComponent implements OnInit {
         }
         this.newCategory = {
           name: '',
-          type: this.flow.active ? requestedType : 'genre',
+          type: this.activeType,
           description: ''
         };
       });

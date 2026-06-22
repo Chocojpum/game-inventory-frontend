@@ -76,7 +76,7 @@
           <p class="generation" *ngIf="family.generation">
             Generation: {{ family.generation }}
           </p>
-          <span class="date">Created: {{ family.createdAt | date }}</span>
+          <span class="date">Created: {{ family.createdAt | date : 'yyyy-MM-dd' }}</span>
         </div>
         <button
           class="delete-btn"

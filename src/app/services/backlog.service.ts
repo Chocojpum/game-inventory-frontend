@@ -6,7 +6,7 @@ import { PaginatedResult, PaginationOptions } from '../components/shared/paginat
 export interface Backlog {
   id: string;
   gameId: string;
-  dlcId?: string;
+  addonId?: string;
   completionDate: string | null;
   endingType: string;
   completionType: string;
@@ -15,12 +15,14 @@ export interface Backlog {
 }
 
 export interface EnrichedBacklog extends Backlog {
-  isDlc?: boolean;
+  isAddon?: boolean;
   parentGameTitle?: string;
   gameTitle: string;
+  gameAlternateTitles: string[];
   gameCoverArt: string;
   gameDeveloper: string;
   gameRegion: string;
+  gamePhysicalDigital: string;
   gameCustomAttributes: Record<string, any>;
   consoleFamilyId: string;
   consoleFamilyName: string;
@@ -39,6 +41,7 @@ export class BacklogService {
       gameId?: string;
       search?: string;
       consoleFamilyId?: string;
+      physicalDigital?: string;
       categoryIds?: string[];
       dateFrom?: string;
       dateTo?: string;
@@ -53,6 +56,7 @@ export class BacklogService {
     if (filters.gameId) params = params.set('gameId', filters.gameId);
     if (filters.search) params = params.set('search', filters.search);
     if (filters.consoleFamilyId) params = params.set('consoleFamilyId', filters.consoleFamilyId);
+    if (filters.physicalDigital) params = params.set('physicalDigital', filters.physicalDigital);
     if (filters.categoryIds) {
       // Send each category as a generic key (categoryId_0, categoryId_1, ...)
       filters.categoryIds.forEach((id, index) => {

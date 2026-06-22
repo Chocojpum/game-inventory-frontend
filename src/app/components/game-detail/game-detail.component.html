@@ -41,7 +41,7 @@
           <div class="info-item">
             <span class="label">Release Date:</span>
             <span class="value">{{
-              game.releaseDate | date : "longDate"
+              game.releaseDate | date : "yyyy-MM-dd"
             }}</span>
           </div>
           <div class="info-item">
@@ -137,11 +137,11 @@
         <div class="actions">
           <button class="edit-button" (click)="editGame()">✏️ Edit</button>
           <button
-            class="dlc-button"
-            *ngIf="game.canHaveDlc"
-            (click)="openAddDlc()"
+            class="addon-button"
+            *ngIf="game.canHaveAddon"
+            (click)="openAddAddon()"
           >
-            ➕ Add DLC
+            ➕ Add Addon
           </button>
           <button class="delete-button" (click)="deleteGame()">
             🗑️ Delete
@@ -163,47 +163,47 @@
       </div>
     </div>
 
-    <div class="dlc-section" *ngIf="dlcs.length > 0">
-      <div class="dlc-section-header">
-        <h2>🧩 DLC</h2>
+    <div class="addon-section" *ngIf="addons.length > 0">
+      <div class="addon-section-header">
+        <h2>🧩 Addon</h2>
         <button
-          class="add-dlc-btn"
-          *ngIf="game.canHaveDlc"
-          (click)="openAddDlc()"
+          class="add-addon-btn"
+          *ngIf="game.canHaveAddon"
+          (click)="openAddAddon()"
         >
-          + Add DLC
+          + Add Addon
         </button>
       </div>
-      <div class="dlc-grid">
-        <div class="dlc-card" *ngFor="let dlc of dlcs">
-          <div class="dlc-cover">
-            <img [src]="dlc.coverArt" [alt]="dlc.title" />
+      <div class="addon-grid">
+        <div class="addon-card" *ngFor="let addon of addons">
+          <div class="addon-cover">
+            <img [src]="addon.coverArt" [alt]="addon.title" />
           </div>
-          <div class="dlc-info">
-            <h3 [title]="dlc.title" appOverflowClass="title-text-animated">
-              <span class="title-text">{{ dlc.title }}</span>
+          <div class="addon-info">
+            <h3 [title]="addon.title" appOverflowClass="title-text-animated">
+              <span class="title-text">{{ addon.title }}</span>
             </h3>
             <p
-              class="dlc-alt"
-              *ngIf="dlc.alternateTitles && dlc.alternateTitles.length > 0"
+              class="addon-alt"
+              *ngIf="addon.alternateTitles && addon.alternateTitles.length > 0"
             >
-              {{ dlc.alternateTitles.join(", ") }}
+              {{ addon.alternateTitles.join(", ") }}
             </p>
-            <p class="dlc-date">{{ dlc.releaseDate | date }}</p>
-            <div class="dlc-attributes" *ngIf="hasDlcAttributes(dlc)">
+            <p class="addon-date">{{ addon.releaseDate | date : 'yyyy-MM-dd' }}</p>
+            <div class="addon-attributes" *ngIf="hasAddonAttributes(addon)">
               <span
-                class="dlc-attr"
-                *ngFor="let attr of getDlcAttributesArray(dlc)"
+                class="addon-attr"
+                *ngFor="let attr of getAddonAttributesArray(addon)"
               >
                 <strong>{{ attr.key }}:</strong> {{ attr.value }}
               </span>
             </div>
-            <div class="dlc-actions">
-              <button class="dlc-action complete" (click)="addDlcCompletion(dlc)">
+            <div class="addon-actions">
+              <button class="addon-action complete" (click)="addAddonCompletion(addon)">
                 🎯 Add completion
               </button>
-              <button class="dlc-action" (click)="openEditDlc(dlc)">✏️</button>
-              <button class="dlc-action delete" (click)="deleteDlc(dlc)">✕</button>
+              <button class="addon-action" (click)="openEditAddon(addon)">✏️</button>
+              <button class="addon-action delete" (click)="deleteAddon(addon)">✕</button>
             </div>
           </div>
         </div>
@@ -231,8 +231,8 @@
               <span class="completion-type-badge">{{
                 backlog.completionType
               }}</span>
-              <span class="dlc-entry-badge" *ngIf="backlog.dlcId">
-                🧩 {{ getDlcTitle(backlog.dlcId) }}
+              <span class="addon-entry-badge" *ngIf="backlog.addonId">
+                🧩 {{ getAddonTitle(backlog.addonId) }}
               </span>
             </div>
             <div class="backlog-details" *ngIf="backlog.endingType">
@@ -321,19 +321,19 @@
     <app-backlog-manager
       *ngIf="showBacklog"
       [gameId]="game.id"
-      [gameTitle]="backlogDlcTitle || game.title"
-      [dlcId]="backlogDlcId"
+      [gameTitle]="backlogAddonTitle || game.title"
+      [addonId]="backlogAddonId"
       (close)="closeBacklogManager()"
     >
     </app-backlog-manager>
 
-    <app-dlc-manager
-      *ngIf="showDlcManager"
+    <app-addon-manager
+      *ngIf="showAddonManager"
       [gameId]="game.id"
-      [dlc]="editingDlc"
-      (close)="closeDlcManager()"
+      [addon]="editingAddon"
+      (close)="closeAddonManager()"
     >
-    </app-dlc-manager>
+    </app-addon-manager>
   </div>
 </div>
 

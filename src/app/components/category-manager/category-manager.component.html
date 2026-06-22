@@ -13,47 +13,53 @@
     </div>
   </div>
 
+  <div class="category-tabs">
+    <button
+      type="button"
+      class="category-tab"
+      *ngFor="let type of categoryTypes"
+      [class.active]="activeType === type"
+      (click)="setActiveType(type)"
+    >
+      {{ type | titlecase }}
+    </button>
+  </div>
+
   <div class="add-category-form">
-    <h3>Add New Category</h3>
+    <h3>Add New {{ activeType | titlecase }}</h3>
     <div class="form-inline">
       <input
         type="text"
         [(ngModel)]="newCategory.name"
-        placeholder="Category name"
+        placeholder="{{ activeType | titlecase }} name"
       />
-      <select title="new-category-select" [(ngModel)]="newCategory.type">
-        <option value="franchise">Franchise</option>
-        <option value="saga">Saga</option>
-        <option value="genre">Genre</option>
-        <option value="custom">Custom</option>
-      </select>
       <input
         type="text"
         [(ngModel)]="newCategory.description"
         placeholder="Description (optional)"
       />
       <button (click)="addCategory()" [disabled]="!newCategory.name">
-        Add Category
+        Add {{ activeType | titlecase }}
       </button>
     </div>
   </div>
 
   <div class="categories-display">
-    <div class="category-group" *ngFor="let type of categoryTypes">
+    <div class="category-group">
       <div class="group-header">
-        <h3>{{ type | titlecase }}</h3>
+        <h3>{{ activeType | titlecase }}</h3>
         <input
           type="text"
           class="search-input"
-          [(ngModel)]="searchQueries[type]"
-          (input)="onSearch(type)"
-          placeholder="Search {{ type }}..."
+          [(ngModel)]="searchQueries[activeType]"
+          (input)="onSearch(activeType)"
+          placeholder="Search {{ activeType }}..."
         />
       </div>
       <div class="category-list">
         <div
           class="category-item"
-          *ngFor="let category of getFilteredCategories(type)"
+          *ngFor="let category of getFilteredCategories(activeType)"
         >
           <label *ngIf="flow.active" class="flow-select">
             <input
@@ -66,7 +72,7 @@
           <div class="category-content">
             <strong>{{ category.name }}</strong>
             <p *ngIf="category.description">{{ category.description }}</p>
-            <span class="date">Created: {{ category.createdAt | date }}</span>
+            <span class="date">Created: {{ category.createdAt | date : 'yyyy-MM-dd' }}</span>
           </div>
           <button
             class="delete-btn"
@@ -77,9 +83,9 @@
         </div>
         <p
           class="empty-message"
-          *ngIf="getFilteredCategories(type).length === 0"
+          *ngIf="getFilteredCategories(activeType).length === 0"
         >
-          No {{ type }} categories found
+          No {{ activeType }} categories found
         </p>
       </div>
     </div>

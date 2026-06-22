@@ -26,7 +26,7 @@ export class GameFormComponent implements OnInit {
   consoleFamilies: ConsoleFamily[] = [];
   globalAttributes: Attribute[] = [];
   selectedCategoryIds: string[] = [];
-  canHaveDlc = false;
+  canHaveAddon = false;
   // Compilation support
   isCompilation = false;
   allGames: Game[] = [];
@@ -228,7 +228,10 @@ export class GameFormComponent implements OnInit {
       if (g.id === this.gameId) return false; // can't include itself
       if (g.isCompilation) return false; // compilations can't nest
       if (!query) return true;
-      return g.title.toLowerCase().includes(query);
+      // Match the main title or any alternate title (e.g. "AAI" -> "Ace Attorney Investigations").
+      return [g.title, ...(g.alternateTitles || [])].some(t =>
+        t.toLowerCase().includes(query),
+      );
     });
   }
 
@@ -266,7 +269,7 @@ export class GameFormComponent implements OnInit {
       }
 
       this.selectedCategoryIds = game.categoryIds || [];
-      this.canHaveDlc = game.canHaveDlc || false;
+      this.canHaveAddon = game.canHaveAddon || false;
       this.isCompilation = game.isCompilation || false;
       this.selectedIncludedGameIds = game.includedGameIds || [];
       this.customAttributesObj = game.customAttributes || {};
@@ -366,7 +369,7 @@ export class GameFormComponent implements OnInit {
         ...this.gameForm.value,
         categoryIds: this.selectedCategoryIds,
         customAttributes: this.customAttributesObj,
-        canHaveDlc: this.canHaveDlc,
+        canHaveAddon: this.canHaveAddon,
         isCompilation: this.isCompilation,
         includedGameIds: this.isCompilation ? this.selectedIncludedGameIds : [],
       };

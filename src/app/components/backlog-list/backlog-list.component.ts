@@ -48,6 +48,7 @@ export class BacklogListComponent extends InventoryListBaseComponent {
       {
         search: this.currentSearchQuery,
         consoleFamilyId: this.activeFilters['consoleFamily'],
+        physicalDigital: this.physicalDigital,
         categoryIds: this.selectedCategoryIds(),
         dateFrom: this.dateFrom,
         dateTo: this.dateTo,

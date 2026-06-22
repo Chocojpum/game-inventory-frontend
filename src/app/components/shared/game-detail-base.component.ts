@@ -3,12 +3,12 @@ import { Router } from '@angular/router';
 import { GameService, Game } from '../../services/game.service';
 import { ConsoleFamilyService, ConsoleFamily } from '../../services/console-family.service';
 import { BacklogService, Backlog } from '../../services/backlog.service';
-import { DlcService, Dlc } from '../../services/dlc.service';
+import { AddonService, Addon } from '../../services/addon.service';
 import { ListReturnService } from '../../services/list-return.service';
 
 /**
  * Shared logic for the game and compilation detail views: console-family
- * loading, the backlog (completions) panel, the DLC panel, custom-attribute
+ * loading, the backlog (completions) panel, the Addon panel, custom-attribute
  * helpers, and the common game actions (edit/delete/back).
  *
  * Subclasses provide their own routing/load orchestration plus any extra,
@@ -21,18 +21,18 @@ export abstract class GameDetailBaseComponent {
   backlogs: Backlog[] = [];
   showBacklog = false;
 
-  dlcs: Dlc[] = [];
-  showDlcManager = false;
-  editingDlc?: Dlc;
-  backlogDlcId?: string;
-  backlogDlcTitle?: string;
+  addons: Addon[] = [];
+  showAddonManager = false;
+  editingAddon?: Addon;
+  backlogAddonId?: string;
+  backlogAddonTitle?: string;
 
   constructor(
     protected router: Router,
     protected gameService: GameService,
     protected consoleFamilyService: ConsoleFamilyService,
     protected backlogService: BacklogService,
-    protected dlcService: DlcService,
+    protected addonService: AddonService,
     protected listReturn: ListReturnService,
   ) {}
 
@@ -59,10 +59,10 @@ export abstract class GameDetailBaseComponent {
     }
   }
 
-  loadDlcs(): void {
+  loadAddons(): void {
     if (this.game) {
-      this.dlcService.getDlcsByGame(this.game.id).subscribe(dlcs => {
-        this.dlcs = dlcs.sort((a, b) => a.title.localeCompare(b.title));
+      this.addonService.getAddonsByGame(this.game.id).subscribe(addons => {
+        this.addons = addons.sort((a, b) => a.title.localeCompare(b.title));
       });
     }
   }
@@ -92,26 +92,26 @@ export abstract class GameDetailBaseComponent {
     return Object.entries(backlog.customAttributes).map(([key, value]) => ({ key, value }));
   }
 
-  hasDlcAttributes(dlc: Dlc): boolean {
-    return Object.keys(dlc.customAttributes || {}).length > 0;
+  hasAddonAttributes(addon: Addon): boolean {
+    return Object.keys(addon.customAttributes || {}).length > 0;
   }
 
-  getDlcAttributesArray(dlc: Dlc): Array<{ key: string; value: any }> {
-    return Object.entries(dlc.customAttributes || {}).map(([key, value]) => ({ key, value }));
+  getAddonAttributesArray(addon: Addon): Array<{ key: string; value: any }> {
+    return Object.entries(addon.customAttributes || {}).map(([key, value]) => ({ key, value }));
   }
 
   // --- Backlog (completions) panel ---
 
   showBacklogManager(): void {
-    this.backlogDlcId = undefined;
-    this.backlogDlcTitle = undefined;
+    this.backlogAddonId = undefined;
+    this.backlogAddonTitle = undefined;
     this.showBacklog = true;
   }
 
   closeBacklogManager(): void {
     this.showBacklog = false;
-    this.backlogDlcId = undefined;
-    this.backlogDlcTitle = undefined;
+    this.backlogAddonId = undefined;
+    this.backlogAddonTitle = undefined;
     this.loadBacklogs();
   }
 
@@ -121,39 +121,39 @@ export abstract class GameDetailBaseComponent {
     }
   }
 
-  // --- DLC panel ---
+  // --- Addon panel ---
 
-  openAddDlc(): void {
-    this.editingDlc = undefined;
-    this.showDlcManager = true;
+  openAddAddon(): void {
+    this.editingAddon = undefined;
+    this.showAddonManager = true;
   }
 
-  openEditDlc(dlc: Dlc): void {
-    this.editingDlc = dlc;
-    this.showDlcManager = true;
+  openEditAddon(addon: Addon): void {
+    this.editingAddon = addon;
+    this.showAddonManager = true;
   }
 
-  closeDlcManager(): void {
-    this.showDlcManager = false;
-    this.editingDlc = undefined;
-    this.loadDlcs();
+  closeAddonManager(): void {
+    this.showAddonManager = false;
+    this.editingAddon = undefined;
+    this.loadAddons();
   }
 
-  deleteDlc(dlc: Dlc): void {
-    if (confirm(`Are you sure you want to delete the DLC "${dlc.title}"?`)) {
-      this.dlcService.deleteDlc(dlc.id).subscribe(() => this.loadDlcs());
+  deleteAddon(addon: Addon): void {
+    if (confirm(`Are you sure you want to delete the Addon "${addon.title}"?`)) {
+      this.addonService.deleteAddon(addon.id).subscribe(() => this.loadAddons());
     }
   }
 
-  addDlcCompletion(dlc: Dlc): void {
-    this.backlogDlcId = dlc.id;
-    this.backlogDlcTitle = dlc.title;
+  addAddonCompletion(addon: Addon): void {
+    this.backlogAddonId = addon.id;
+    this.backlogAddonTitle = addon.title;
     this.showBacklog = true;
   }
 
-  getDlcTitle(dlcId: string): string {
-    const dlc = this.dlcs.find(d => d.id === dlcId);
-    return dlc ? dlc.title : 'DLC';
+  getAddonTitle(addonId: string): string {
+    const addon = this.addons.find(d => d.id === addonId);
+    return addon ? addon.title : 'Addon';
   }
 
   // --- Game actions ---

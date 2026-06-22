@@ -91,6 +91,77 @@
       </select>
     </div>
 
+    <div class="filter-group">
+      <label>Format:</label>
+      <select
+        title="format-filter-select"
+        [ngModel]="physicalDigital"
+        [ngModelOptions]="{ standalone: true }"
+        (change)="onPhysicalDigitalFilter($event)"
+        class="filter-select"
+      >
+        <option value="">All</option>
+        <option value="physical">Physical</option>
+        <option value="digital">Digital</option>
+      </select>
+    </div>
+
+    <div class="filter-group ownership-filter-group">
+      <label>Ownership:</label>
+      <label class="ownership-toggle">
+        <input
+          type="checkbox"
+          [checked]="includeNotOwned"
+          (change)="toggleIncludeNotOwned()"
+        />
+        <span>Show not-owned games</span>
+      </label>
+    </div>
+
+    <div class="filter-group pc-filter-group" *ngIf="pcFamilies.length > 0">
+      <label>PC Platforms:</label>
+      <button
+        type="button"
+        class="pc-filter-toggle"
+        (click)="showPcFilter = !showPcFilter"
+      >
+        🖥️ PC platforms ({{ pcFamilies.length - excludedPcFamilyIds.size }}/{{
+          pcFamilies.length
+        }} shown)
+      </button>
+      <div
+        class="pc-filter-dropdown"
+        *ngIf="showPcFilter"
+        (clickOutside)="showPcFilter = false"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="pc-filter-actions">
+          <button type="button" class="apply-btn" (click)="showAllPcFamilies()">
+            Show all
+          </button>
+          <button type="button" class="clear-btn" (click)="hideAllPcFamilies()">
+            Hide all PC
+          </button>
+        </div>
+        <label
+          class="pc-filter-option"
+          *ngFor="let family of pcFamilies"
+        >
+          <input
+            type="checkbox"
+            [checked]="isPcFamilyIncluded(family.id)"
+            (change)="togglePcFamily(family.id)"
+          />
+          <span>
+            {{ family.name }}
+            <small *ngIf="isBarePcFamily(family)" class="pc-legacy-tag"
+              >(legacy backlog)</small
+            >
+          </span>
+        </label>
+      </div>
+    </div>
+
     <div class="filter-group date-range-group">
       <label>Release Date Range:</label>
       <input
@@ -211,7 +282,7 @@
           <span class="title-text">{{ game.title }}</span>
         </h3>
         <p class="platform">{{ getConsoleFamilyName(game.consoleFamilyId) }}</p>
-        <p class="release-date">{{ game.releaseDate | date }}</p>
+        <p class="release-date">{{ game.releaseDate | date : 'yyyy-MM-dd' }}</p>
         <p class="part-of-compilation" *ngIf="game.compilationId">
           📦 Part of {{ game.compilationTitle }}
         </p>

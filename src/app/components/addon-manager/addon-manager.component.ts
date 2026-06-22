@@ -1,27 +1,27 @@
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
-import { DlcService, Dlc } from '../../services/dlc.service';
+import { AddonService, Addon } from '../../services/addon.service';
 
 @Component({
-  selector: 'app-dlc-manager',
-  templateUrl: `./dlc-manager.component.html`,
-  styleUrls: [`./dlc-manager.component.css`]
+  selector: 'app-addon-manager',
+  templateUrl: `./addon-manager.component.html`,
+  styleUrls: [`./addon-manager.component.css`]
 })
-export class DlcManagerComponent implements OnInit {
+export class AddonManagerComponent implements OnInit {
   @Input() gameId!: string;
-  @Input() dlc?: Dlc; // present => edit mode
+  @Input() addon?: Addon; // present => edit mode
   @Output() close = new EventEmitter<void>();
   @Output() saved = new EventEmitter<void>();
 
-  dlcForm: FormGroup;
+  addonForm: FormGroup;
   isEditMode = false;
   newAttributeName = '';
   newAttributeValue = '';
   customAttributesObj: Record<string, any> = {};
   customAttributesArray: Array<{ key: string; value: any }> = [];
 
-  constructor(private fb: FormBuilder, private dlcService: DlcService) {
-    this.dlcForm = this.fb.group({
+  constructor(private fb: FormBuilder, private addonService: AddonService) {
+    this.addonForm = this.fb.group({
       title: ['', Validators.required],
       alternateTitles: this.fb.array([]),
       coverArt: ['', Validators.required],
@@ -30,21 +30,21 @@ export class DlcManagerComponent implements OnInit {
   }
 
   get alternateTitles(): FormArray {
-    return this.dlcForm.get('alternateTitles') as FormArray;
+    return this.addonForm.get('alternateTitles') as FormArray;
   }
 
   ngOnInit(): void {
-    if (this.dlc) {
+    if (this.addon) {
       this.isEditMode = true;
-      this.dlcForm.patchValue({
-        title: this.dlc.title,
-        coverArt: this.dlc.coverArt,
-        releaseDate: this.dlc.releaseDate ? this.dlc.releaseDate.split('T')[0] : '',
+      this.addonForm.patchValue({
+        title: this.addon.title,
+        coverArt: this.addon.coverArt,
+        releaseDate: this.addon.releaseDate ? this.addon.releaseDate.split('T')[0] : '',
       });
-      (this.dlc.alternateTitles || []).forEach(t =>
+      (this.addon.alternateTitles || []).forEach(t =>
         this.alternateTitles.push(this.fb.control(t)),
       );
-      this.customAttributesObj = { ...(this.dlc.customAttributes || {}) };
+      this.customAttributesObj = { ...(this.addon.customAttributes || {}) };
       this.updateCustomAttributesArray();
     }
   }
@@ -79,21 +79,21 @@ export class DlcManagerComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (!this.dlcForm.valid) return;
+    if (!this.addonForm.valid) return;
 
-    const payload: Partial<Dlc> = {
+    const payload: Partial<Addon> = {
       gameId: this.gameId,
-      ...this.dlcForm.value,
+      ...this.addonForm.value,
       customAttributes: this.customAttributesObj,
     };
 
-    if (this.isEditMode && this.dlc) {
-      this.dlcService.updateDlc(this.dlc.id, payload).subscribe(() => {
+    if (this.isEditMode && this.addon) {
+      this.addonService.updateAddon(this.addon.id, payload).subscribe(() => {
         this.saved.emit();
         this.close.emit();
       });
     } else {
-      this.dlcService.createDlc(payload).subscribe(() => {
+      this.addonService.createAddon(payload).subscribe(() => {
         this.saved.emit();
         this.close.emit();
       });

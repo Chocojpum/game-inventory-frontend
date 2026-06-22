@@ -91,6 +91,21 @@
       </select>
     </div>
 
+    <div class="filter-group">
+      <label>Format:</label>
+      <select
+        title="format-filter-select"
+        [ngModel]="physicalDigital"
+        [ngModelOptions]="{ standalone: true }"
+        (change)="onPhysicalDigitalFilter($event)"
+        class="filter-select"
+      >
+        <option value="">All</option>
+        <option value="physical">Physical</option>
+        <option value="digital">Digital</option>
+      </select>
+    </div>
+
     <div class="filter-group date-range-group">
       <label>Completion Date Range:</label>
       <input
@@ -191,9 +206,9 @@
       <div class="entry-game">
         <h3 class="game-title">
           {{ entry.gameTitle }}
-          <span class="dlc-tag" *ngIf="entry.isDlc">DLC</span>
+          <span class="addon-tag" *ngIf="entry.isAddon">Addon</span>
         </h3>
-        <p class="dlc-parent" *ngIf="entry.isDlc && entry.parentGameTitle">
+        <p class="addon-parent" *ngIf="entry.isAddon && entry.parentGameTitle">
           for {{ entry.parentGameTitle }}
         </p>
         <span class="console-badge">{{ entry.consoleFamilyName }}</span>

@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GameService, Game } from '../../services/game.service';
+import { CategoryService, Category } from '../../services/category.service';
 import { ConsoleFamilyService, ConsoleFamily } from '../../services/console-family.service';
 import { BacklogService } from '../../services/backlog.service';
-import { DlcService } from '../../services/dlc.service';
+import { AddonService } from '../../services/addon.service';
 import { ListReturnService } from '../../services/list-return.service';
 import { trigger, transition, style, animate, query, stagger } from '@angular/animations';
 import { GameDetailBaseComponent } from '../shared/game-detail-base.component';
@@ -34,17 +35,19 @@ import { GameDetailBaseComponent } from '../shared/game-detail-base.component';
 export class CompilationDetailComponent extends GameDetailBaseComponent implements OnInit {
   includedGames: Game[] = [];
   consoleFamilies: ConsoleFamily[] = [];
+  gameCategories: Category[] = [];
 
   constructor(
     private route: ActivatedRoute,
     router: Router,
     gameService: GameService,
+    private categoryService: CategoryService,
     consoleFamilyService: ConsoleFamilyService,
     backlogService: BacklogService,
-    dlcService: DlcService,
+    addonService: AddonService,
     listReturn: ListReturnService
   ) {
-    super(router, gameService, consoleFamilyService, backlogService, dlcService, listReturn);
+    super(router, gameService, consoleFamilyService, backlogService, addonService, listReturn);
   }
 
   ngOnInit(): void {
@@ -68,18 +71,38 @@ export class CompilationDetailComponent extends GameDetailBaseComponent implemen
         return;
       }
       this.game = game;
+      this.loadCategories();
       this.loadConsoleFamily();
       this.loadBacklogs();
-      this.loadDlcs();
+      this.loadAddons();
       this.gameService.getIncludedGames(game.id).subscribe(games => {
         this.includedGames = games;
       });
     });
   }
 
+  loadCategories(): void {
+    if (this.game && this.game.categoryIds.length > 0) {
+      this.categoryService.getAllCategories().subscribe(categories => {
+        this.gameCategories = categories.filter(cat =>
+          this.game!.categoryIds.includes(cat.id)
+        );
+      });
+    }
+  }
+
   getConsoleFamilyName(familyId: string): string {
     const family = this.consoleFamilies.find(f => f.id === familyId);
     return family ? family.name : 'Unknown';
+  }
+
+  getCategoriesByType(type: string): Category[] {
+    return this.gameCategories.filter(cat => cat.type === type);
+  }
+
+  /** Opens the library filtered by the clicked category. */
+  filterByCategory(category: Category): void {
+    this.router.navigate(['/'], { queryParams: { [category.type]: category.id } });
   }
 
   viewIncludedGame(gameId: string): void {

@@ -5,7 +5,7 @@ import { CategoryService, Category } from '../../services/category.service';
 import { ConsoleService, Console } from '../../services/console.service';
 import { ConsoleFamilyService } from '../../services/console-family.service';
 import { BacklogService, Backlog } from '../../services/backlog.service';
-import { DlcService } from '../../services/dlc.service';
+import { AddonService } from '../../services/addon.service';
 import { ListReturnService } from '../../services/list-return.service';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { GameDetailBaseComponent } from '../shared/game-detail-base.component';
@@ -37,10 +37,10 @@ export class GameDetailComponent extends GameDetailBaseComponent implements OnIn
     private consoleService: ConsoleService,
     consoleFamilyService: ConsoleFamilyService,
     backlogService: BacklogService,
-    dlcService: DlcService,
+    addonService: AddonService,
     listReturn: ListReturnService
   ) {
-    super(router, gameService, consoleFamilyService, backlogService, dlcService, listReturn);
+    super(router, gameService, consoleFamilyService, backlogService, addonService, listReturn);
   }
 
   ngOnInit(): void {
@@ -58,7 +58,7 @@ export class GameDetailComponent extends GameDetailBaseComponent implements OnIn
         this.loadConsole();
         this.loadConsoleFamily();
         this.loadBacklogs();
-        this.loadDlcs();
+        this.loadAddons();
       });
     }
   }

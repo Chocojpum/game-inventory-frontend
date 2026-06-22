@@ -19,7 +19,7 @@ import { ConsoleFormComponent } from './components/console-form/console-form.com
 import { PeripheralListComponent } from './components/peripheral-list/peripheral-list.component';
 import { PeripheralFormComponent } from './components/peripheral-form/peripheral-form.component';
 import { BacklogManagerComponent } from './components/backlog-manager/backlog-manager.component';
-import { DlcManagerComponent } from './components/dlc-manager/dlc-manager.component';
+import { AddonManagerComponent } from './components/addon-manager/addon-manager.component';
 import { BacklogListComponent } from './components/backlog-list/backlog-list.component';
 
 import { ConsoleFamilyManagerComponent } from './components/console-family-manager/console-family-manager.component';
@@ -63,7 +63,7 @@ const routes: Routes = [
     PeripheralListComponent,
     PeripheralFormComponent,
     BacklogManagerComponent,
-    DlcManagerComponent,
+    AddonManagerComponent,
     BacklogListComponent,
     PaginationControlsComponent,
     ClickOutsideDirective,

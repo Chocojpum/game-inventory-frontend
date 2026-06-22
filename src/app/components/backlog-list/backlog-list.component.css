@@ -266,7 +266,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.dlc-tag {
+.addon-tag {
   display: inline-block;
   background: #9b59b6;
   color: #fff;
@@ -277,7 +277,7 @@
   vertical-align: middle;
   margin-left: 0.35rem;
 }
-.dlc-parent {
+.addon-parent {
   margin: 0.1rem 0 0 0;
   font-size: 0.8rem;
   font-style: italic;

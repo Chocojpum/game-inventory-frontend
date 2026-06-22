@@ -19,7 +19,7 @@ export interface Game {
   conditionDetails?: string;
   customAttributes: Record<string, any>;
   categoryIds: string[];
-  canHaveDlc?: boolean;
+  canHaveAddon?: boolean;
   isCompilation?: boolean;
   includedGameIds?: string[];
   // Derived by the backend for games that belong to a compilation.

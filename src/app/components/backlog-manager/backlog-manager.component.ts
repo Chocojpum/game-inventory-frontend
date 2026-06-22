@@ -10,7 +10,7 @@ import { CompletionTypeService, CompletionType } from '../../services/completion
 export class BacklogManagerComponent implements OnInit {
   @Input() gameId!: string;
   @Input() gameTitle!: string;
-  @Input() dlcId?: string;
+  @Input() addonId?: string;
   @Output() close = new EventEmitter<void>();
 
   backlogs: Backlog[] = [];
@@ -95,7 +95,7 @@ export class BacklogManagerComponent implements OnInit {
     if (this.newBacklog.completionType && (this.newBacklog.completionDate || this.unknownDate)) {
       this.backlogService.createBacklog({
         gameId: this.gameId,
-        dlcId: this.dlcId,
+        addonId: this.addonId,
         completionDate: this.unknownDate ? null : this.newBacklog.completionDate,
         endingType: this.newBacklog.endingType,
         completionType: this.newBacklog.completionType,
