@@ -10,11 +10,40 @@
 
     <div class="mb-5">
       <label class="mb-1.5 block font-semibold text-ink">Console Family <span class="text-danger">*</span></label>
-      <select title="console-family-input" formControlName="consoleFamilyId" class="w-full px-3 py-2">
+      <select title="console-family-input" formControlName="consoleFamilyId" (change)="onPrimaryFamilyChange()" class="w-full px-3 py-2">
         <option value="">Select Console Family</option>
         <option *ngFor="let family of families" [value]="family.id">{{ family.name }} ({{ family.developer }})</option>
       </select>
       <button type="button" class="btn btn-ghost mt-2 !px-3 !py-1.5 text-sm" (click)="startCreate('consoleFamilyId', false, '/console-families')">+ New console family</button>
+    </div>
+
+    <div class="mb-5">
+      <label class="mb-1.5 block font-semibold text-ink">Backwards Compatible With</label>
+      <p class="mb-2 text-sm text-ink-subtle">
+        Other families this console can also play (e.g. a PS2 that runs PS1 games). Leave empty if none.
+      </p>
+      <div
+        *ngIf="compatibleFamilyOptions.length > 0; else noOtherFamilies"
+        class="grid max-h-48 grid-cols-1 gap-1.5 overflow-y-auto rounded-lg border border-border bg-surface-2 p-3 sm:grid-cols-2"
+      >
+        <label
+          *ngFor="let family of compatibleFamilyOptions"
+          class="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm text-ink hover:bg-surface-3"
+        >
+          <input
+            type="checkbox"
+            class="h-4 w-4 cursor-pointer"
+            [checked]="isCompatibleFamilySelected(family.id)"
+            (change)="toggleCompatibleFamily(family.id)"
+          />
+          <span>{{ family.name }} <span class="text-ink-subtle">({{ family.developer }})</span></span>
+        </label>
+      </div>
+      <ng-template #noOtherFamilies>
+        <p class="text-sm italic text-ink-subtle">
+          {{ form.get('consoleFamilyId')?.value ? 'No other families available.' : 'Select a console family first.' }}
+        </p>
+      </ng-template>
     </div>
 
     <div class="mb-5 grid gap-4 sm:grid-cols-2">

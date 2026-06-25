@@ -1,18 +1,13 @@
 <div class="mx-auto max-w-[1400px]">
-  <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
-    <div>
-      <h2 class="flex items-center gap-2 text-3xl font-bold text-ink">
-        <span aria-hidden="true">💿</span> Game Inventory
-      </h2>
-      <p class="mt-1 text-sm text-ink-muted">{{ totalItems }} game{{ totalItems === 1 ? '' : 's' }} in your collection</p>
-    </div>
-    <button class="btn btn-primary" routerLink="/add-game">
-      <span aria-hidden="true">+</span> Add Game
-    </button>
+  <div class="mb-6">
+    <h2 class="flex items-center gap-2 text-3xl font-bold text-ink">
+      <span aria-hidden="true">🧩</span> Addons
+    </h2>
+    <p class="mt-1 text-sm text-ink-muted">{{ totalItems }} addon{{ totalItems === 1 ? '' : 's' }} across your collection</p>
   </div>
 
   <app-search-bar
-    [placeholder]="'🔍 Search games by title...'"
+    [placeholder]="'🔍 Search addons by title or parent game...'"
     [value]="currentSearchQuery"
     (searchQuery)="onSearch($event)"
   ></app-search-bar>
@@ -232,7 +227,7 @@
       </button>
     </div>
     <p class="text-sm text-ink-muted">
-      Showing <span class="font-bold text-ink">{{ games.length }}</span> of
+      Showing <span class="font-bold text-ink">{{ addons.length }}</span> of
       <span class="font-bold text-ink">{{ totalItems }}</span> · page
       <span class="font-bold text-ink">{{ currentPage }}</span>/{{ totalPages || 1 }}
     </p>
@@ -252,60 +247,53 @@
 
   <div
     class="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-7"
-    *ngIf="games.length > 0"
-    [@listAnimation]="games.length"
+    *ngIf="addons.length > 0"
+    [@listAnimation]="addons.length"
   >
     <div
       class="game-card group relative cursor-pointer overflow-hidden rounded-xl border border-border bg-surface shadow-card transition-all duration-300 hover:-translate-y-2 hover:border-brand hover:shadow-card-hover"
-      *ngFor="let game of games"
-      (click)="viewGame(game)"
+      *ngFor="let addon of addons"
+      (click)="viewAddon(addon)"
       [@cardAnimation]
     >
       <div class="relative h-[280px] w-full overflow-hidden bg-surface-2">
-        <img [src]="game.coverArt" [alt]="game.title" class="h-full w-full object-cover" />
+        <img [src]="addon.coverArt" [alt]="addon.title" class="h-full w-full object-cover" />
         <div
-          class="absolute right-2.5 top-2.5 rounded-full px-2 py-1 text-lg shadow-card"
-          [ngClass]="game.physicalDigital === 'digital' ? 'bg-info/90' : 'bg-brand/90'"
-          [title]="game.physicalDigital === 'physical' ? 'Physical copy' : 'Digital copy'"
+          class="absolute right-2.5 top-2.5 rounded-full px-2 py-1 text-xs font-semibold text-white shadow-card"
+          [ngClass]="addon.completed ? 'bg-success/90' : 'bg-warning/90'"
+          [title]="addon.completed ? 'Completed' : 'Pending'"
         >
-          {{ game.physicalDigital === "physical" ? "📀" : "💾" }}
-        </div>
-        <div
-          class="absolute bottom-2.5 left-2.5 rounded-full px-2 py-1 text-xs font-semibold text-white shadow-card"
-          style="background: linear-gradient(135deg, #f39c12, #e67e22)"
-          *ngIf="game.isCompilation"
-        >
-          📦 Compilation
+          {{ addon.completed ? "✓ Completed" : "◷ Pending" }}
         </div>
       </div>
       <div class="p-4">
         <h3
-          [title]="game.title"
+          [title]="addon.title"
           appOverflowClass="title-text-animated"
           class="relative mb-1 h-[2.4em] overflow-hidden text-base font-semibold text-ink"
         >
-          <span class="title-text">{{ game.title }}</span>
+          <span class="title-text">{{ addon.title }}</span>
         </h3>
-        <p class="text-sm font-semibold text-ink-muted">{{ getConsoleFamilyName(game.consoleFamilyId) }}</p>
-        <p class="text-xs text-ink-subtle">{{ game.releaseDate | date : 'yyyy-MM-dd' }}</p>
-        <p class="mt-1 truncate text-xs font-semibold text-warning" *ngIf="game.compilationId">
-          📦 Part of {{ game.compilationTitle }}
+        <p class="truncate text-xs font-semibold text-accent" [title]="addon.parentGameTitle">🎮 {{ addon.parentGameTitle }}</p>
+        <p class="text-sm font-semibold text-ink-muted">{{ addon.consoleFamilyName }}</p>
+        <p class="text-xs text-ink-subtle">{{ addon.releaseDate | date : 'yyyy-MM-dd' }}</p>
+        <p class="mt-1 truncate text-xs font-semibold text-warning" *ngIf="addon.parentCompilationTitle">
+          📦 Part of {{ addon.parentCompilationTitle }}
         </p>
       </div>
     </div>
   </div>
 
   <!-- Empty state -->
-  <div class="card flex flex-col items-center gap-4 px-8 py-16 text-center" *ngIf="games.length === 0">
-    <span class="text-5xl" aria-hidden="true">🎮</span>
+  <div class="card flex flex-col items-center gap-4 px-8 py-16 text-center" *ngIf="addons.length === 0">
+    <span class="text-5xl" aria-hidden="true">🧩</span>
     <div>
-      <p class="text-lg font-semibold text-ink">No games found</p>
+      <p class="text-lg font-semibold text-ink">No addons found</p>
       <p class="mt-1 text-ink-muted">
-        {{ hasActiveFilters ? 'Try adjusting or clearing your filters.' : 'Start building your collection by adding your first game.' }}
+        {{ hasActiveFilters ? 'Try adjusting or clearing your filters.' : 'Addons you add to your games will appear here.' }}
       </p>
     </div>
     <button *ngIf="hasActiveFilters" class="btn btn-ghost" (click)="clearFilters()">Clear filters</button>
-    <button *ngIf="!hasActiveFilters" class="btn btn-primary" routerLink="/add-game">+ Add your first game</button>
   </div>
 
   <app-pagination-controls

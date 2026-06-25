@@ -7,6 +7,9 @@ import { PaginatedResult, PaginationOptions } from '../components/shared/paginat
 export interface Console {
   id: string;
   consoleFamilyId: string;
+  // Additional families a backwards-compatible console can also play
+  // (e.g. a PS2 that also runs PS1 games). The native family isn't repeated here.
+  compatibleConsoleFamilyIds?: string[];
   releaseDate: string;
   picture: string;
   region: string;

@@ -21,6 +21,7 @@ import { PeripheralFormComponent } from './components/peripheral-form/peripheral
 import { BacklogManagerComponent } from './components/backlog-manager/backlog-manager.component';
 import { AddonManagerComponent } from './components/addon-manager/addon-manager.component';
 import { BacklogListComponent } from './components/backlog-list/backlog-list.component';
+import { AddonListComponent } from './components/addon-list/addon-list.component';
 
 import { ConsoleFamilyManagerComponent } from './components/console-family-manager/console-family-manager.component';
 import { PaginationControlsComponent } from './components/shared/pagination-controls/pagination-controls.component';
@@ -45,6 +46,7 @@ const routes: Routes = [
   { path: 'edit-peripheral/:id', component: PeripheralFormComponent },
   { path: 'categories', component: CategoryManagerComponent },
   { path: 'attributes', component: AttributeManagerComponent },
+  { path: 'addons', component: AddonListComponent },
   { path: 'backlog', component: BacklogListComponent },
 ];
 
@@ -67,6 +69,7 @@ const routes: Routes = [
     BacklogManagerComponent,
     AddonManagerComponent,
     BacklogListComponent,
+    AddonListComponent,
     PaginationControlsComponent,
     ToastContainerComponent,
     ConfirmDialogComponent,

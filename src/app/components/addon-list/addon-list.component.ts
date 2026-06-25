@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute, ParamMap, Params, Router } from '@angular/router';
-import { GameService, Game } from '../../services/game.service';
+import { AddonService, EnrichedAddon } from '../../services/addon.service';
 import { CategoryService } from '../../services/category.service';
 import { ConsoleFamilyService, ConsoleFamily } from '../../services/console-family.service';
 import { ListReturnService } from '../../services/list-return.service';
@@ -15,10 +15,16 @@ import {
 import { PaginationOptions } from '../shared/pagination.interface';
 import { InventoryListBaseComponent } from '../shared/inventory-list-base.component';
 
+/**
+ * Addons list view. Mirrors the games list filters (search, categories, console,
+ * format, ownership, PC platforms, date range, hide-compiled, completed/pending),
+ * resolving each Addon's filterable attributes from its parent game on the
+ * backend. Clicking an Addon opens its parent game's detail page.
+ */
 @Component({
-  selector: 'app-game-list',
-  templateUrl: `./game-list.component.html`,
-  styleUrls: [`./game-list.component.css`],
+  selector: 'app-addon-list',
+  templateUrl: `./addon-list.component.html`,
+  styleUrls: [`./addon-list.component.css`],
   animations: [
     trigger('listAnimation', [
       transition('* => *', [
@@ -45,9 +51,9 @@ import { InventoryListBaseComponent } from '../shared/inventory-list-base.compon
     ]),
   ],
 })
-export class GameListComponent extends InventoryListBaseComponent {
-  games: Game[] = [];
-  currentSort: { field: 'title' | 'date' | null; direction: 'asc' | 'desc' } = {
+export class AddonListComponent extends InventoryListBaseComponent {
+  addons: EnrichedAddon[] = [];
+  currentSort: { field: 'title' | 'date'; direction: 'asc' | 'desc' } = {
     field: 'title',
     direction: 'asc',
   };
@@ -59,21 +65,18 @@ export class GameListComponent extends InventoryListBaseComponent {
   /** Whether the PC platform filter panel is expanded. */
   showPcFilter = false;
   /**
-   * When true, also show not-owned games (those without a console attached).
-   * Default false: only owned games are listed.
+   * When true, also show Addons whose parent game isn't owned (no console attached).
+   * Default false: only Addons of owned games are listed.
    */
   includeNotOwned = false;
   /**
-   * When true, games that belong to a compilation are hidden from the list
-   * (the compilations themselves and standalone games still show).
-   * Default false: members are listed alongside everything else.
+   * When true, Addons whose parent game belongs to a compilation are hidden.
+   * Default false: they're listed alongside everything else.
    */
   excludeCompilationMembers = false;
   /**
-   * Backlog completion-status filter: '' (all), 'completed', or 'pending'.
-   * A game is "completed" when it has a completion entry, when it's a
-   * compilation whose every member is completed, or when it's a member of a
-   * completed compilation; "pending" is the complement.
+   * Completion-status filter: '' (all), 'completed', or 'pending'. An Addon is
+   * "completed" when it has a completion (backlog) entry of its own.
    */
   completionStatus: '' | 'completed' | 'pending' = '';
   /**
@@ -84,7 +87,7 @@ export class GameListComponent extends InventoryListBaseComponent {
   private pcFilterApplied = false;
 
   constructor(
-    private gameService: GameService,
+    private addonService: AddonService,
     categoryService: CategoryService,
     consoleFamilyService: ConsoleFamilyService,
     router: Router,
@@ -101,12 +104,10 @@ export class GameListComponent extends InventoryListBaseComponent {
       limit: this.limit,
     };
 
-    // The search term is sent as part of the filter params (see collectFilterParams),
-    // so a single unified endpoint handles search + category/console/date filters.
-    this.gameService
-      .getFilteredAndPaginatedGames(this.collectFilterParams(), options)
+    this.addonService
+      .getFilteredAndPaginatedAddons(this.collectFilterParams(), options)
       .subscribe((result) => {
-        this.games = result.data;
+        this.addons = result.data;
         this.applyPagination(result);
       });
   }
@@ -119,7 +120,6 @@ export class GameListComponent extends InventoryListBaseComponent {
       sortBy: `${this.currentSort.field}-${this.currentSort.direction}`,
     };
 
-    // Add all active category IDs
     this.selectedCategoryIds().forEach(
       (id, index) => (params[`categoryId_${index}`] = id)
     );
@@ -132,23 +132,18 @@ export class GameListComponent extends InventoryListBaseComponent {
       params['physicalDigital'] = this.physicalDigital;
     }
 
-    // By default the backend returns only owned games; opt into the not-owned ones.
     if (this.includeNotOwned) {
       params['includeNotOwned'] = '1';
     }
 
-    // Hide games that are part of a compilation when the filter is on.
     if (this.excludeCompilationMembers) {
       params['excludeCompiled'] = '1';
     }
 
-    // Narrow to completed or pending games by backlog status.
     if (this.completionStatus) {
       params['completion'] = this.completionStatus;
     }
 
-    // Only send the PC filter once it's explicitly driven; otherwise the backend
-    // applies its default (hide the pirated bare-"PC" games).
     if (this.pcFilterApplied) {
       params['pcFilter'] = '1';
       let i = 0;
@@ -180,8 +175,6 @@ export class GameListComponent extends InventoryListBaseComponent {
 
   protected override onConsoleFamiliesLoaded(): void {
     this.pcFamilies = this.consoleFamilies.filter((f) => this.isPcFamily(f));
-    // Reflect the backend default in the checkboxes unless the URL/user already
-    // took control (in which case the restored selection stands).
     if (!this.pcFilterApplied) {
       this.excludedPcFamilyIds = this.defaultExcludedPcFamilyIds();
     }
@@ -282,13 +275,11 @@ export class GameListComponent extends InventoryListBaseComponent {
 
   toggleSort(field: 'title' | 'date'): void {
     if (this.currentSort.field === field) {
-      // Same field, just reverse the direction
       this.currentSort = {
         field,
         direction: this.currentSort.direction === 'asc' ? 'desc' : 'asc',
       };
     } else {
-      // New field, default to ascending
       this.currentSort = { field, direction: 'asc' };
     }
     this.currentPage = 1;
@@ -297,7 +288,6 @@ export class GameListComponent extends InventoryListBaseComponent {
 
   clearFilters(): void {
     this.resetCommonFilters();
-    // Back to the default: backend hides pirated bare-"PC" games, panel reflects it.
     this.pcFilterApplied = false;
     this.excludedPcFamilyIds = this.defaultExcludedPcFamilyIds();
     this.includeNotOwned = false;
@@ -316,11 +306,8 @@ export class GameListComponent extends InventoryListBaseComponent {
     return count;
   }
 
-  viewGame(game: Game): void {
-    if (game.isCompilation) {
-      this.router.navigate(['/compilation', game.id]);
-    } else {
-      this.router.navigate(['/game', game.id]);
-    }
+  /** Opens the parent game's detail page for the given Addon. */
+  viewAddon(addon: EnrichedAddon): void {
+    this.router.navigate(['/game', addon.gameId]);
   }
 }

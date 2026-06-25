@@ -289,11 +289,23 @@ export class GameFormComponent implements OnInit {
   getFilteredConsoles(): Console[] {
     const familyId = this.gameForm.get('consoleFamilyId')?.value;
     if (!familyId) return [];
-    return this.consoles.filter(c => c.consoleFamilyId === familyId);
+    // Include backwards-compatible consoles: a PS2 can host a PS1 game, etc.
+    return this.consoles.filter(
+      c =>
+        c.consoleFamilyId === familyId ||
+        (c.compatibleConsoleFamilyIds || []).includes(familyId),
+    );
   }
 
   getConsoleName(console: Console): string {
-    return `${console.model} - ${console.region} (${console.color})`;
+    const base = `${console.model} - ${console.region} (${console.color})`;
+    // Flag when the console only plays this game's family via backwards compatibility.
+    const familyId = this.gameForm.get('consoleFamilyId')?.value;
+    if (familyId && console.consoleFamilyId !== familyId) {
+      const nativeFamily = this.consoleFamilies.find(f => f.id === console.consoleFamilyId);
+      return `${base} — ${nativeFamily?.name || 'other'}, backwards compatible`;
+    }
+    return base;
   }
 
   addAlternateTitle(): void {

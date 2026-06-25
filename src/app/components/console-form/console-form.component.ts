@@ -28,12 +28,43 @@ export class ConsoleFormComponent implements OnInit {
   ) {
     this.form = this.fb.group({
       consoleFamilyId: ['', Validators.required],
+      // Families this console is backwards-compatible with (retro hardware).
+      compatibleConsoleFamilyIds: [[] as string[]],
       model: ['', Validators.required],
       releaseDate: ['', Validators.required],
       region: ['', Validators.required],
       color: ['', Validators.required],
       picture: ['', Validators.required],
     });
+  }
+
+  /** Families selectable as backwards-compatible: every family except the chosen primary. */
+  get compatibleFamilyOptions(): ConsoleFamily[] {
+    const primaryId = this.form.get('consoleFamilyId')?.value;
+    return this.families.filter(f => f.id !== primaryId);
+  }
+
+  isCompatibleFamilySelected(familyId: string): boolean {
+    return (this.form.get('compatibleConsoleFamilyIds')?.value || []).includes(familyId);
+  }
+
+  toggleCompatibleFamily(familyId: string): void {
+    const current: string[] = this.form.get('compatibleConsoleFamilyIds')?.value || [];
+    const next = current.includes(familyId)
+      ? current.filter(id => id !== familyId)
+      : [...current, familyId];
+    this.form.patchValue({ compatibleConsoleFamilyIds: next });
+  }
+
+  /** Keeps the primary family out of the compatible list if it was selected there. */
+  onPrimaryFamilyChange(): void {
+    const primaryId = this.form.get('consoleFamilyId')?.value;
+    const current: string[] = this.form.get('compatibleConsoleFamilyIds')?.value || [];
+    if (primaryId && current.includes(primaryId)) {
+      this.form.patchValue({
+        compatibleConsoleFamilyIds: current.filter(id => id !== primaryId),
+      });
+    }
   }
 
   ngOnInit(): void {
@@ -81,6 +112,7 @@ export class ConsoleFormComponent implements OnInit {
     this.consoleService.getConsole(id).subscribe(console => {
       this.form.patchValue({
         consoleFamilyId: console.consoleFamilyId,
+        compatibleConsoleFamilyIds: console.compatibleConsoleFamilyIds || [],
         model: console.model,
         releaseDate: console.releaseDate.split('T')[0],
         region: console.region,

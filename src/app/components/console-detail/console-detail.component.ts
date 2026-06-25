@@ -13,6 +13,8 @@ import { ToastService } from '../../services/toast.service';
 export class ConsoleDetailComponent implements OnInit {
   console: Console | null = null;
   family: ConsoleFamily | null = null;
+  /** Families this console is backwards-compatible with, resolved for display. */
+  compatibleFamilies: ConsoleFamily[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -34,12 +36,18 @@ export class ConsoleDetailComponent implements OnInit {
   }
 
   loadFamily(): void {
-    if (this.console) {
-      this.familyService.getFamily(this.console.consoleFamilyId).subscribe(
-        family => this.family = family,
-        error => console.error('Family not found', error)
-      );
-    }
+    if (!this.console) return;
+    const compatibleIds = this.console.compatibleConsoleFamilyIds || [];
+    // One call resolves both the primary family and the compatible ones for display.
+    this.familyService.getAllFamilies().subscribe(
+      families => {
+        this.family = families.find(f => f.id === this.console!.consoleFamilyId) || null;
+        this.compatibleFamilies = compatibleIds
+          .map(id => families.find(f => f.id === id))
+          .filter((f): f is ConsoleFamily => !!f);
+      },
+      error => console.error('Families not found', error)
+    );
   }
 
   getConsoleName(): string {

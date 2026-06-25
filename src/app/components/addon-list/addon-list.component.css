@@ -1,0 +1,20 @@
+/* Layout & visuals are handled with Tailwind utilities in the template.
+   The only thing kept here is the marquee-style title scroll on hover, which
+   the OverflowClassDirective toggles via the `.title-text-animated` class. */
+.title-text,
+.title-text-animated {
+  display: inline-block;
+  white-space: nowrap;
+  padding-right: 10px;
+}
+.game-card:hover .title-text-animated {
+  animation: scrollTitle 8s linear infinite;
+}
+@keyframes scrollTitle {
+  50% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
