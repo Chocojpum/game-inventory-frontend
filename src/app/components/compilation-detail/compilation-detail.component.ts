@@ -38,6 +38,11 @@ export class CompilationDetailComponent extends GameDetailBaseComponent implemen
   includedGames: Game[] = [];
   consoleFamilies: ConsoleFamily[] = [];
   gameCategories: Category[] = [];
+  /** Sort applied to the included-games grid (client-side; the full list is loaded). */
+  includedSort: { field: 'title' | 'date'; direction: 'asc' | 'desc' } = {
+    field: 'date',
+    direction: 'asc',
+  };
 
   constructor(
     private route: ActivatedRoute,
@@ -81,6 +86,7 @@ export class CompilationDetailComponent extends GameDetailBaseComponent implemen
       this.loadAddons();
       this.gameService.getIncludedGames(game.id).subscribe(games => {
         this.includedGames = games;
+        this.applyIncludedSort();
       });
     });
   }
@@ -111,5 +117,37 @@ export class CompilationDetailComponent extends GameDetailBaseComponent implemen
 
   viewIncludedGame(gameId: string): void {
     this.router.navigate(['/game', gameId]);
+  }
+
+  /** Switches the sort field, or flips direction when the field is unchanged. */
+  toggleIncludedSort(field: 'title' | 'date'): void {
+    if (this.includedSort.field === field) {
+      this.includedSort.direction = this.includedSort.direction === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.includedSort = { field, direction: 'asc' };
+    }
+    this.applyIncludedSort();
+  }
+
+  /** Reorders the included games (by title or release date) per the current sort. */
+  private applyIncludedSort(): void {
+    const { field, direction } = this.includedSort;
+    const dir = direction === 'asc' ? 1 : -1;
+    this.includedGames = [...this.includedGames].sort((a, b) => {
+      if (field === 'title') {
+        return a.title.localeCompare(b.title, undefined, { sensitivity: 'base' }) * dir;
+      }
+      // Release date: missing/invalid dates always sort last, regardless of direction.
+      const ta = this.releaseTime(a.releaseDate);
+      const tb = this.releaseTime(b.releaseDate);
+      if (ta === tb) return 0;
+      if (isNaN(ta)) return 1;
+      if (isNaN(tb)) return -1;
+      return (ta - tb) * dir;
+    });
+  }
+
+  private releaseTime(date: string): number {
+    return date ? new Date(date).getTime() : NaN;
   }
 }

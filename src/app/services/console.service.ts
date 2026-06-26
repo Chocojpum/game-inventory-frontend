@@ -15,6 +15,9 @@ export interface Console {
   region: string;
   color: string;
   model: string;
+  // Free-form completeness/condition detail of the owned console
+  // (e.g. "Console only", "Boxed complete", "Missing power cable", "Includes 2 controllers").
+  conditionDetails?: string;
   customAttributes: Record<string, any>;
   createdAt: Date;
   updatedAt: Date;

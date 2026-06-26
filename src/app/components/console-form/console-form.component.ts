@@ -34,6 +34,8 @@ export class ConsoleFormComponent implements OnInit {
       releaseDate: ['', Validators.required],
       region: ['', Validators.required],
       color: ['', Validators.required],
+      // Optional free-form condition/completeness of the owned console.
+      conditionDetails: [''],
       picture: ['', Validators.required],
     });
   }
@@ -117,6 +119,7 @@ export class ConsoleFormComponent implements OnInit {
         releaseDate: console.releaseDate.split('T')[0],
         region: console.region,
         color: console.color,
+        conditionDetails: console.conditionDetails || '',
         picture: console.picture,
       });
     });

@@ -71,7 +71,30 @@
 
     <!-- Included games -->
     <div class="border-t border-border p-6 md:p-8">
-      <h2 class="mb-4 text-xl font-bold text-ink">🎮 Games in this Compilation</h2>
+      <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <h2 class="text-xl font-bold text-ink">🎮 Games in this Compilation</h2>
+        <div class="flex items-center gap-2 text-sm font-semibold text-ink-muted" *ngIf="includedGames.length > 1">
+          <span aria-hidden="true">↕️</span> Sort by:
+          <button
+            type="button"
+            (click)="toggleIncludedSort('title')"
+            class="rounded-lg border px-3 py-1.5 font-semibold transition-colors"
+            [ngClass]="includedSort.field === 'title' ? 'border-brand bg-brand text-ink' : 'border-accent bg-transparent text-ink hover:bg-surface-3'"
+          >
+            Title
+            {{ includedSort.field === "title" && includedSort.direction === "asc" ? "↑" : includedSort.field === "title" && includedSort.direction === "desc" ? "↓" : "" }}
+          </button>
+          <button
+            type="button"
+            (click)="toggleIncludedSort('date')"
+            class="rounded-lg border px-3 py-1.5 font-semibold transition-colors"
+            [ngClass]="includedSort.field === 'date' ? 'border-brand bg-brand text-ink' : 'border-accent bg-transparent text-ink hover:bg-surface-3'"
+          >
+            Release Date
+            {{ includedSort.field === "date" && includedSort.direction === "asc" ? "↑" : includedSort.field === "date" && includedSort.direction === "desc" ? "↓" : "" }}
+          </button>
+        </div>
+      </div>
       <div class="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-5" *ngIf="includedGames.length > 0" [@listAnimation]="includedGames.length">
         <div class="game-card cursor-pointer overflow-hidden rounded-xl border border-border bg-surface-2 shadow-card transition-all duration-300 hover:-translate-y-1.5 hover:border-brand hover:shadow-card-hover" *ngFor="let included of includedGames" (click)="viewIncludedGame(included.id)">
           <div class="h-[240px] w-full overflow-hidden bg-surface-3">

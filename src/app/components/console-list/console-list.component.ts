@@ -68,9 +68,9 @@ export class ConsoleListComponent implements OnInit {
     });
   }
 
-  getConsoleName(console: Console): string {
+  getFamilyName(console: Console): string {
     const family = this.families.find(f => f.id === console.consoleFamilyId);
-    return family ? family.name : 'Unknown Console';
+    return family ? family.name : 'Unknown';
   }
 
   onSearch(query: string): void {

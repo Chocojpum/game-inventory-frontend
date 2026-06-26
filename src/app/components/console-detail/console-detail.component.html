@@ -28,6 +28,10 @@
             <span class="block text-xs uppercase tracking-wide text-ink-subtle">Color</span>
             <span class="font-semibold text-ink">{{ console.color }}</span>
           </div>
+          <div class="rounded-lg border border-border bg-surface-2 px-3 py-2" *ngIf="console.conditionDetails">
+            <span class="block text-xs uppercase tracking-wide text-ink-subtle">Condition</span>
+            <span class="font-semibold text-ink">{{ console.conditionDetails }}</span>
+          </div>
         </div>
 
         <div class="mt-5" *ngIf="compatibleFamilies.length > 0">

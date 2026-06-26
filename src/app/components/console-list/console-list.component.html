@@ -61,11 +61,11 @@
       [@cardAnimation]
     >
       <div class="console-art flex h-[200px] w-full items-center justify-center p-4">
-        <img [src]="console.picture" [alt]="getConsoleName(console)" class="max-h-full max-w-full object-contain" />
+        <img [src]="console.picture" [alt]="getFamilyName(console)" class="max-h-full max-w-full object-contain" />
       </div>
       <div class="p-6">
-        <h3 class="mb-1 text-xl font-bold text-ink">{{ getConsoleName(console) }}</h3>
-        <p class="font-semibold text-brand-strong">{{ console.model }}</p>
+        <h3 class="mb-1 text-xl font-bold text-ink">{{ console.model }}</h3>
+        <p class="font-semibold text-brand-strong">{{ getFamilyName(console) }}</p>
         <p class="mt-1 text-sm text-ink-subtle">Region: {{ console.region }}</p>
       </div>
     </div>
