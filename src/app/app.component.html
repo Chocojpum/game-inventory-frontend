@@ -2,7 +2,7 @@
   <header
     class="sticky top-0 z-[1000] border-b border-border bg-surface/95 px-4 py-4 backdrop-blur-md sm:px-8"
   >
-    <div class="mx-auto flex max-w-[1400px] flex-col gap-4">
+    <div class="mx-auto flex max-w-[1400px] flex-col">
       <div class="flex flex-wrap items-center justify-between gap-4">
         <a
           routerLink="/"
@@ -12,6 +12,19 @@
           <span>Game Collection Inventory</span>
         </a>
         <div class="flex items-center gap-2">
+          <button
+            type="button"
+            class="btn btn-ghost"
+            (click)="toggleNav()"
+            [attr.aria-expanded]="!navCollapsed"
+            aria-controls="primary-nav"
+          >
+            <span aria-hidden="true">{{ navCollapsed ? '▾' : '▴' }}</span>
+            {{ navCollapsed ? 'Menu' : 'Hide' }}
+          </button>
+          <button type="button" class="btn btn-ghost" (click)="scrollToTop()">
+            <span aria-hidden="true">⬆️</span> Top
+          </button>
           <button type="button" class="btn btn-ghost" (click)="exportData()" [disabled]="busy">
             <span aria-hidden="true">📁</span> Export
           </button>
@@ -32,7 +45,15 @@
         </div>
       </div>
 
-      <nav class="flex flex-wrap gap-1.5" aria-label="Primary">
+      <div
+        class="grid transition-all duration-300 ease-out"
+        [ngClass]="navCollapsed ? 'grid-rows-[0fr] mt-0' : 'grid-rows-[1fr] mt-4'"
+      >
+      <nav
+        id="primary-nav"
+        class="flex flex-wrap gap-1.5 overflow-hidden min-h-0"
+        aria-label="Primary"
+      >
         <a
           routerLink="/"
           routerLinkActive="!bg-brand !text-ink !shadow-card"
@@ -83,6 +104,7 @@
           >Backlog</a
         >
       </nav>
+      </div>
     </div>
   </header>
 

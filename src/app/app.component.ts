@@ -18,6 +18,9 @@ export class AppComponent implements OnInit {
   /** True while an export/import is running, to disable the data buttons. */
   busy = false;
 
+  /** Whether the nav row is collapsed to reclaim vertical space. */
+  navCollapsed = localStorage.getItem('navCollapsed') === 'true';
+
   constructor(
     private exportService: ExportService,
     private router: Router,
@@ -46,6 +49,15 @@ export class AppComponent implements OnInit {
           this.lastPath = path;
         }
       });
+  }
+
+  scrollToTop(): void {
+    this.viewportScroller.scrollToPosition([0, 0]);
+  }
+
+  toggleNav(): void {
+    this.navCollapsed = !this.navCollapsed;
+    localStorage.setItem('navCollapsed', String(this.navCollapsed));
   }
 
   exportData(): void {
