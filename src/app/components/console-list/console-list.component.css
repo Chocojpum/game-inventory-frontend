@@ -1,4 +1,4 @@
 /* Layout is handled with Tailwind utilities in the template. */
 .console-art {
-  background: linear-gradient(135deg, #6a1e55, #3b1c32);
+  background: var(--c-art);
 }

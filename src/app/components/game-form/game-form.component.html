@@ -1,276 +1,213 @@
-<div class="form-container">
-  <h2>{{ isEditMode ? "Edit Game" : "Add New Game" }}</h2>
+<div class="mx-auto max-w-4xl card p-6 md:p-8">
+  <h2 class="mb-6 text-2xl font-bold text-ink">{{ isEditMode ? "Edit Game" : "Add New Game" }}</h2>
 
-  <div class="flow-banner" *ngIf="isFlowTarget">
+  <div
+    class="mb-6 rounded-lg border border-warning bg-warning/10 px-4 py-3 text-sm text-ink"
+    *ngIf="isFlowTarget"
+  >
     📦 You're creating a game to add to a compilation. Fill it in and click
     <strong>Add Game</strong> to return with it selected.
   </div>
 
-  <form [formGroup]="gameForm" (ngSubmit)="onSubmit()" class="game-form">
-    <div class="form-section">
-      <h3>Basic Information</h3>
+  <form [formGroup]="gameForm" (ngSubmit)="onSubmit()">
+    <section class="mb-8 border-b border-border pb-8 last-of-type:mb-0 last-of-type:border-b-0 last-of-type:pb-0">
+      <h3 class="mb-4 text-lg font-bold text-accent">Basic Information</h3>
 
-      <div class="form-group">
-        <label>Title *</label>
-        <input
-          type="text"
-          formControlName="title"
-          placeholder="Enter game title"
-        />
+      <div class="mb-5">
+        <label class="mb-1.5 block font-semibold text-ink">Title <span class="text-danger">*</span></label>
+        <input type="text" formControlName="title" placeholder="Enter game title" class="w-full px-3 py-2" />
       </div>
 
-      <div class="form-group">
-        <label>Alternate Titles</label>
-        <div formArrayName="alternateTitles">
+      <div class="mb-5">
+        <label class="mb-1.5 block font-semibold text-ink">Alternate Titles</label>
+        <div formArrayName="alternateTitles" class="flex flex-col gap-2">
           <div
             *ngFor="let title of alternateTitles.controls; let i = index"
-            class="array-item"
+            class="flex gap-2"
           >
-            <input
-              type="text"
-              [formControlName]="i"
-              placeholder="Alternate title"
-            />
+            <input type="text" [formControlName]="i" placeholder="Alternate title" class="w-full px-3 py-2" />
             <button
               type="button"
-              class="remove-btn"
+              class="btn btn-danger !px-3 !py-2"
+              title="Remove alternate title"
               (click)="removeAlternateTitle(i)"
             >
               ✕
             </button>
           </div>
         </div>
-        <button type="button" class="add-btn" (click)="addAlternateTitle()">
+        <button type="button" class="btn btn-ghost mt-2 !px-3 !py-1.5 text-sm" (click)="addAlternateTitle()">
           + Add Alternate Title
         </button>
       </div>
 
-      <div class="form-group">
-        <label>Cover Art URL *</label>
-        <input
-          type="url"
-          formControlName="coverArt"
-          placeholder="https://example.com/cover.jpg"
-        />
-        <div class="cover-preview" *ngIf="gameForm.get('coverArt')?.value">
-          <img [src]="gameForm.get('coverArt')?.value" alt="Cover preview" />
+      <div class="mb-5">
+        <label class="mb-1.5 block font-semibold text-ink">Cover Art URL <span class="text-danger">*</span></label>
+        <input type="url" formControlName="coverArt" placeholder="https://example.com/cover.jpg" class="w-full px-3 py-2" />
+        <div
+          class="mt-3 max-w-[200px] overflow-hidden rounded-lg border border-border"
+          *ngIf="gameForm.get('coverArt')?.value"
+        >
+          <img [src]="gameForm.get('coverArt')?.value" alt="Cover preview" class="block w-full" />
         </div>
       </div>
 
-      <div class="form-row">
-        <div class="form-group">
-          <label>Release Date *</label>
-          <input
-            title="release-date-input"
-            type="date"
-            formControlName="releaseDate"
-          />
+      <div class="mb-5 grid gap-4 sm:grid-cols-2">
+        <div>
+          <label class="mb-1.5 block font-semibold text-ink">Release Date <span class="text-danger">*</span></label>
+          <input title="release-date-input" type="date" formControlName="releaseDate" class="w-full px-3 py-2" />
         </div>
-
-        <div class="form-group">
-          <label>Developer *</label>
-          <input
-            type="text"
-            formControlName="developer"
-            placeholder="e.g., Nintendo, Sony"
-          />
+        <div>
+          <label class="mb-1.5 block font-semibold text-ink">Developer <span class="text-danger">*</span></label>
+          <input type="text" formControlName="developer" placeholder="e.g., Nintendo, Sony" class="w-full px-3 py-2" />
         </div>
       </div>
 
-      <div class="form-row">
-        <div class="form-group">
-          <label>Console Family *</label>
-          <select
-            title="console-family-select"
-            formControlName="consoleFamilyId"
-          >
+      <div class="mb-5 grid gap-4 sm:grid-cols-2">
+        <div>
+          <label class="mb-1.5 block font-semibold text-ink">Console Family <span class="text-danger">*</span></label>
+          <select title="console-family-select" formControlName="consoleFamilyId" class="w-full px-3 py-2">
             <option value="">Select Console</option>
-            <option *ngFor="let family of consoleFamilies" [value]="family.id">
-              {{ family.name }}
-            </option>
+            <option *ngFor="let family of consoleFamilies" [value]="family.id">{{ family.name }}</option>
           </select>
-          <p class="hint">
-            The console platform (e.g., PlayStation 5, Nintendo Switch)
-          </p>
-          <button type="button" class="add-btn" (click)="startCreate('consoleFamilyId', false, '/console-families')">
+          <p class="mt-1.5 text-sm text-ink-subtle">The console platform (e.g., PlayStation 5, Nintendo Switch)</p>
+          <button type="button" class="btn btn-ghost mt-2 !px-3 !py-1.5 text-sm" (click)="startCreate('consoleFamilyId', false, '/console-families')">
             + New console family
           </button>
         </div>
-
-        <div class="form-group">
-          <label>Owned Console Instance</label>
-          <select title="console-select" formControlName="consoleId">
+        <div>
+          <label class="mb-1.5 block font-semibold text-ink">Owned Console Instance</label>
+          <select title="console-select" formControlName="consoleId" class="w-full px-3 py-2">
             <option value="">None / Not Owned</option>
-            <option
-              *ngFor="let console of getFilteredConsoles()"
-              [value]="console.id"
-            >
-              {{ getConsoleName(console) }}
-            </option>
+            <option *ngFor="let console of getFilteredConsoles()" [value]="console.id">{{ getConsoleName(console) }}</option>
           </select>
-          <p class="hint">Your specific owned console (optional)</p>
-          <button type="button" class="add-btn" (click)="startCreate('consoleId', false, '/add-console')">
+          <p class="mt-1.5 text-sm text-ink-subtle">Your specific owned console (optional)</p>
+          <button type="button" class="btn btn-ghost mt-2 !px-3 !py-1.5 text-sm" (click)="startCreate('consoleId', false, '/add-console')">
             + New console
           </button>
         </div>
       </div>
 
-      <div class="form-row">
-        <div class="form-group">
-          <label>Region <span *ngIf="isRegionRequired">*</span></label>
-          <input
-            type="text"
-            formControlName="region"
-            placeholder="e.g., NTSC, PAL, NTSC-J"
-          />
+      <div class="mb-5 grid gap-4 sm:grid-cols-2">
+        <div>
+          <label class="mb-1.5 block font-semibold text-ink">Region <span *ngIf="isRegionRequired" class="text-danger">*</span></label>
+          <input type="text" formControlName="region" placeholder="e.g., NTSC, PAL, NTSC-J" class="w-full px-3 py-2" />
         </div>
-
-        <div class="form-group">
-          <label>Physical / Digital *</label>
-          <div class="radio-group">
-            <label class="radio-label">
-              <input
-                type="radio"
-                formControlName="physicalDigital"
-                value="physical"
-              />
-              📀 Physical
+        <div>
+          <label class="mb-1.5 block font-semibold text-ink">Physical / Digital <span class="text-danger">*</span></label>
+          <div class="flex gap-3">
+            <label class="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border border-border bg-surface-2 px-3 py-2 font-medium text-ink transition-colors hover:border-brand hover:bg-surface-3">
+              <input type="radio" formControlName="physicalDigital" value="physical" /> 📀 Physical
             </label>
-            <label class="radio-label">
-              <input
-                type="radio"
-                formControlName="physicalDigital"
-                value="digital"
-              />
-              💾 Digital
+            <label class="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border border-border bg-surface-2 px-3 py-2 font-medium text-ink transition-colors hover:border-brand hover:bg-surface-3">
+              <input type="radio" formControlName="physicalDigital" value="digital" /> 💾 Digital
             </label>
           </div>
         </div>
-
-        <div class="form-group">
-          <label>Condition / Completeness</label>
-          <input
-            type="text"
-            formControlName="conditionDetails"
-            list="conditionDetailsOptions"
-            placeholder="e.g., Complete in box, Cart only, Missing manual"
-          />
-          <datalist id="conditionDetailsOptions">
-            <option value="Complete in box"></option>
-            <option value="Cart only"></option>
-            <option value="Loose"></option>
-            <option value="Missing manual"></option>
-            <option value="Includes goods"></option>
-            <option value="Sealed"></option>
-          </datalist>
-        </div>
-      </div>
-    </div>
-
-    <div class="form-section">
-      <h3>Compilation & Addon</h3>
-
-      <div class="form-group">
-        <label class="checkbox-label">
-          <input type="checkbox" [(ngModel)]="canHaveAddon" [ngModelOptions]="{ standalone: true }" />
-          🧩 This game can have Addons
-        </label>
-        <p class="hint">
-          Enables an "Add Addon" option and an Addon section in this game's detail view.
-        </p>
       </div>
 
-      <div class="form-group">
-        <label class="checkbox-label">
-          <input type="checkbox" [(ngModel)]="isCompilation" [ngModelOptions]="{ standalone: true }" />
-          📦 This is a compilation game (bundles several other games)
-        </label>
-        <p class="hint">
-          A compilation appears in the game list and opens a special detail view
-          listing all the games it includes.
-        </p>
-      </div>
-
-      <div class="included-games-picker" *ngIf="isCompilation">
-        <h4>Included Games ({{ selectedIncludedGameIds.length }} selected)</h4>
+      <div class="mb-5">
+        <label class="mb-1.5 block font-semibold text-ink">Condition / Completeness</label>
         <input
           type="text"
-          class="search-input"
+          formControlName="conditionDetails"
+          list="conditionDetailsOptions"
+          placeholder="e.g., Complete in box, Cart only, Missing manual"
+          class="w-full px-3 py-2"
+        />
+        <datalist id="conditionDetailsOptions">
+          <option value="Complete in box"></option>
+          <option value="Cart only"></option>
+          <option value="Loose"></option>
+          <option value="Missing manual"></option>
+          <option value="Includes goods"></option>
+          <option value="Sealed"></option>
+        </datalist>
+      </div>
+    </section>
+
+    <section class="mb-8 border-b border-border pb-8 last-of-type:mb-0 last-of-type:border-b-0 last-of-type:pb-0">
+      <h3 class="mb-4 text-lg font-bold text-accent">Compilation &amp; Addon</h3>
+
+      <label class="mb-4 flex cursor-pointer items-start gap-3 rounded-lg border border-border bg-surface-2 px-4 py-3 transition-colors hover:border-brand hover:bg-surface-3">
+        <input type="checkbox" [(ngModel)]="canHaveAddon" [ngModelOptions]="{ standalone: true }" class="mt-0.5 h-4 w-4 cursor-pointer" />
+        <span>
+          <span class="font-semibold text-ink">🧩 This game can have Addons</span>
+          <span class="mt-1 block text-sm text-ink-subtle">Enables an "Add Addon" option and an Addon section in this game's detail view.</span>
+        </span>
+      </label>
+
+      <label class="flex cursor-pointer items-start gap-3 rounded-lg border border-border bg-surface-2 px-4 py-3 transition-colors hover:border-brand hover:bg-surface-3">
+        <input type="checkbox" [(ngModel)]="isCompilation" [ngModelOptions]="{ standalone: true }" class="mt-0.5 h-4 w-4 cursor-pointer" />
+        <span>
+          <span class="font-semibold text-ink">📦 This is a compilation game (bundles several other games)</span>
+          <span class="mt-1 block text-sm text-ink-subtle">A compilation appears in the game list and opens a special detail view listing all the games it includes.</span>
+        </span>
+      </label>
+
+      <div class="mt-4 rounded-lg border border-border bg-surface-2 p-4" *ngIf="isCompilation">
+        <h4 class="mb-2 font-semibold text-ink-muted">Included Games ({{ selectedIncludedGameIds.length }} selected)</h4>
+        <input
+          type="text"
+          class="mb-3 w-full px-3 py-2"
           [(ngModel)]="includedGameSearchQuery"
           [ngModelOptions]="{ standalone: true }"
           placeholder="Search games to include..."
         />
-        <div class="categories-list">
-          <label
-            *ngFor="let g of getSelectableGames()"
-            class="checkbox-label"
-          >
-            <input
-              type="checkbox"
-              [checked]="isGameIncluded(g.id)"
-              (change)="toggleIncludedGame(g.id)"
-            />
-            {{ g.title }}
+        <div class="grid max-h-56 grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-1.5 overflow-y-auto rounded-lg border border-border bg-base p-2">
+          <label *ngFor="let g of getSelectableGames()" class="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm text-ink hover:bg-surface-3">
+            <input type="checkbox" [checked]="isGameIncluded(g.id)" (change)="toggleIncludedGame(g.id)" class="h-4 w-4 cursor-pointer" />
+            <span>{{ g.title }}</span>
           </label>
-          <p class="hint" *ngIf="getSelectableGames().length === 0">
-            No games found to include.
-          </p>
+          <p class="px-2 py-1.5 text-sm text-ink-subtle" *ngIf="getSelectableGames().length === 0">No games found to include.</p>
         </div>
-        <button type="button" class="add-btn" (click)="startCreate('includedGameIds', true, '/add-game')">
+        <button type="button" class="btn btn-ghost mt-2 !px-3 !py-1.5 text-sm" (click)="startCreate('includedGameIds', true, '/add-game')">
           + New game
         </button>
       </div>
-    </div>
+    </section>
 
-    <div class="form-section">
-      <h3>Categories</h3>
+    <section class="mb-8 border-b border-border pb-8 last-of-type:mb-0 last-of-type:border-b-0 last-of-type:pb-0">
+      <h3 class="mb-4 text-lg font-bold text-accent">Categories</h3>
 
-      <div class="category-type-section" *ngFor="let type of categoryTypes">
-        <h4>{{ type | titlecase }}</h4>
+      <div class="mb-6 last:mb-0" *ngFor="let type of categoryTypes">
+        <h4 class="mb-2 font-semibold text-ink-muted">{{ type | titlecase }}</h4>
         <input
           type="text"
-          class="search-input"
+          class="mb-3 w-full px-3 py-2"
           [(ngModel)]="categorySearchQueries[type]"
           [ngModelOptions]="{ standalone: true }"
           placeholder="Search {{ type }}..."
         />
-        <div class="categories-list">
-          <label
-            *ngFor="let category of getFilteredCategories(type)"
-            class="checkbox-label"
-          >
-            <input
-              type="checkbox"
-              [checked]="isCategorySelected(category.id)"
-              (change)="toggleCategory(category.id)"
-            />
-            {{ category.name }}
+        <div class="grid max-h-56 grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-1.5 overflow-y-auto rounded-lg border border-border bg-base p-2">
+          <label *ngFor="let category of getFilteredCategories(type)" class="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm text-ink hover:bg-surface-3">
+            <input type="checkbox" [checked]="isCategorySelected(category.id)" (change)="toggleCategory(category.id)" class="h-4 w-4 cursor-pointer" />
+            <span>{{ category.name }}</span>
           </label>
-          <p class="hint" *ngIf="getFilteredCategories(type).length === 0">
-            No {{ type }} categories found
-          </p>
+          <p class="px-2 py-1.5 text-sm text-ink-subtle" *ngIf="getFilteredCategories(type).length === 0">No {{ type }} categories found</p>
         </div>
-        <button type="button" class="add-btn" (click)="startCreate('categoryIds', true, '/categories', { categoryType: type })">
+        <button type="button" class="btn btn-ghost mt-2 !px-3 !py-1.5 text-sm" (click)="startCreate('categoryIds', true, '/categories', { categoryType: type })">
           + New {{ type }}
         </button>
       </div>
-    </div>
+    </section>
 
-    <div class="form-section">
-      <h3>Custom Attributes</h3>
+    <section class="mb-8 border-b border-border pb-8 last-of-type:mb-0 last-of-type:border-b-0 last-of-type:pb-0">
+      <h3 class="mb-4 text-lg font-bold text-accent">Custom Attributes</h3>
 
-      <button type="button" class="add-btn" (click)="startCreate('globalAttribute', false, '/attributes')">
+      <button type="button" class="btn btn-ghost !px-3 !py-1.5 text-sm" (click)="startCreate('globalAttribute', false, '/attributes')">
         + New global attribute
       </button>
 
-      <div class="global-attributes" *ngIf="globalAttributes.length > 0">
-        <h4>Global Attributes</h4>
-        <div *ngFor="let attr of globalAttributes" class="form-group">
-          <label>{{ attr.name }}</label>
+      <div class="mt-5" *ngIf="globalAttributes.length > 0">
+        <h4 class="mb-2 font-semibold text-ink-muted">Global Attributes</h4>
+        <div *ngFor="let attr of globalAttributes" class="mb-4">
+          <label class="mb-1.5 block font-semibold text-ink">{{ attr.name }}</label>
           <input
             title="global-attribute-text-input"
             *ngIf="attr.type === 'text'"
             type="text"
+            class="w-full px-3 py-2"
             [value]="getAttributeValue(attr.name)"
             (change)="setAttributeValue(attr.name, $event)"
           />
@@ -278,6 +215,7 @@
             title="global-attribute-number-input"
             *ngIf="attr.type === 'number'"
             type="number"
+            class="w-full px-3 py-2"
             [value]="getAttributeValue(attr.name)"
             (change)="setAttributeValue(attr.name, $event)"
           />
@@ -285,78 +223,62 @@
             title="global-attribute-date-input"
             *ngIf="attr.type === 'date'"
             type="date"
+            class="w-full px-3 py-2"
             [value]="getAttributeValue(attr.name)"
             (change)="setAttributeValue(attr.name, $event)"
           />
-          <label *ngIf="attr.type === 'boolean'" class="checkbox-label">
-            <input
-              type="checkbox"
-              [checked]="getAttributeValue(attr.name)"
-              (change)="setAttributeValue(attr.name, $event)"
-            />
+          <label *ngIf="attr.type === 'boolean'" class="flex w-fit cursor-pointer items-center gap-2 rounded-lg border border-border bg-surface-2 px-3 py-2 font-medium text-ink transition-colors hover:border-brand">
+            <input type="checkbox" [checked]="getAttributeValue(attr.name)" (change)="setAttributeValue(attr.name, $event)" class="h-4 w-4 cursor-pointer" />
             Yes
           </label>
           <select
             title="attribute-type-select"
             *ngIf="attr.type === 'select'"
+            class="w-full px-3 py-2"
             [value]="getAttributeValue(attr.name)"
             (change)="setAttributeValue(attr.name, $event)"
           >
             <option value="">Select...</option>
-            <option *ngFor="let opt of attr.options" [value]="opt">
-              {{ opt }}
-            </option>
+            <option *ngFor="let opt of attr.options" [value]="opt">{{ opt }}</option>
           </select>
         </div>
       </div>
 
-      <div class="custom-attribute-builder">
-        <h4>Add Custom Attribute for This Game</h4>
-        <div class="inline-form">
+      <div class="mt-6">
+        <h4 class="mb-2 font-semibold text-ink-muted">Add Custom Attribute for This Game</h4>
+        <div class="flex flex-wrap gap-2">
           <input
             type="text"
+            class="min-w-[140px] flex-1 px-3 py-2"
             [(ngModel)]="newAttributeName"
             [ngModelOptions]="{ standalone: true }"
             placeholder="Attribute name"
           />
           <input
             type="text"
+            class="min-w-[140px] flex-1 px-3 py-2"
             [(ngModel)]="newAttributeValue"
             [ngModelOptions]="{ standalone: true }"
             placeholder="Value"
           />
-          <button type="button" class="add-btn" (click)="addCustomAttribute()">
-            Add
-          </button>
+          <button type="button" class="btn btn-primary" (click)="addCustomAttribute()">Add</button>
         </div>
       </div>
 
-      <div
-        class="current-custom-attributes"
-        *ngIf="customAttributesArray.length > 0"
-      >
-        <h4>Current Custom Attributes</h4>
-        <div *ngFor="let attr of customAttributesArray" class="attribute-row">
-          <strong>{{ attr.key }}:</strong> {{ attr.value }}
-          <button
-            type="button"
-            class="remove-btn"
-            (click)="removeCustomAttribute(attr.key)"
-          >
-            ✕
-          </button>
+      <div class="mt-6" *ngIf="customAttributesArray.length > 0">
+        <h4 class="mb-2 font-semibold text-ink-muted">Current Custom Attributes</h4>
+        <div *ngFor="let attr of customAttributesArray" class="mb-2 flex items-center gap-3 rounded-lg border border-border bg-surface-2 px-4 py-2.5 text-ink">
+          <strong class="min-w-[150px] text-accent">{{ attr.key }}:</strong>
+          <span class="flex-1">{{ attr.value }}</span>
+          <button type="button" class="btn btn-danger !px-3 !py-1.5 text-sm" title="Remove attribute" (click)="removeCustomAttribute(attr.key)">✕</button>
         </div>
       </div>
-    </div>
+    </section>
 
-    <p class="required-legend"><span class="req">*</span> Required field</p>
-    <div class="form-actions">
-      <button type="submit" class="submit-btn">
-        {{ isEditMode ? "Update Game" : "Add Game" }}
-      </button>
-      <button type="button" class="cancel-btn" (click)="cancel()">
-        Cancel
-      </button>
+    <p class="mb-4 text-sm text-ink-subtle"><span class="text-danger">*</span> Required field</p>
+    <div class="flex gap-3">
+      <button type="submit" class="btn btn-primary flex-1">{{ isEditMode ? "Update Game" : "Add Game" }}</button>
+      <button type="button" class="btn btn-ghost" (click)="cancel()">Cancel</button>
     </div>
   </form>
 </div>
