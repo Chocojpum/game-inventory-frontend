@@ -24,6 +24,11 @@ export abstract class GameDetailBaseComponent {
   showBacklog = false;
 
   addons: Addon[] = [];
+  // Addon panel sort. Defaults to release date (newest first).
+  addonSort: { field: 'title' | 'date'; direction: 'asc' | 'desc' } = {
+    field: 'date',
+    direction: 'desc',
+  };
   showAddonManager = false;
   editingAddon?: Addon;
   backlogAddonId?: string;
@@ -66,9 +71,28 @@ export abstract class GameDetailBaseComponent {
   loadAddons(): void {
     if (this.game) {
       this.addonService.getAddonsByGame(this.game.id).subscribe(addons => {
-        this.addons = addons.sort((a, b) => a.title.localeCompare(b.title));
+        this.addons = addons;
+        this.applyAddonSort();
       });
     }
+  }
+
+  setAddonSort(field: 'title' | 'date'): void {
+    if (this.addonSort.field === field) {
+      this.addonSort.direction = this.addonSort.direction === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.addonSort = { field, direction: field === 'date' ? 'desc' : 'asc' };
+    }
+    this.applyAddonSort();
+  }
+
+  private applyAddonSort(): void {
+    const dir = this.addonSort.direction === 'asc' ? 1 : -1;
+    this.addons = [...this.addons].sort((a, b) =>
+      this.addonSort.field === 'title'
+        ? dir * a.title.localeCompare(b.title)
+        : dir * (new Date(a.releaseDate).getTime() - new Date(b.releaseDate).getTime()),
+    );
   }
 
   // --- Custom-attribute helpers ---

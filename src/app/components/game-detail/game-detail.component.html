@@ -98,9 +98,30 @@
 
     <!-- Addons -->
     <div class="border-t border-border p-6 md:p-8" *ngIf="addons.length > 0">
-      <div class="mb-4 flex items-center justify-between gap-3">
+      <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h2 class="text-xl font-bold text-ink">🧩 Addon</h2>
-        <button type="button" class="btn btn-ghost !px-3 !py-1.5 text-sm" *ngIf="game.canHaveAddon" (click)="openAddAddon()">+ Add Addon</button>
+        <div class="flex items-center gap-2 text-sm font-semibold text-ink-muted">
+          <span aria-hidden="true">↕️</span> Sort by:
+          <button
+            type="button"
+            (click)="setAddonSort('title')"
+            class="rounded-lg border px-3 py-1.5 font-semibold transition-colors"
+            [ngClass]="addonSort.field === 'title' ? 'border-brand bg-brand text-ink' : 'border-accent bg-transparent text-ink hover:bg-surface-3'"
+          >
+            Title
+            {{ addonSort.field === "title" && addonSort.direction === "asc" ? "↑" : addonSort.field === "title" && addonSort.direction === "desc" ? "↓" : "" }}
+          </button>
+          <button
+            type="button"
+            (click)="setAddonSort('date')"
+            class="rounded-lg border px-3 py-1.5 font-semibold transition-colors"
+            [ngClass]="addonSort.field === 'date' ? 'border-brand bg-brand text-ink' : 'border-accent bg-transparent text-ink hover:bg-surface-3'"
+          >
+            Date
+            {{ addonSort.field === "date" && addonSort.direction === "asc" ? "↑" : addonSort.field === "date" && addonSort.direction === "desc" ? "↓" : "" }}
+          </button>
+          <button type="button" class="btn btn-ghost !px-3 !py-1.5 text-sm" *ngIf="game.canHaveAddon" (click)="openAddAddon()">+ Add Addon</button>
+        </div>
       </div>
       <div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-5">
         <div class="game-card overflow-hidden rounded-xl border border-border bg-surface-2 shadow-card" *ngFor="let addon of addons">

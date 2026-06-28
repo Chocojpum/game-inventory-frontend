@@ -66,9 +66,9 @@ export class GameListComponent extends InventoryListBaseComponent {
   /**
    * When true, games that belong to a compilation are hidden from the list
    * (the compilations themselves and standalone games still show).
-   * Default false: members are listed alongside everything else.
+   * Default true: compilation members are hidden until the user opts in.
    */
-  excludeCompilationMembers = false;
+  excludeCompilationMembers = true;
   /**
    * Backlog completion-status filter: '' (all), 'completed', or 'pending'.
    * A game is "completed" when it has a completion entry, when it's a
@@ -229,7 +229,8 @@ export class GameListComponent extends InventoryListBaseComponent {
           : 'none'
         : null,
       notowned: this.includeNotOwned ? '1' : null,
-      nocomp: this.excludeCompilationMembers ? '1' : null,
+      // Default is ON, so the param only appears to mark the opt-out (show members).
+      nocomp: this.excludeCompilationMembers ? null : '0',
       completion: this.completionStatus || null,
     };
   }
@@ -252,7 +253,7 @@ export class GameListComponent extends InventoryListBaseComponent {
     }
 
     this.includeNotOwned = params.get('notowned') === '1';
-    this.excludeCompilationMembers = params.get('nocomp') === '1';
+    this.excludeCompilationMembers = params.get('nocomp') !== '0';
 
     const completion = params.get('completion');
     this.completionStatus =
@@ -301,7 +302,7 @@ export class GameListComponent extends InventoryListBaseComponent {
     this.pcFilterApplied = false;
     this.excludedPcFamilyIds = this.defaultExcludedPcFamilyIds();
     this.includeNotOwned = false;
-    this.excludeCompilationMembers = false;
+    this.excludeCompilationMembers = true;
     this.completionStatus = '';
     this.currentPage = 1;
     this.fetchItems();
@@ -310,7 +311,7 @@ export class GameListComponent extends InventoryListBaseComponent {
   override get activeFilterCount(): number {
     let count = super.activeFilterCount;
     if (this.includeNotOwned) count++;
-    if (this.excludeCompilationMembers) count++;
+    if (!this.excludeCompilationMembers) count++;
     if (this.completionStatus) count++;
     if (this.pcFilterApplied) count++;
     return count;
