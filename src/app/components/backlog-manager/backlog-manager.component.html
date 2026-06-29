@@ -22,7 +22,7 @@
         </div>
 
         <div>
-          <label class="mb-1.5 block font-semibold text-ink">Completion Type <span class="text-danger">*</span></label>
+          <label class="mb-1.5 block font-semibold text-ink">Completion Type</label>
           <select class="w-full px-3 py-2" [(ngModel)]="newBacklog.completionType" title="completion-type-select">
             <option value="">Select...</option>
             <option *ngFor="let ct of completionTypes" [value]="ct.name">{{ ct.name }}</option>
@@ -57,7 +57,7 @@
         type="button"
         class="btn btn-primary mt-5"
         (click)="addBacklogEntry()"
-        [disabled]="!newBacklog.completionType || (!newBacklog.completionDate && !unknownDate)"
+        [disabled]="!newBacklog.completionDate && !unknownDate"
       >
         Add Entry
       </button>
@@ -73,7 +73,7 @@
           <div class="min-w-0 flex-1">
             <div class="flex flex-wrap items-center gap-2">
               <strong class="text-ink">{{ backlog.completionDate ? (backlog.completionDate | date : "yyyy-MM-dd") : "Unknown date" }}</strong>
-              <span class="rounded-full bg-success/15 px-2.5 py-0.5 text-xs font-semibold text-success">{{ backlog.completionType }}</span>
+              <span class="rounded-full bg-success/15 px-2.5 py-0.5 text-xs font-semibold text-success" *ngIf="backlog.completionType">{{ backlog.completionType }}</span>
             </div>
             <div class="mt-1 text-sm text-ink-muted" *ngIf="backlog.endingType"><span class="text-ink-subtle">Ending:</span> {{ backlog.endingType }}</div>
             <div class="mt-1 flex flex-col gap-0.5" *ngIf="hasAttributes(backlog)">

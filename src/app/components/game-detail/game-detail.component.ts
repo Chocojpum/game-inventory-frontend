@@ -67,12 +67,6 @@ export class GameDetailComponent extends GameDetailBaseComponent implements OnIn
     }
   }
 
-  viewCompilation(): void {
-    if (this.game?.compilationId) {
-      this.router.navigate(['/compilation', this.game.compilationId]);
-    }
-  }
-
   loadCategories(): void {
     if (this.game && this.game.categoryIds.length > 0) {
       this.categoryService.getAllCategories().subscribe(categories => {

@@ -233,6 +233,12 @@ export abstract class GameDetailBaseComponent {
     });
   }
 
+  viewCompilation(): void {
+    if (this.game?.compilationId) {
+      this.router.navigate(['/compilation', this.game.compilationId]);
+    }
+  }
+
   goBack(): void {
     // Always return to the last list view the user was on, with its filters,
     // search, sort and page intact (via the stored URL). Navigating explicitly

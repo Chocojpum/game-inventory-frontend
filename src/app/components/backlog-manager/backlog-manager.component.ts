@@ -101,13 +101,13 @@ export class BacklogManagerComponent implements OnInit {
   }
 
   addBacklogEntry(): void {
-    if (this.newBacklog.completionType && (this.newBacklog.completionDate || this.unknownDate)) {
+    if (this.newBacklog.completionDate || this.unknownDate) {
       this.backlogService.createBacklog({
         gameId: this.gameId,
         addonId: this.addonId,
         completionDate: this.unknownDate ? null : this.newBacklog.completionDate,
         endingType: this.newBacklog.endingType,
-        completionType: this.newBacklog.completionType,
+        completionType: this.newBacklog.completionType || undefined,
         customAttributes: this.customAttributesObj
       }).subscribe({
         next: () => {

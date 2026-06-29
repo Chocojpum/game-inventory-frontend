@@ -162,7 +162,7 @@
           <span class="text-xs italic text-ink-subtle" *ngIf="!entry.completionDate">Unknown date</span>
         </div>
 
-        <span class="inline-block w-fit rounded-full bg-success/15 px-2.5 py-1 text-xs font-semibold text-success">{{ entry.completionType }}</span>
+        <span class="inline-block w-fit rounded-full bg-success/15 px-2.5 py-1 text-xs font-semibold text-success" *ngIf="entry.completionType">{{ entry.completionType }}</span>
 
         <div class="text-sm" *ngIf="entry.endingType">
           <span class="text-ink-subtle">Ending:</span>
