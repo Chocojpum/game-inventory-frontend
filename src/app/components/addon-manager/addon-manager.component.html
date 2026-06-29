@@ -36,6 +36,14 @@
       </div>
 
       <div class="mb-5">
+        <label class="flex cursor-pointer items-center gap-2 font-semibold text-ink">
+          <input type="checkbox" formControlName="canBeCompleted" class="h-4 w-4 cursor-pointer" />
+          <span>Can be completed</span>
+        </label>
+        <p class="mt-1 text-xs text-ink-muted">Enable for addons you can finish (e.g. expansions). Leave off for purely aesthetic addons.</p>
+      </div>
+
+      <div class="mb-5">
         <h4 class="mb-2 font-semibold text-ink-muted">Custom Attributes</h4>
         <div class="flex flex-wrap gap-2">
           <input type="text" class="min-w-[140px] flex-1 px-3 py-2" [(ngModel)]="newAttributeName" [ngModelOptions]="{ standalone: true }" placeholder="Attribute name" />

@@ -10,6 +10,7 @@ export interface Addon {
   alternateTitles?: string[];
   coverArt: string;
   releaseDate: string;
+  canBeCompleted?: boolean;
   customAttributes: Record<string, any>;
   createdAt: Date;
   updatedAt: Date;

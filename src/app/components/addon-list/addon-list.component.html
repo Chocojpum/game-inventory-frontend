@@ -259,6 +259,7 @@
       <div class="relative h-[280px] w-full overflow-hidden bg-surface-2">
         <img [src]="addon.coverArt" [alt]="addon.title" class="h-full w-full object-cover" />
         <div
+          *ngIf="addon.canBeCompleted"
           class="absolute right-2.5 top-2.5 rounded-full px-2 py-1 text-xs font-semibold text-white shadow-card"
           [ngClass]="addon.completed ? 'bg-success/90' : 'bg-warning/90'"
           [title]="addon.completed ? 'Completed' : 'Pending'"

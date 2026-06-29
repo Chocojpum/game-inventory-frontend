@@ -27,6 +27,7 @@ export class AddonManagerComponent implements OnInit {
       alternateTitles: this.fb.array([]),
       coverArt: ['', Validators.required],
       releaseDate: ['', Validators.required],
+      canBeCompleted: [false],
     });
   }
 
@@ -46,6 +47,7 @@ export class AddonManagerComponent implements OnInit {
         title: this.addon.title,
         coverArt: this.addon.coverArt,
         releaseDate: this.addon.releaseDate ? this.addon.releaseDate.split('T')[0] : '',
+        canBeCompleted: this.addon.canBeCompleted ?? false,
       });
       (this.addon.alternateTitles || []).forEach(t =>
         this.alternateTitles.push(this.fb.control(t)),
