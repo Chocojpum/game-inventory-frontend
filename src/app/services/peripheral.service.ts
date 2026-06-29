@@ -20,7 +20,7 @@ export interface Peripheral {
   providedIn: 'root'
 })
 export class PeripheralService {
-  private apiUrl = 'http://localhost:3000/peripherals';
+  private apiUrl = 'http://localhost:3000/api/peripherals';
 
   constructor(private http: HttpClient) { }
 

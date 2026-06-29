@@ -35,8 +35,8 @@ export interface EnrichedAddon extends Addon {
   providedIn: 'root'
 })
 export class AddonService {
-  private apiUrl = 'http://localhost:3000/addons';
-  private listUrl = 'http://localhost:3000/addon-list';
+  private apiUrl = 'http://localhost:3000/api/addons';
+  private listUrl = 'http://localhost:3000/api/addon-list';
 
   constructor(private http: HttpClient) { }
 

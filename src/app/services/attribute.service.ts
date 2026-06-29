@@ -17,7 +17,7 @@ export interface Attribute {
   providedIn: 'root'
 })
 export class AttributeService {
-  private apiUrl = 'http://localhost:3000/attributes';
+  private apiUrl = 'http://localhost:3000/api/attributes';
 
   constructor(private http: HttpClient) { }
 

@@ -32,7 +32,7 @@ export interface EnrichedBacklog extends Backlog {
   providedIn: 'root'
 })
 export class BacklogService {
-  private apiUrl = 'http://localhost:3000/backlog';
+  private apiUrl = 'http://localhost:3000/api/backlog';
 
   constructor(private http: HttpClient) { }
 

@@ -56,7 +56,7 @@ export interface GameFilterParams {
   providedIn: 'root'
 })
 export class GameService {
-  private apiUrl = 'http://localhost:3000/games';
+  private apiUrl = 'http://localhost:3000/api/games';
 
   constructor(private http: HttpClient) { }
 

@@ -16,7 +16,7 @@ export interface ConsoleFamily {
   providedIn: 'root'
 })
 export class ConsoleFamilyService {
-  private apiUrl = 'http://localhost:3000/console-families';
+  private apiUrl = 'http://localhost:3000/api/console-families';
 
   constructor(private http: HttpClient) { }
 

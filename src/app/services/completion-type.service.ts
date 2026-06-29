@@ -14,7 +14,7 @@ export interface CompletionType {
   providedIn: 'root'
 })
 export class CompletionTypeService {
-  private apiUrl = 'http://localhost:3000/completion-types';
+  private apiUrl = 'http://localhost:3000/api/completion-types';
 
   constructor(private http: HttpClient) { }
 

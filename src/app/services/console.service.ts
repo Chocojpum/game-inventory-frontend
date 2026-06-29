@@ -27,7 +27,7 @@ export interface Console {
   providedIn: 'root'
 })
 export class ConsoleService {
-  private apiUrl = 'http://localhost:3000/consoles';
+  private apiUrl = 'http://localhost:3000/api/consoles';
 
   constructor(private http: HttpClient) { }
 

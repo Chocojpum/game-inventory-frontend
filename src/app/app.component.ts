@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { ViewportScroller } from '@angular/common';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { ExportService } from './services/export.service';
 import { ToastService } from './services/toast.service';
 import { ConfirmService } from './services/confirm.service';
+import { DirtyService } from './services/dirty.service';
 
 @Component({
   selector: 'app-root',
@@ -27,7 +28,33 @@ export class AppComponent implements OnInit {
     private viewportScroller: ViewportScroller,
     private toast: ToastService,
     private confirm: ConfirmService,
+    private dirty: DirtyService,
   ) {}
+
+  /** Set while we trigger our own reload (e.g. after import) to skip the quit nag. */
+  private suppressQuitPrompt = false;
+
+  /**
+   * On quit: if there are unsaved changes, auto-export to the local data file via
+   * a beacon (the only request that survives unload) and warn before leaving.
+   * Skipped entirely when the last action was already an export (nothing to save).
+   */
+  @HostListener('window:beforeunload', ['$event'])
+  onBeforeUnload(event: BeforeUnloadEvent): void {
+    // Inside the Electron app the native close dialog handles this instead.
+    if (navigator.userAgent.includes('Electron')) {
+      return;
+    }
+    if (!this.dirty.isDirty()) {
+      return;
+    }
+    navigator.sendBeacon('http://localhost:3000/api/export/save');
+    if (this.suppressQuitPrompt) {
+      return;
+    }
+    event.preventDefault();
+    event.returnValue = '';
+  }
 
   ngOnInit(): void {
     this.importDataFirst();
@@ -114,6 +141,10 @@ export class AppComponent implements OnInit {
           `Games ${i.games} · Consoles ${i.consoles} · Peripherals ${i.peripherals} · ` +
             `Backlog ${i.backlogs} · Categories ${i.categories} · Attributes ${i.attributes}. Reloading…`
         );
+        // The merged collection now lives only in memory; mark dirty so it is
+        // persisted on quit, but don't nag on the reload we trigger here.
+        this.dirty.markDirty();
+        this.suppressQuitPrompt = true;
         setTimeout(() => window.location.reload(), 1200);
       },
       error: (error) => {
