@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute, ParamMap, Params, Router } from '@angular/router';
-import { GameService, Game } from '../../services/game.service';
+import { GameService, Game, GameVersion } from '../../services/game.service';
 import { CategoryService } from '../../services/category.service';
 import { ConsoleFamilyService, ConsoleFamily } from '../../services/console-family.service';
 import { ListReturnService } from '../../services/list-return.service';
@@ -317,11 +317,22 @@ export class GameListComponent extends InventoryListBaseComponent {
     return count;
   }
 
+  /** The collapsed game whose platform picker is open, or null. */
+  versionPickerGame: Game | null = null;
+
   viewGame(game: Game): void {
-    if (game.isCompilation) {
+    if ((game.versions?.length ?? 0) > 1) {
+      // Same title owned on several platforms: ask which copy to open.
+      this.versionPickerGame = game;
+    } else if (game.isCompilation) {
       this.router.navigate(['/compilation', game.id]);
     } else {
       this.router.navigate(['/game', game.id]);
     }
+  }
+
+  openVersion(version: GameVersion): void {
+    this.versionPickerGame = null;
+    this.router.navigate([version.isCompilation ? '/compilation' : '/game', version.id]);
   }
 }

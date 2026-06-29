@@ -25,8 +25,19 @@ export interface Game {
   // Derived by the backend for games that belong to a compilation.
   compilationId?: string;
   compilationTitle?: string;
+  // Set by the backend on a collapsed list card when the same title is owned on
+  // several platforms; lists each copy so the UI can ask which one to open.
+  versions?: GameVersion[];
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface GameVersion {
+  id: string;
+  consoleFamilyId: string;
+  physicalDigital: 'physical' | 'digital';
+  region?: string;
+  isCompilation?: boolean;
 }
 
 export interface GameFilterParams {
