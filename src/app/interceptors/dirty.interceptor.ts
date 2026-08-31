@@ -20,7 +20,8 @@ export class DirtyInterceptor implements HttpInterceptor {
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const isExportArea = req.url.includes('/api/export');
-    if (req.method !== 'GET' && !isExportArea) {
+    const isOneDrive = req.url.includes('/api/onedrive');
+    if (req.method !== 'GET' && !isExportArea && !isOneDrive) {
       this.dirty.markDirty();
     }
     return next.handle(req).pipe(

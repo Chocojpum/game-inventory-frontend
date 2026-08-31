@@ -52,6 +52,10 @@ export class GameListComponent extends InventoryListBaseComponent {
     direction: 'asc',
   };
 
+  /** Distinct publishers for the filter dropdown, and the selected value. */
+  publishers: string[] = [];
+  publisherFilter = '';
+
   /** PC-platform console families (bare "PC" plus storefronts like "PC (Steam)"). */
   pcFamilies: ConsoleFamily[] = [];
   /** IDs of PC platforms currently excluded from the list (unchecked). */
@@ -95,6 +99,11 @@ export class GameListComponent extends InventoryListBaseComponent {
     this.limit = 10;
   }
 
+  override ngOnInit(): void {
+    super.ngOnInit();
+    this.gameService.getPublishers().subscribe((list) => (this.publishers = list));
+  }
+
   fetchItems(): void {
     const options: PaginationOptions = {
       page: this.currentPage,
@@ -130,6 +139,10 @@ export class GameListComponent extends InventoryListBaseComponent {
 
     if (this.physicalDigital) {
       params['physicalDigital'] = this.physicalDigital;
+    }
+
+    if (this.publisherFilter) {
+      params['publisher'] = this.publisherFilter;
     }
 
     // By default the backend returns only owned games; opt into the not-owned ones.
@@ -232,6 +245,7 @@ export class GameListComponent extends InventoryListBaseComponent {
       // Default is ON, so the param only appears to mark the opt-out (show members).
       nocomp: this.excludeCompilationMembers ? null : '0',
       completion: this.completionStatus || null,
+      publisher: this.publisherFilter || null,
     };
   }
 
@@ -258,6 +272,14 @@ export class GameListComponent extends InventoryListBaseComponent {
     const completion = params.get('completion');
     this.completionStatus =
       completion === 'completed' || completion === 'pending' ? completion : '';
+
+    this.publisherFilter = params.get('publisher') ?? '';
+  }
+
+  onPublisherFilter(event: Event): void {
+    this.publisherFilter = (event.target as HTMLSelectElement).value;
+    this.currentPage = 1;
+    this.fetchItems();
   }
 
   toggleIncludeNotOwned(): void {
@@ -304,6 +326,7 @@ export class GameListComponent extends InventoryListBaseComponent {
     this.includeNotOwned = false;
     this.excludeCompilationMembers = true;
     this.completionStatus = '';
+    this.publisherFilter = '';
     this.currentPage = 1;
     this.fetchItems();
   }
@@ -313,6 +336,7 @@ export class GameListComponent extends InventoryListBaseComponent {
     if (this.includeNotOwned) count++;
     if (!this.excludeCompilationMembers) count++;
     if (this.completionStatus) count++;
+    if (this.publisherFilter) count++;
     if (this.pcFilterApplied) count++;
     return count;
   }

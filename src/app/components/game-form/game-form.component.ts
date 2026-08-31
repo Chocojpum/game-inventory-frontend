@@ -28,6 +28,8 @@ export class GameFormComponent implements OnInit {
   globalAttributes: Attribute[] = [];
   selectedCategoryIds: string[] = [];
   canHaveAddon = false;
+  // True when this game is a port; when set, an origin console family is required.
+  isPort = false;
   // Compilation support
   isCompilation = false;
   allGames: Game[] = [];
@@ -59,8 +61,11 @@ export class GameFormComponent implements OnInit {
       coverArt: ['', Validators.required],
       releaseDate: ['', Validators.required],
       developer: ['', Validators.required],
+      publisher: [''],
       consoleFamilyId: ['', Validators.required],
       consoleId: [''],
+      // Required only when the game is a port (see updatePortValidator).
+      portedFromConsoleFamilyId: [''],
       // Region is only required for physical games (see updateRegionValidator).
       region: ['', Validators.required],
       physicalDigital: ['physical', Validators.required],
@@ -257,8 +262,10 @@ export class GameFormComponent implements OnInit {
         coverArt: game.coverArt,
         releaseDate: game.releaseDate.split('T')[0],
         developer: game.developer,
+        publisher: game.publisher || '',
         consoleFamilyId: game.consoleFamilyId,
         consoleId: game.consoleId || '',
+        portedFromConsoleFamilyId: game.portedFromConsoleFamilyId || '',
         region: game.region,
         physicalDigital: game.physicalDigital,
         conditionDetails: game.conditionDetails || '',
@@ -272,6 +279,8 @@ export class GameFormComponent implements OnInit {
 
       this.selectedCategoryIds = game.categoryIds || [];
       this.canHaveAddon = game.canHaveAddon || false;
+      this.isPort = game.isPort || false;
+      this.updatePortValidator();
       this.isCompilation = game.isCompilation || false;
       this.selectedIncludedGameIds = game.includedGameIds || [];
       this.customAttributesObj = game.customAttributes || {};
@@ -377,6 +386,21 @@ export class GameFormComponent implements OnInit {
     region.updateValueAndValidity({ emitEvent: false });
   }
 
+  /** Toggling the port flag makes the origin console family required (or clears it). */
+  onIsPortChange(): void {
+    if (!this.isPort) {
+      this.gameForm.get('portedFromConsoleFamilyId')?.setValue('');
+    }
+    this.updatePortValidator();
+  }
+
+  private updatePortValidator(): void {
+    const control = this.gameForm.get('portedFromConsoleFamilyId');
+    if (!control) return;
+    control.setValidators(this.isPort ? [Validators.required] : []);
+    control.updateValueAndValidity({ emitEvent: false });
+  }
+
   onSubmit(): void {
     if (this.gameForm.invalid) {
       // Surface every problem at once instead of silently disabling submit.
@@ -393,6 +417,8 @@ export class GameFormComponent implements OnInit {
       categoryIds: this.selectedCategoryIds,
       customAttributes: this.customAttributesObj,
       canHaveAddon: this.canHaveAddon,
+      isPort: this.isPort,
+      portedFromConsoleFamilyId: this.isPort ? (this.gameForm.value.portedFromConsoleFamilyId || '') : '',
       isCompilation: this.isCompilation,
       includedGameIds: this.isCompilation ? this.selectedIncludedGameIds : [],
     };

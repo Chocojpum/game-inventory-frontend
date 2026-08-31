@@ -32,8 +32,6 @@ export abstract class InventoryListBaseComponent implements OnInit {
   currentSearchQuery = '';
   dateFrom = '';
   dateTo = '';
-  dateRangeText = '';
-  showDatePicker = false;
 
   /** Format filter: '' (all), 'physical' or 'digital'. */
   physicalDigital = '';
@@ -118,7 +116,6 @@ export abstract class InventoryListBaseComponent implements OnInit {
 
     this.dateFrom = params.get('dateFrom') ?? '';
     this.dateTo = params.get('dateTo') ?? '';
-    this.updateDateRangeText();
 
     for (const key of CATEGORY_FILTER_KEYS) {
       const value = params.get(key);
@@ -215,30 +212,8 @@ export abstract class InventoryListBaseComponent implements OnInit {
       .map(([, value]) => value);
   }
 
-  updateDateRangeText(): void {
-    if (this.dateFrom && this.dateTo) {
-      this.dateRangeText = `${this.dateFrom} to ${this.dateTo}`;
-    } else if (this.dateFrom) {
-      this.dateRangeText = `From ${this.dateFrom}`;
-    } else if (this.dateTo) {
-      this.dateRangeText = `Until ${this.dateTo}`;
-    } else {
-      this.dateRangeText = '';
-    }
-  }
-
-  applyDateRange(): void {
-    this.updateDateRangeText();
-    this.showDatePicker = false;
-    this.currentPage = 1;
-    this.fetchItems();
-  }
-
-  clearDateRange(): void {
-    this.dateFrom = '';
-    this.dateTo = '';
-    this.dateRangeText = '';
-    this.showDatePicker = false;
+  /** Re-fetch when either date bound changes (inline inputs filter live). */
+  onDateRangeChange(): void {
     this.currentPage = 1;
     this.fetchItems();
   }
@@ -292,7 +267,6 @@ export abstract class InventoryListBaseComponent implements OnInit {
     this.currentSearchQuery = '';
     this.dateFrom = '';
     this.dateTo = '';
-    this.dateRangeText = '';
     this.physicalDigital = '';
   }
 }

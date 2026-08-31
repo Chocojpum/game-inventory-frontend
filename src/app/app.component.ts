@@ -6,6 +6,7 @@ import { ExportService } from './services/export.service';
 import { ToastService } from './services/toast.service';
 import { ConfirmService } from './services/confirm.service';
 import { DirtyService } from './services/dirty.service';
+import { OneDriveService, OneDriveStatus } from './services/onedrive.service';
 
 @Component({
   selector: 'app-root',
@@ -29,7 +30,13 @@ export class AppComponent implements OnInit {
     private toast: ToastService,
     private confirm: ConfirmService,
     private dirty: DirtyService,
+    private oneDrive: OneDriveService,
   ) {}
+
+  // --- OneDrive backup UI state ---
+  oneDriveOpen = false;
+  oneDriveStatus: OneDriveStatus | null = null;
+  oneDriveBusy = false;
 
   /** Set while we trigger our own reload (e.g. after import) to skip the quit nag. */
   private suppressQuitPrompt = false;
@@ -156,6 +163,85 @@ export class AppComponent implements OnInit {
   }
 
   importDataFirst(): void {
-    this.exportService.importFromLocal().subscribe();
+    // Load the local sheet first, then (either way) see if OneDrive has a newer one.
+    this.exportService.importFromLocal().subscribe({
+      next: () => this.checkOneDrive(),
+      error: () => this.checkOneDrive(),
+    });
+  }
+
+  // --- OneDrive: startup "newer copy?" check ---
+
+  private checkOneDrive(): void {
+    this.oneDrive.check().subscribe({
+      next: (r) => {
+        if (r?.available && r?.newer) {
+          this.promptImportFromOneDrive(r.remoteModified);
+        }
+      },
+      error: () => {},
+    });
+  }
+
+  private async promptImportFromOneDrive(remoteModified?: string): Promise<void> {
+    const when = remoteModified ? new Date(remoteModified).toLocaleString() : 'recently';
+    const ok = await this.confirm.ask({
+      title: 'Newer backup found in OneDrive',
+      message:
+        `Your OneDrive "Data Backup" has a copy modified ${when}, newer than what's loaded. ` +
+        `Import it and replace the current data? The local copy will be overwritten.`,
+      confirmText: 'Import from OneDrive',
+      cancelText: 'Keep current',
+    });
+    if (!ok) return;
+
+    const pending = this.toast.loading('Importing from OneDrive…', 'Downloading the latest backup.');
+    this.oneDrive.pull().subscribe({
+      next: () => {
+        this.toast.dismiss(pending);
+        this.toast.success('Imported from OneDrive', 'Reloading…');
+        // Data now matches OneDrive; don't nag about unsaved changes on the reload.
+        this.suppressQuitPrompt = true;
+        setTimeout(() => window.location.reload(), 1000);
+      },
+      error: (e) => {
+        this.toast.dismiss(pending);
+        this.toast.error('OneDrive import failed', e?.error?.message || e?.message);
+      },
+    });
+  }
+
+  // --- OneDrive: connect dialog ---
+
+  openOneDrive(): void {
+    this.oneDriveOpen = true;
+    this.refreshOneDriveStatus();
+  }
+
+  closeOneDrive(): void {
+    this.oneDriveOpen = false;
+  }
+
+  refreshOneDriveStatus(): void {
+    this.oneDrive.status().subscribe((s) => (this.oneDriveStatus = s));
+  }
+
+  /** Manual backup: writes locally and mirrors into the OneDrive folder now. */
+  backupNow(): void {
+    this.oneDriveBusy = true;
+    const pending = this.toast.loading('Backing up…', 'Writing to your OneDrive folder.');
+    this.oneDrive.backupNow().subscribe({
+      next: () => {
+        this.toast.dismiss(pending);
+        this.toast.success('Backed up to OneDrive');
+        this.oneDriveBusy = false;
+        this.refreshOneDriveStatus();
+      },
+      error: (e) => {
+        this.toast.dismiss(pending);
+        this.toast.error('Backup failed', e?.error?.message || e?.message);
+        this.oneDriveBusy = false;
+      },
+    });
   }
 }

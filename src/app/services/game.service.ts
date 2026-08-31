@@ -12,6 +12,7 @@ export interface Game {
   consoleFamilyId: string;
   consoleId?: string;
   developer: string;
+  publisher?: string;
   region: string;
   physicalDigital: 'physical' | 'digital';
   // Free-form completeness/condition detail of the owned copy
@@ -20,6 +21,10 @@ export interface Game {
   customAttributes: Record<string, any>;
   categoryIds: string[];
   canHaveAddon?: boolean;
+  // True when this game is a port from another console platform.
+  isPort?: boolean;
+  // When isPort, the console family this game was ported from.
+  portedFromConsoleFamilyId?: string;
   isCompilation?: boolean;
   includedGameIds?: string[];
   // Derived by the backend for games that belong to a compilation.
@@ -102,6 +107,11 @@ export class GameService {
 
   getGame(id: string): Observable<Game> {
     return this.http.get<Game>(`${this.apiUrl}/${id}`);
+  }
+
+  /** Distinct publisher names across the collection, for the filter dropdown. */
+  getPublishers(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.apiUrl}/publishers`);
   }
 
   getIncludedGames(id: string): Observable<Game[]> {

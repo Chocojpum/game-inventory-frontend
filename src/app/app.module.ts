@@ -26,6 +26,7 @@ import { AddonListComponent } from './components/addon-list/addon-list.component
 
 import { ConsoleFamilyManagerComponent } from './components/console-family-manager/console-family-manager.component';
 import { PaginationControlsComponent } from './components/shared/pagination-controls/pagination-controls.component';
+import { CoverArtComponent } from './components/shared/cover-art/cover-art.component';
 import { ToastContainerComponent } from './components/shared/toast/toast-container.component';
 import { ConfirmDialogComponent } from './components/shared/confirm-dialog/confirm-dialog.component';
 import { ClickOutsideDirective } from './directives/click-outside.directive';
@@ -72,6 +73,7 @@ const routes: Routes = [
     BacklogListComponent,
     AddonListComponent,
     PaginationControlsComponent,
+    CoverArtComponent,
     ToastContainerComponent,
     ConfirmDialogComponent,
     ClickOutsideDirective,

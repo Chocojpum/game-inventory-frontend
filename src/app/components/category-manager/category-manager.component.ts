@@ -96,7 +96,7 @@ export class CategoryManagerComponent implements OnInit {
             description: ''
           };
         },
-        error: (err) => this.toast.error('Could not add category', err?.message),
+        error: (err) => this.toast.error('Could not add category', err?.error?.message ?? err?.message),
       });
     }
   }

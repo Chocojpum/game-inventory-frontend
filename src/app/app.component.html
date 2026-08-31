@@ -42,6 +42,9 @@
               (change)="importData($event)"
             />
           </label>
+          <button type="button" class="btn btn-ghost" (click)="openOneDrive()">
+            <span aria-hidden="true">☁️</span> OneDrive
+          </button>
         </div>
       </div>
 
@@ -111,6 +114,44 @@
   <main class="mx-auto max-w-[1400px] px-4 py-8 sm:px-8">
     <router-outlet></router-outlet>
   </main>
+</div>
+
+<!-- OneDrive backup dialog -->
+<div
+  *ngIf="oneDriveOpen"
+  class="fixed inset-0 z-[1500] flex items-start justify-center overflow-y-auto bg-black/60 p-4 backdrop-blur-sm"
+  (click)="closeOneDrive()"
+>
+  <div class="card my-8 w-full max-w-md p-6" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+    <div class="mb-4 flex items-center justify-between gap-3">
+      <h2 class="flex items-center gap-2 text-xl font-bold text-ink"><span aria-hidden="true">☁️</span> OneDrive backup</h2>
+      <button type="button" class="rounded-full px-2.5 py-0.5 text-lg leading-none text-ink-subtle transition-colors hover:bg-surface-3 hover:text-ink" aria-label="Close" (click)="closeOneDrive()">✕</button>
+    </div>
+
+    <ng-container *ngIf="oneDriveStatus as s; else odLoading">
+      <div *ngIf="!s.available" class="rounded-lg border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-ink">
+        No OneDrive folder was found on this device. Sign the Windows <strong>OneDrive</strong> app into your account so it syncs locally, then reopen this dialog.
+        <span class="mt-1 block text-ink-muted">You can also point it anywhere with the <code class="rounded bg-surface-3 px-1">GAME_INVENTORY_BACKUP_DIR</code> env var, or a <code class="rounded bg-surface-3 px-1">backupDir</code> in <code class="rounded bg-surface-3 px-1">data/onedrive.json</code>.</span>
+      </div>
+
+      <ng-container *ngIf="s.available">
+        <p class="mb-3 text-sm text-ink-muted">
+          Every export is mirrored to this OneDrive folder, and on startup the app offers to import a newer copy synced from another device.
+        </p>
+
+        <div class="mb-4 rounded-lg border border-border bg-surface-2 px-4 py-3 text-sm">
+          <div class="text-xs uppercase tracking-wide text-ink-subtle">Backup folder</div>
+          <code class="mt-0.5 block break-all text-ink">{{ s.backupDir }}</code>
+          <div class="mt-2 text-ink-muted" *ngIf="s.backupExists">Last backup: <strong class="text-ink">{{ s.lastModified | date: 'medium' }}</strong></div>
+          <div class="mt-2 text-ink-muted" *ngIf="!s.backupExists">No backup yet — it'll be created on your next export.</div>
+          <div class="mt-2 text-warning" *ngIf="!s.oneDriveDetected">Note: %OneDrive% wasn't detected — using a custom/config path. Make sure the OneDrive client syncs it.</div>
+        </div>
+
+        <button type="button" class="btn btn-primary w-full" (click)="backupNow()" [disabled]="oneDriveBusy">Back up now</button>
+      </ng-container>
+    </ng-container>
+    <ng-template #odLoading><div class="py-6 text-center text-ink-muted">Loading…</div></ng-template>
+  </div>
 </div>
 
 <app-toast-container></app-toast-container>

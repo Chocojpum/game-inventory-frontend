@@ -20,6 +20,8 @@ import { ToastService } from '../../services/toast.service';
 export abstract class GameDetailBaseComponent {
   game: Game | null = null;
   consoleFamily: ConsoleFamily | null = null;
+  /** For a port, the console family it was ported from (resolved for display). */
+  portedFromFamily: ConsoleFamily | null = null;
   backlogs: Backlog[] = [];
   showBacklog = false;
 
@@ -53,6 +55,14 @@ export abstract class GameDetailBaseComponent {
         family => (this.consoleFamily = family),
         error => console.error('Console family not found', error),
       );
+      // For a port, also resolve the origin platform so the view can name it.
+      this.portedFromFamily = null;
+      if (this.game.isPort && this.game.portedFromConsoleFamilyId) {
+        this.consoleFamilyService.getFamily(this.game.portedFromConsoleFamilyId).subscribe(
+          family => (this.portedFromFamily = family),
+          error => console.error('Origin console family not found', error),
+        );
+      }
     }
   }
 

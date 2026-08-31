@@ -82,7 +82,7 @@ export class AttributeManagerComponent implements OnInit {
           };
           this.optionsString = '';
         },
-        error: (err) => this.toast.error('Could not create attribute', err?.message),
+        error: (err) => this.toast.error('Could not create attribute', err?.error?.message ?? err?.message),
       });
     }
   }
