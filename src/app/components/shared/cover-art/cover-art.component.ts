@@ -32,7 +32,9 @@ import { Component, Input } from '@angular/core';
     </ng-template>
   `,
   host: {
-    class: 'relative block overflow-hidden',
+    // `isolate` keeps the inner blur/cover z-index self-contained so overlay
+    // badges (digital/physical, compilation…) painted as siblings stay on top.
+    class: 'relative isolate block overflow-hidden',
   },
 })
 export class CoverArtComponent {
